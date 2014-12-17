@@ -1,0 +1,80 @@
+mixin menu(isRoot, menuItem)
+    li(class=menuItem.children ? "dropdown" : "")
+        if (menuItem.children && isRoot)
+            a(href="#", data-toggle="dropdown").dropdown-toggle= messages(menuItem.name)
+                b.caret
+        else
+            a(href=menuItem.url)= messages(menuItem.name)
+
+        if menuItem.children
+            ul.dropdown-menu
+                each child in menuItem.children
+                    +menu(false, child)
+
+block vars
+
+doctype html
+html
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1.0')
+        meta(name='description', content='')
+        meta(name='author', content='')
+        link(rel='shortcut icon', href='../../docs-assets/ico/favicon.png')
+        title= menuService.appName()
+        link(href='/assets/less/' + services.themeService.mainCss(), rel='stylesheet')
+        script(src='/assets/lib/js/jquery/jquery.js')
+        script(src='/assets/lib/js/underscore/underscore.js')
+        script(src='/assets/lib/js/angular/angular.js')
+
+    body(class=hasToolbar? 'has-toolbar' : '')
+        .navbar.navbar-default.navbar-fixed-top(role='navigation')
+            div(class=fluid ? 'container-fluid col-lg-12' : 'container')
+                .navbar-header
+                    button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+                        span.sr-only Toggle navigation
+                        span.icon-bar
+                        span.icon-bar
+                        span.icon-bar
+                    a.navbar-brand(href='/')= menuService.appName()
+                if user || !securityService.onlyAuthenticated
+                    .navbar-collapse.collapse
+                        ul.nav.navbar-nav
+                            each i in menuService.menus(user)
+                                +menu(true, i)
+                        if user
+                            ul.nav.navbar-nav.navbar-right
+                                li.dropdown
+                                    a.dropdown-toggle(href='#', data-toggle='dropdown')
+                                        i.glyphicon.glyphicon-user
+                                        | &nbsp;#{user.username}
+                                        b.caret
+                                    ul.dropdown-menu
+                                        li
+                                            if user.hasRole('admin')
+                                                a(href='/entity/User')= messages('Users')
+                                            a(href='/logout')= messages('Logout')
+
+        block content
+
+        script(src='/assets/js/jquery.visible.js')
+        script(src='/assets/lib/js/bootstrap/js/bootstrap.js')
+        script(src='/assets/lib/js/angular-animate/angular-animate.js')
+        script(src='/assets/lib/js/blueimp-file-upload/jquery.ui.widget.js')
+        script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload.js')
+        script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload-process.js')
+        script(src='/assets/lib/js/blueimp-file-upload/jquery.iframe-transport.js')
+        script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload-angular.js')
+        script(src='/assets/lib/js/typeahead.js/typeahead.bundle.js')
+        script(src='/assets/lib/js/jquery.inputmask/jquery.inputmask.js')
+        script(src='/assets/lib/js/jquery.inputmask/jquery.inputmask.numeric.extensions.js')
+
+        if locale
+            script(src="/assets/lib/js/angular-i18n/angular-locale_" + locale.locale + ".js")
+        script(src="/assets/js/allcount.js")
+        script(src="/assets/lib/js/bootstrap-datepicker/bootstrap-datepicker.js")
+        if locale
+            script(src="/assets/lib/js/bootstrap-datepicker/bootstrap-datepicker." + locale.language + ".js")
+        script(src="/js/messages.js")
+        script $(function () {$('.btn').tooltip()})

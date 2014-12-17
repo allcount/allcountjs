@@ -1,0 +1,50 @@
+<table class="table">
+    <thead>
+        <tr>
+            <th style="width: 68px">
+                <button class="btn btn-default btn-xs" style="opacity: 0">
+                    <i class="glyphicon glyphicon-chevron-right"></i>
+                </button>
+            </th>
+            <th ng-repeat="fd in fieldDescriptions" ng-class="headerClass(fd)">{{messages(fd.name)}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="item in items" class="animated-grid-row">
+            <td class="action-grid-cell">
+                <button class="btn btn-default btn-xs" data-toggle="tooltip" data-placement="bottom" title="View" data-container="body" ng-show="!isInEditMode" ng-click="navigate(item.id)">
+                    <i class="glyphicon glyphicon-chevron-right"></i>
+                </button>
+                <button class="btn btn-danger btn-xs" data-toggle="tooltip" data-placement="bottom" title="Delete" data-container="body" ng-show="isInEditMode" ng-click="deleteEntity(item)">
+                    <i class="glyphicon glyphicon-trash"></i>
+                </button>
+                <button class="btn btn-default btn-xs" ng-show="isInEditMode &amp;&amp; editingItem !== item" ng-click="editEntity(item)">
+                    <i class="glyphicon glyphicon-pencil"></i>
+                </button>
+                <button class="btn btn-default btn-xs" ng-show="isInEditMode &amp;&amp; editingItem === item" ng-click="saveEntity()">
+                    <i class="glyphicon glyphicon-ok"></i>
+                </button>
+            </td>
+            <td ng-repeat="fd in fieldDescriptions">
+                <div a-field="fd" ng-model="item[fd.field]" is-editor="editingItem === item"></div>
+            </td>
+        </tr>
+        <tr ng-if="isInEditMode">
+            <td class="action-grid-cell">
+                <button class="btn btn-success btn-xs" ng-click="createEntity()">
+                    <i class="glyphicon glyphicon-plus"></i>
+                </button>
+            </td>
+            <td ng-repeat="fd in fieldDescriptions">
+            </td>
+        </tr>
+    </tbody>
+    <tfoot ng-if="!isInEditMode && totalRow">
+        <tr class="active">
+            <td></td>
+            <td ng-repeat="fd in fieldDescriptions">
+                <div a-field="fd" ng-model="totalRow[fd.field]" is-editor="false"></div>
+            </td>
+        </tr>
+    </tfoot>
+</table>

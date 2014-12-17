@@ -1,0 +1,13 @@
+extends main
+block content
+    .container
+        form.form-signin(role='form', action='/login' + (redirect_url ? "?redirect_url=" + redirect_url : ""), method='post')
+            h2.form-signin-heading= messages('Please sign in')
+            .form-signin-container
+                input.form-control(type='text', placeholder=messages("Login"), required='', autofocus='', name='username')
+                input.form-control(type='password', placeholder=messages("Password"), required='', name='password')
+            button.btn.btn-lg.btn-primary.btn-block(type='submit')= messages('Sign in')
+            if loginMethods.length > 0
+                .login-or= messages('Or')
+            each method in loginMethods
+                a.btn.btn-lg.btn-primary.btn-block(href=method.url, type='submit')= messages(method.label)

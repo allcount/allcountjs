@@ -1,0 +1,72 @@
+var fs = require('fs');
+var nodegit = require('nodegit');
+var Q = require('q');
+var _ = require('underscore');
+var crypto = require('crypto');
+var fsExtra = require('fs.extra');
+var childProcess = require('child_process');
+
+module.exports = function (gitRepoUrl, gitService, halt) {
+    var service = {};
+
+    var repositoryDir;
+
+    service.cloneRepo = function (repoUrl, repoDir) {
+        return Q.nfcall(childProcess.exec, 'git clone ' + repoUrl + ' ' + repoDir, {cwd: process.cwd, timeout: 30000})
+    };
+
+    service.configFiles = function (callback) {
+        var hash = crypto.createHash('md5');
+        hash.update(gitRepoUrl, 'utf8');
+        var repoDir = "tmp" + '/' + hash.digest('hex');
+        if (fs.existsSync(repoDir)) {
+            fsExtra.rmrfSync(repoDir);
+        }
+        service.cloneRepo(gitRepoUrl, repoDir).then(function () {
+            repositoryDir = repoDir;
+            setInterval(function () {
+                gitService.checkForUpdates(process.cwd() + '/' + repositoryDir).then(function (changed) {
+                    if (changed) {
+                        halt("application repository update");
+                    }
+                }).done();
+            }, 60000);
+            fs.readdir(repoDir, function (err, files) {
+                if (err) {
+                    throw err; //TODO
+                }
+                Q.all(files.filter(function (file) {
+                    return file.indexOf('.js') === file.length - ".js".length;
+                }).map(function (file) {
+                    return Q.nfcall(fs.readFile, repoDir + '/' + file, "utf-8").then(function (content) {
+                        return {fileName: file, content: content};
+                    })
+                })
+                ).then(callback).done();
+            });
+        }).done();
+    };
+
+    function checkRepoInitialized() {
+        if (!repositoryDir) {
+            throw new Error('Repository is not initialized');
+        }
+    }
+
+    service.loadFileFromRepo = function (fileName) {
+        checkRepoInitialized();
+        return Q.nfcall(fs.readFile, repositoryDir + '/' + fileName, "utf-8");
+    };
+
+    service.fileExistsInRepo = function (fileName) {
+        checkRepoInitialized();
+
+        var deferred = Q.defer();
+        fs.exists(repositoryDir + '/' + fileName, function (result) {
+            deferred.resolve(result);
+        });
+        return deferred.promise;
+    };
+
+    return service;
+};

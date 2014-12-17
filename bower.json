@@ -1,0 +1,51 @@
+{
+    "name": "AllcountJS",
+    "version": "1.0.0",
+    "devDependencies": {},
+    "dependencies": {
+        "typeahead.js": "0.10.5",
+        "bootstrap": "3.3.1",
+        "bootstrap-datepicker": "1.3.0",
+        "components-font-awesome": "4.2.0",
+        "jquery.visible": "*",
+        "angular": "1.2.28",
+        "angular-animate": "1.2.28",
+        "angular-i18n": "1.2.28",
+        "blueimp-file-upload": "9.8.1",
+        "jquery.inputmask": "3.1.48",
+        "underscore": "1.7.0",
+        "bootswatch": "3.3.1+2"
+    },
+    "install" : {
+        "path"  : {
+            "js": "public/assets/lib/js",
+            "css": "public/assets/lib/css",
+            "less": "public/assets/lib/less",
+            "scss": "public/assets/lib/scss",
+            "eot": "public/assets/lib/fonts",
+            "svg": "public/assets/lib/fonts",
+            "ttf": "public/assets/lib/fonts",
+            "woff": "public/assets/lib/fonts",
+            "otf": "public/assets/lib/fonts",
+            "map": "public/assets/lib/map"
+        },
+        "sources" : {
+            "bootstrap" : [
+                "bower_components/bootstrap/less/**",
+                "bower_components/bootstrap/dist/**"
+            ],
+            "bootstrap-datepicker": [
+                "bower_components/bootstrap-datepicker/less/**",
+                "bower_components/bootstrap-datepicker/js/locales/*.js",
+                "bower_components/bootstrap-datepicker/js/*.js"
+            ],
+            "components-font-awesome": [
+                "bower_components/components-font-awesome/fonts/**",
+                "bower_components/components-font-awesome/less/**"
+            ],
+            "angular-i18n": [
+                "bower_components/angular-i18n/*.js"
+            ]
+        }
+    }
+}

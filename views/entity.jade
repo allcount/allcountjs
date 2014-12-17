@@ -1,0 +1,43 @@
+extends main
+block vars
+    - var hasToolbar = true
+block content
+    .a-refresh-form-controller(ng-app='allcount', ng-controller='EntityViewController')
+        .toolbar-header
+            .container.form-inline(ng-show='viewState.mode == "list"')
+                .pull-left: .btn-toolbar
+                    button.btn.btn-success(ng-click='toCreate()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.create"), data-container='body', ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                        i.glyphicon.glyphicon-plus
+                    button.btn.btn-default(ng-click='startGridEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.edit"), data-container='body', ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                        i.glyphicon.glyphicon-pencil
+                    button.btn.btn-default(ng-click='doneGridEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.done"), data-container='body', ng-show='viewState.editState')
+                        i.glyphicon.glyphicon-ok
+                    span(lc-actions='"' + entityTypeId + '"', action-target="'all-items'")
+                        button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()') {{action.name}}
+                    span.entity-title= messages(entityTitle) || ' '
+                .pull-right.form-inline
+                    input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
+                    span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')
+            .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
+                button.btn.btn-default(ng-click='returnToGrid()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.backToList"), data-container='body')
+                    i.glyphicon.glyphicon-chevron-left
+                button.btn.btn-default(ng-click='createForm.createEntity(returnToGrid)', data-toggle='tooltip', data-placement='bottom', title=messages("entity.create"), data-container='body')
+                    i.glyphicon.glyphicon-ok
+            .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
+                button.btn.btn-default(ng-click='returnToGrid()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.backToList"), data-container='body')
+                    i.glyphicon.glyphicon-chevron-left
+                button.btn.btn-default(ng-click='startEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.edit"), data-container='body', ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
+                    i.glyphicon.glyphicon-pencil
+                button.btn.btn-default(ng-click='doneEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.done"), data-container='body', ng-show='viewState.isFormEditing')
+                    i.glyphicon.glyphicon-ok
+        .container.screen-container
+            .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')
+            .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm')
+                .form-group(a-layout='"' + entityTypeId + '"', field='field')
+                    label.col-sm-3.control-label(ng-if='showLabel(field)') {{fieldToDesc[field].name}}
+                    div(ng-class='{"col-sm-9": showLabel(field), "col-sm-12": !showLabel(field)}')
+                        .form-control(a-field='fieldToDesc[field]', ng-model='entity[field]', is-editor='true')
+            div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0")
+                b= messages("entity.noRecords")
+            .right-animation-screen.form-horizontal.lc-form-default(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='editForm', is-editor='viewState.isFormEditing')
+    script(src='/assets/js/views/entity.js')
