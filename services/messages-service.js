@@ -37,7 +37,7 @@ module.exports = function () {
 
         if (!messages[localeKey]) {
             if (_.isUndefined(messages[localeKey])) {
-                messages[localeKey] = require(process.cwd() + '/config/locale/messages' + fileSuffix + '.js');
+                messages[localeKey] = require('../config/locale/messages' + fileSuffix + '.js');
             }
             if (appMessages[localeKey]) {
                 if (!messages[localeKey]) {

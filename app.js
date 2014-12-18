@@ -31,7 +31,7 @@ injection.bindFactory('halt', function () {
 });
 injection.bindMultiple('loginMethods', []);
 
-var server = require('./allcount-server.js');
+var server = require('./allcount-server.js').inject('allcountServerStartup');
 server.startup(function (errors) {
     Q.onerror = undefined;
     if (errors) {

@@ -32,5 +32,6 @@ injection.bindMultiple('viewPaths', ['defaultViewPathProvider']);
 injection.bindFactory('defaultViewPathProvider', function () {
     return [path.join(__dirname, 'views')];
 });
+injection.bindFactory('express', require('express'));
 
-module.exports = injection.inject('allcountServerStartup');
+module.exports = injection;

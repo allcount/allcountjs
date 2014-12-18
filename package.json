@@ -1,13 +1,14 @@
 {
-    "name": "AllcountJS",
+    "name": "allcountjs",
     "version": "1.0.0",
     "scripts": {
         "start": "node app.js",
-        "install": "./node_modules/bower-installer/bower-installer.js"
+        "postinstall": "node node_modules/bower-installer/bower-installer.js"
     },
     "devDependencies": {
         "nodeunit": "^0.9.0"
     },
+    "main": "./allcount-server",
     "dependencies": {
         "express": "^4.10.0",
         "ejs": "^1.0.0",
