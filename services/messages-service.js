@@ -1,5 +1,6 @@
 var fs = require('fs');
 var _ = require('underscore');
+var path = require('path');
 
 module.exports = function () {
     var messages = {};
@@ -63,7 +64,7 @@ module.exports = function () {
             if (appMessages[lang]) {
                 return true;
             } else if (_.isUndefined(messages[lang])) {
-                if (fs.existsSync('config/locale/messages_' + lang + '.js')) {
+                if (fs.existsSync(path.join(__dirname, '../config/locale/messages_' + lang + '.js'))) {
                     return true;
                 } else {
                     messages[lang] = false;

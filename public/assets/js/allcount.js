@@ -241,7 +241,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             input.datepicker({
                 autoclose: true,
                 language: $locale.id.split("-")[0],
-                format: $locale.DATETIME_FORMATS.mediumDate
+                format: $locale.DATETIME_FORMATS.shortDate
                     .replace("MMMM", "^^").replace("MMM", "^").replace("MM","mm").replace("M", "m").replace("^^", "MM").replace("^", "M")
                     .replace("EEE", "D").replace("EEEE", "DD")
             });
@@ -293,7 +293,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             scope.$watch('checkboxValue', function (checkboxValue) {
                 controller.$setViewValue(checkboxValue);
             });
-            return $compile('<div class="checkbox"><input type="checkbox" ng-model="checkboxValue"></div>')(scope);
+            return $compile('<div class="checkbox"><label><input type="checkbox" ng-model="checkboxValue"></label></div>')(scope);
         },
         relation: function (fieldDescription, controller, updateValue, clone, scope) {
             scope.$parent.$watch('entity', function (entity) {
