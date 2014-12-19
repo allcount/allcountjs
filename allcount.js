@@ -17,7 +17,6 @@ var gitUrl = argv.git || process.env.GIT_URL;
 var dbUrl = argv.db || process.env.DB_URL;
 
 if (!gitUrl || !dbUrl) {
-    console.dir(argv);
     console.log('Usage: allcountjs --git <Application Git URL> --db <Application MongoDB URL> -port [Application HTTP port]');
     process.exit(0);
 }
