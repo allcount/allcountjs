@@ -12,7 +12,7 @@ npm install -g allcountjs
 ```
 
 # Getting Started
-AllcountJS servers uses Git repositories to load app configurations from it and MongoDB to store application data.
+AllcountJS server uses Git repositories to load app configurations from it and MongoDB to store application data.
 To run AllcountJS Git should be installed and available in path.
 Create empty repository directory with
 
