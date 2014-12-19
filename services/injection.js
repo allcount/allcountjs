@@ -1,4 +1,6 @@
 var _ = require("underscore");
+var fs = require('fs');
+var path = require('path');
 
 exports.lookup = function (serviceName) {
     if (!serviceName.match(/^[A-Z]\w*$/)) {
@@ -53,7 +55,7 @@ exports.inject = function (serviceName) {
             factory = requireWithServiceNameMatcher(serviceName);
         }
         if (!factory) {
-            throw new Error('No factory found for "' + serviceName + '"');
+            throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
         }
         var instance;
         if (_.isFunction(factory)) {
@@ -77,7 +79,8 @@ exports.inject = function (serviceName) {
 
 function requireWithServiceNameMatcher(serviceName) {
     var matcher = _.find(exports.nameMatchers, function (matcher) { return serviceName.match(matcher.regex)});
-    return matcher && matcher.requireFn(matcher.replaceFun(serviceName)) || undefined;
+    var servicePath;
+    return matcher && (servicePath = matcher.replaceFun(serviceName)) && matcher.requireFn(servicePath) || undefined;
 }
 
 exports.bindFactory = function (serviceName, factory) {
@@ -138,7 +141,9 @@ exports.resetInjection = function () {
     exports.nameMatchers = [];
 
     exports.addNameMatcher(/.*/, function (serviceName) {
-        return './' + camelHumpsToWireName(serviceName) + '.js';
+        if (fs.existsSync(path.join(__dirname, camelHumpsToWireName(serviceName) + '.js'))) {
+            return './' + camelHumpsToWireName(serviceName) + '.js';
+        }
     }, require);
 
     exports.addNameMatcher(/^[A-Z]\w*$/, function (serviceName) {
