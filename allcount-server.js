@@ -32,6 +32,6 @@ injection.bindMultiple('viewPaths', ['defaultViewPathProvider']);
 injection.bindFactory('defaultViewPathProvider', function () {
     return [path.join(__dirname, 'views')];
 });
-injection.bindFactory('express', require('express'));
+injection.bindFactory('express', function () { return require('express') });
 
 module.exports = injection;
