@@ -1,7 +1,7 @@
 {
   "name": "allcountjs",
   "description": "Data-centric application framework",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "scripts": {
     "start": "node app.js",
     "postinstall": "node_modules/bower-installer/bower-installer.js"
