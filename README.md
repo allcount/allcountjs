@@ -62,11 +62,13 @@ allcountjs --git file://<path to allcountjs-helloworld> --db mongodb://localhost
 Please note that MongoDB should be running in order to run this example.
 
 # Try it
-[Run application demo](http://allcountjs.com/)
+
+- [Run application demo](http://allcountjs.com/)
 
 # Documentation
-[Application Development](http://allcountjs.com/docs/apps)
-[Running & extending](http://allcountjs.com/docs/server)
+
+- [Application Development](http://allcountjs.com/docs/apps)
+- [Running & extending](http://allcountjs.com/docs/server)
 
 # License
 AllcountJS is licensed under the MIT Open Source license. For more information, see the LICENSE file in this repository.
