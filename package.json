@@ -1,6 +1,6 @@
 {
   "name": "allcountjs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "start": "node app.js",
     "postinstall": "node node_modules/bower-installer/bower-installer.js"
