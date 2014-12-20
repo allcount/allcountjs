@@ -11,6 +11,9 @@ To install AllcountJS you should have npm installed. To install AllcountJS serve
 npm install -g allcountjs
 ```
 
+*NOTE:* There could be an EACCES issue with bower install on Mac OS X.
+As workaround please remove bower cache (USER_HOME/.cache/bower) and run `npm install allcountjs` to pre load it.
+
 # Getting Started
 AllcountJS server uses Git repositories to load app configurations from it and MongoDB to store application data.
 To run AllcountJS Git should be installed and available in path.
