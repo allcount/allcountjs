@@ -9,6 +9,7 @@ injection.bindFactory('entityCrudStrategy', require('./services/crud/entity-crud
 injection.bindMultiple('compileServices', [
     'migrationService',
     'themeService',
+    'trackingService',
     'menuService',
     'viewService',
     'computedFieldService',

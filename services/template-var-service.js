@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (menuService, messagesService, securityService, themeService, entityDescriptionService) {
+module.exports = function (menuService, messagesService, securityService, themeService, entityDescriptionService, trackingService) {
     var service = {};
 
     service.vars = function (req, obj) {
@@ -14,6 +14,7 @@ module.exports = function (menuService, messagesService, securityService, themeS
             user: req.user,
             securityService: securityService,
             entityTitle: req.params.entityTypeId && entityDescriptionService.entityDescription(entityDescriptionService.entityTypeIdCrudId(req.params.entityTypeId)).title || undefined,
+            googleAnalyticsId: trackingService.googleAnalyticsId,
             services: {
                 menuService: menuService,
                 entityTypeId: req.params.entityTypeId,
