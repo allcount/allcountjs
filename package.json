@@ -4,7 +4,7 @@
   "version": "1.0.4",
   "scripts": {
     "start": "node app.js",
-    "postinstall": "node node_modules/bower-installer/bower-installer.js"
+    "postinstall": "node_modules/bower-installer/bower-installer.js"
   },
   "devDependencies": {
     "nodeunit": "^0.9.0"
