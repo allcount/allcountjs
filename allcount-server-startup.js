@@ -64,7 +64,7 @@ module.exports = function (
             passport.deserializeUser(securityService.deserializeUser);
 
             app.use(require('body-parser')());
-            app.use(require('less-middleware')({ src: path.join(__dirname, 'public') }));
+            app.use(require('less-middleware')({ src: path.join(__dirname, 'public'), dest: 'tmp/css' }));
             app.use(express.static(path.join(__dirname, 'public')));
             app.use(sessionMiddleware);
             app.use(passport.initialize());
