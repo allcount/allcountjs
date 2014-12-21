@@ -1,5 +1,9 @@
 var injection = require('./services/injection.js');
 var path = require('path');
+var Keygrip = require('keygrip');
+var crypto = require('crypto');
+var http = require('http');
+var util = require('util');
 
 injection.addNameMatcher(/(.*?)Route/, function (serviceName) {
     return './routes/' + injection.camelHumpsToWireName(serviceName) + '.js';
@@ -34,5 +38,24 @@ injection.bindFactory('defaultViewPathProvider', function () {
     return [path.join(__dirname, 'views')];
 });
 injection.bindFactory('express', function () { return require('express') });
+
+injection.bindFactory('keygrip', function () {
+    return Keygrip([crypto.randomBytes(30).toString('hex')]); //TODO load rotating keys from somewhere
+});
+injection.bindFactory('sessionMiddleware', function (keygrip) { return require('cookie-session')({keys: keygrip}) });
+injection.bindFactory('httpServer', function (port) {
+    return function (handler, onReady) {
+        http.createServer(handler).listen(port, onReady);
+    }
+});
+injection.bindFactory('proxyHandler', function () { return function (req, res, next) { next() } });
+injection.bindMultiple('appConfigurators', []);
+injection.bindFactory('halt', function (gitRepoUrl) {
+    return function (cause) {
+        console.log(util.format('Exiting app "%s"%s...'), gitRepoUrl, cause ? " (" + cause + ")" : "");
+        process.exit();
+    };
+});
+injection.bindMultiple('loginMethods', []);
 
 module.exports = injection;
