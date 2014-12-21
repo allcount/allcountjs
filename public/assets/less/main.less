@@ -187,6 +187,28 @@ body {
   }
 }
 
+.splash-bar {
+  color: #fff;
+  background: darken(@brand-primary, 10%);
+  padding: @font-size-h2/2;
+
+  a {
+    .transition(~"all 0.1s ease-out");
+    color: #fff;
+    .opacity(0.75);
+
+    &:hover {
+      .opacity(1);
+    }
+
+    i {
+      font-size: @font-size-h3;
+    }
+
+    margin-right: 1em;
+  }
+}
+
 .splash-left {
   .splash();
   text-align: left;
