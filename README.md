@@ -4,6 +4,15 @@ AllcountJS is an application framework aimed for building data-centric applicati
 The main idea is to make application development fully declarative and reduce application configuration to minimum possible amount.
 AllcountJS applications are JavaScript applications.
 
+# Try it
+
+- [Run application demo](http://allcountjs.com/#demo)
+
+# Documentation
+
+- [Application Development](http://allcountjs.com/docs/apps)
+- [Running & extending](http://allcountjs.com/docs/server)
+
 # Install
 To install AllcountJS you should have npm installed. To install AllcountJS server you should run:
 
@@ -63,15 +72,6 @@ allcountjs --git file://<path to allcountjs-helloworld> --db mongodb://localhost
 ```
 
 Please note that MongoDB should be running in order to run this example.
-
-# Try it
-
-- [Run application demo](http://allcountjs.com/)
-
-# Documentation
-
-- [Application Development](http://allcountjs.com/docs/apps)
-- [Running & extending](http://allcountjs.com/docs/server)
 
 # License
 AllcountJS is licensed under the MIT Open Source license. For more information, see the LICENSE file in this repository.
