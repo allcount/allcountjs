@@ -15,6 +15,13 @@ body {
   }
 }
 
+a.shifted-anchor {
+  display: block;
+  position: relative;
+  top: -(@navbar-height + @line-height-computed);
+  visibility: hidden;
+}
+
 .toolbar-header {
   padding-bottom: ((@line-height-computed / 2) - 1);
   padding-top: ((@line-height-computed / 2) - 1);
