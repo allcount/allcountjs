@@ -234,6 +234,33 @@ a.shifted-anchor {
   .fa {
     margin-right: .5em;
   }
+
+  .big-icon {
+    margin-right: 0;
+    font-size: 15em;
+    text-align: center;
+  }
+
+  .big-icon-frame {
+    padding: 30px;
+    border-radius: 15px;
+    #gradient > .vertical(@start-color: darken(@brand-primary, 10%); @end-color: @brand-primary);
+    color: #fff;
+    .box-shadow(0 3px 5px rgba(0,0,0,.5));
+    margin-top: 1em;
+    margin-bottom: 1em;
+    width: 24em;
+    margin-left: auto;
+    margin-right: auto;
+
+    &.frame-success {
+      #gradient > .vertical(@start-color: darken(@brand-success, 10%); @end-color: @brand-success);
+    }
+
+    &.frame-info {
+      #gradient > .vertical(@start-color: darken(@brand-info, 10%); @end-color: @brand-info);
+    }
+  }
 }
 
 .inverse-splash {
