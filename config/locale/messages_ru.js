@@ -14,5 +14,10 @@ module.exports = {
     "Users": "Пользователи",
     "Permission denied": "Доступ запрещен",
     "Login using AllcountJS": "Войти используя AllcountJS",
-    "Or": "Или"
+    "Or": "Или",
+    "Edit": "Изменить",
+    "Add": "Добавить",
+    "View": "Просмотреть",
+    "Save": "Сохранить",
+    "Delete": "Удалить"
 };

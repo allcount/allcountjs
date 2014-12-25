@@ -6,11 +6,11 @@ block content
         .toolbar-header
             .container.form-inline(ng-show='viewState.mode == "list"')
                 .pull-left: .btn-toolbar
-                    button.btn.btn-success(ng-click='toCreate()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.create"), data-container='body', ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                    button.btn.btn-success(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
                         i.glyphicon.glyphicon-plus
-                    button.btn.btn-default(ng-click='startGridEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.edit"), data-container='body', ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                    button.btn.btn-default(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
                         i.glyphicon.glyphicon-pencil
-                    button.btn.btn-default(ng-click='doneGridEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.done"), data-container='body', ng-show='viewState.editState')
+                    button.btn.btn-default(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                         i.glyphicon.glyphicon-ok
                     span(lc-actions='"' + entityTypeId + '"', action-target="'all-items'")
                         button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()') {{action.name}}
@@ -19,16 +19,16 @@ block content
                     input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
                     span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')
             .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
-                button.btn.btn-default(ng-click='returnToGrid()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.backToList"), data-container='body')
+                button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                     i.glyphicon.glyphicon-chevron-left
-                button.btn.btn-default(ng-click='createForm.createEntity(returnToGrid)', data-toggle='tooltip', data-placement='bottom', title=messages("entity.create"), data-container='body')
+                button.btn.btn-default(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.create")
                     i.glyphicon.glyphicon-ok
             .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
-                button.btn.btn-default(ng-click='returnToGrid()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.backToList"), data-container='body')
+                button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                     i.glyphicon.glyphicon-chevron-left
-                button.btn.btn-default(ng-click='startEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.edit"), data-container='body', ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
+                button.btn.btn-default(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
                     i.glyphicon.glyphicon-pencil
-                button.btn.btn-default(ng-click='doneEditing()', data-toggle='tooltip', data-placement='bottom', title=messages("entity.done"), data-container='body', ng-show='viewState.isFormEditing')
+                button.btn.btn-default(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                     i.glyphicon.glyphicon-ok
         .container.screen-container
             .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')

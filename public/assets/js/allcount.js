@@ -1074,6 +1074,18 @@ allcountModule.directive("lcModal", ["$parse", function ($parse) {
     }
 }]);
 
+allcountModule.directive("lcTooltip", ["$parse", "messages", function ($parse, messages) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            $(element).tooltip({
+                placement: 'bottom',
+                title: messages(attrs.lcTooltip)
+            });
+        }
+    }
+}]);
+
 
 function toEntityCrudId(id) {
     if (angular.isString(id)) {
