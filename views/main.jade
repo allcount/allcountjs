@@ -22,7 +22,7 @@ html
         meta(name='description', content='')
         meta(name='author', content='')
         link(rel='shortcut icon', href='../../docs-assets/ico/favicon.png')
-        title= menuService.appName()
+        title= menuService.appTitle || menuService.appName()
         link(href='/assets/less/' + services.themeService.mainCss(), rel='stylesheet')
         script(src='/assets/lib/js/jquery/jquery.js')
         script(src='/assets/lib/js/underscore/underscore.js')

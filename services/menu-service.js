@@ -20,6 +20,10 @@ module.exports = function (entityDescriptionService, viewService) {
             if (appIcon) {
                 menuService.appIconValue = appIcon;
             }
+            var appTitle = obj.propertyValue('appTitle');
+            if (appTitle) {
+                menuService.appTitle = appTitle;
+            }
         });
     };
 
