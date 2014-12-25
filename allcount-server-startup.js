@@ -13,6 +13,7 @@ var passport = require('passport'),
 var Q = require('q');
 var busboy = require('connect-busboy');
 var _ = require('underscore');
+var jade = require('jade');
 
 module.exports = function (
     appService,
@@ -42,7 +43,7 @@ module.exports = function (
             var app = express();
 
             app.engine('html', cons.just);
-            app.engine('jade', cons.jade);
+            app.engine('jade', jade.renderFile);
             app.set('port', port);
             app.set('views', _.flatten(viewPaths));
             app.set('view engine', 'jade');
