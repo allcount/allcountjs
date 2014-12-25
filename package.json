@@ -1,6 +1,7 @@
 {
   "name": "allcountjs",
-  "description": "Data-centric application framework",
+  "description": "The open source framework for rapid business application development with Node.js",
+  "keywords": ["rapid", "business", "application", "development", "data-centric", "RAD"],
   "version": "1.0.10",
   "scripts": {
     "start": "node app.js",
