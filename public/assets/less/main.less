@@ -187,10 +187,17 @@ a.shifted-anchor {
 
   h1 {
     font-size: 4em;
+    font-weight: 700;
   }
 
-  p {
+  h2 {
     font-size: 2em;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 1.25em;
+    opacity: 0.75;
   }
 }
 
@@ -207,6 +214,8 @@ a.shifted-anchor {
     &:hover {
       .opacity(1);
     }
+
+    line-height: 1.7;
 
     i {
       font-size: @font-size-h3;
@@ -249,7 +258,8 @@ a.shifted-anchor {
     .box-shadow(0 3px 5px rgba(0,0,0,.5));
     margin-top: 1em;
     margin-bottom: 1em;
-    width: 24em;
+    width: 100%;
+    max-width: 360px;
     margin-left: auto;
     margin-right: auto;
 
@@ -259,6 +269,16 @@ a.shifted-anchor {
 
     &.frame-info {
       #gradient > .vertical(@start-color: darken(@brand-info, 10%); @end-color: @brand-info);
+    }
+  }
+
+  &.highlights {
+    p {
+      font-size: @font-size-h4;
+    }
+
+    .highlight-item {
+      font-size: @font-size-h4;
     }
   }
 }
