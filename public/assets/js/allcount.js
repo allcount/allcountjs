@@ -311,7 +311,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             scope.$watch('fieldValue', function (value) {
                 controller.$setViewValue(value);
             });
-            return $compile('<div a-upload="fieldValue"></div>')(scope);
+            return $compile('<div lc-upload="fieldValue"></div>')(scope);
         }
     };
 
@@ -370,175 +370,192 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
     return service;
 }]);
 
-allcountModule.directive("aUpload", ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
-    return {
-        restrict: 'A',
-        templateUrl: '/assets/template/upload.html',
-        scope: true,
-        link: function (scope, element, attrs) {
-            var fieldValueGetter = $parse(attrs.aUpload);
-            scope.options = {
-                url: '/rest/upload',
-                autoUpload: true,
-                handleResponse: function (e, data) {
-                    var files = data.result && data.result.files;
-                    if (files) {
-                        fieldValueGetter.assign(scope.$parent, files[0]);
-                        data.scope.replace(data.files, files);
-                    } else if (data.errorThrown ||
-                        data.textStatus === 'error') {
-                        data.files[0].error = data.errorThrown ||
-                            data.textStatus;
-                    }
-                }
-            };
-
-            scope.isNoFile = function (queue) {
-                return !fieldValueGetter(scope.$parent) && queue.length === 0;
-            };
-
-            scope.fileName = function (queue) {
-                return fieldValueGetter(scope.$parent) && fieldValueGetter(scope.$parent).name || queue.length > 0 && queue[queue.length - 1].name || undefined;
-            };
-
-            scope.isUploading = function (queue) {
-                return queue.length > 0 && queue[queue.length - 1].$state && queue[queue.length - 1].$state() === 'pending';
-            };
-
-            scope.hasFile = function () {
-                return !!fieldValueGetter(scope.$parent);
-            };
-
-            scope.removeFile = function () {
-                if (!scope.hasFile()) {
-                    return;
-                }
-                //TODO REST remove unused file call
-                fieldValueGetter.assign(scope.$parent, undefined);
-            }
-        }
-    }
-}]);
-
-allcountModule.directive("aField", ["rest", "fieldRenderingService", "$compile", function (rest, fieldRenderingService, $compile) {
-    return {
-        restrict: 'A',
-        require: 'ngModel',
-        scope: false,
-        transclude: 'element',
-        link: function (scope, element, attrs, controller, transclude) {
-            var fieldElement, fieldScope;
-
-            function setFieldElement(elem) {
-                if (fieldElement) {
-                    fieldElement.remove();
-                    fieldElement = undefined;
-                }
-                if (elem) {
-                    elem = $(elem);
-                    element.after(elem);
-                    fieldElement = elem;
-                }
-            }
-
-            function updateValue(value) {
-                scope.$apply(function () {
-                    controller.$setViewValue(value);
-                })
-            }
-
-            function renderField(fieldDescription, isEditor) {
-                if (!fieldDescription || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false && fieldScope) {
-                    if (fieldScope) {
-                        fieldScope.isEditor = isEditor;
-                    }
-                    return;
-                }
-                if (fieldScope) fieldScope.$destroy();
-                if (!fieldDescription) return;
-                fieldScope = scope.$new();
-                if (isEditor || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false) {
-                    fieldScope.isEditor = isEditor;
-                    controller.$render = function () {
-                        transclude(scope, function (clone) { //TODO what scope for transclude?
-                            setFieldElement(fieldRenderingService.fieldEditor(fieldDescription, controller, updateValue, clone, fieldScope));
-                        });
-                    };
-                } else {
-                    controller.$render = function () {
-                        var value = fieldRenderingService.readOnlyFieldRenderer(fieldDescription)(controller.$viewValue);
-
-                        var elem;
-                        if (value instanceof jQuery) {
-                            elem = $compile('<div class="form-control-static"></div>')(fieldScope);
-                            elem.append(value);
-                        } else {
-                            fieldScope.renderedText = value || '';
-                            elem = $compile('<div class="form-control-static">{{renderedText}}</div>')(fieldScope);
+function uploadDirective(directiveName) {
+    return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
+        return {
+            restrict: 'A',
+            templateUrl: '/assets/template/upload.html',
+            scope: true,
+            link: function (scope, element, attrs) {
+                var fieldValueGetter = $parse(attrs[directiveName]);
+                scope.options = {
+                    url: '/rest/upload',
+                    autoUpload: true,
+                    handleResponse: function (e, data) {
+                        var files = data.result && data.result.files;
+                        if (files) {
+                            fieldValueGetter.assign(scope.$parent, files[0]);
+                            data.scope.replace(data.files, files);
+                        } else if (data.errorThrown ||
+                            data.textStatus === 'error') {
+                            data.files[0].error = data.errorThrown ||
+                                data.textStatus;
                         }
-                        setFieldElement(elem);
                     }
-                }
-                controller.$render();
-            }
+                };
 
-            scope.$watch(attrs.isEditor, function (isEditor) {
-                renderField(scope.$eval(attrs.aField), isEditor);
-            });
-            scope.$watch(attrs.aField, function (fd) {
-                renderField(fd, scope.$eval(attrs.isEditor));
-            })
+                scope.isNoFile = function (queue) {
+                    return !fieldValueGetter(scope.$parent) && queue.length === 0;
+                };
+
+                scope.fileName = function (queue) {
+                    return fieldValueGetter(scope.$parent) && fieldValueGetter(scope.$parent).name || queue.length > 0 && queue[queue.length - 1].name || undefined;
+                };
+
+                scope.isUploading = function (queue) {
+                    return queue.length > 0 && queue[queue.length - 1].$state && queue[queue.length - 1].$state() === 'pending';
+                };
+
+                scope.hasFile = function () {
+                    return !!fieldValueGetter(scope.$parent);
+                };
+
+                scope.removeFile = function () {
+                    if (!scope.hasFile()) {
+                        return;
+                    }
+                    //TODO REST remove unused file call
+                    fieldValueGetter.assign(scope.$parent, undefined);
+                }
+            }
         }
-    }
-}]);
+    }];
+}
+allcountModule.directive("aUpload", uploadDirective("aUpload")); //TODO deprecated
+allcountModule.directive("lcUpload", uploadDirective("lcUpload"));
 
-allcountModule.directive("aLayout", ["rest", "fieldRenderingService", function (rest, fieldRenderingService) {
-    return {
-        restrict: 'A',
-        scope: false,
-        priority: 1000,
-        transclude: 'element',
-        link: function (scope, element, attrs, controller, transclude) {
-            var currentLayout, childScopes = [];
+function fieldDirective(directiveName) {
+    return ["rest", "fieldRenderingService", "$compile", function (rest, fieldRenderingService, $compile) {
+        return {
+            restrict: 'A',
+            require: 'ngModel',
+            scope: false,
+            transclude: 'element',
+            link: function (scope, element, attrs, controller, transclude) {
+                var fieldElement, fieldScope;
 
-            function allocateScope(field) {
-                var childScope = scope.$new();
-                childScope[attrs.field] = field;
-                childScopes.push(childScope);
-                return childScope;
-            }
-
-            function renderChild(layoutElem) {
-                var containerId = layoutElem.containerId;
-                if (containerId == 'field') {
-                    return transclude(allocateScope(layoutElem.params.field), function (clone) { //TODO: compact field format
-                        return clone;
-                    });
-                }
-                return fieldRenderingService.layoutRenderer(
-                    containerId,
-                    layoutElem.params,
-                    $(layoutElem.children).map(function (index, item) {return function() { return renderChild(item); }}),
-                    layoutElem.children
-                );
-            }
-
-            scope.$watch(attrs.aLayout, function (entityTypeId) {
-                rest.layout(entityTypeId, function (layout) {
-                    $(childScopes).each(function (index, item) {
-                        item.$destroy();
-                    });
-                    childScopes = [];
-                    if (currentLayout) {
-                        currentLayout.remove();
+                function setFieldElement(elem) {
+                    if (fieldElement) {
+                        fieldElement.remove();
+                        fieldElement = undefined;
                     }
-                    currentLayout = renderChild(layout);
-                    element.after(currentLayout);
+                    if (elem) {
+                        elem = $(elem);
+                        element.after(elem);
+                        fieldElement = elem;
+                    }
+                }
+
+                function updateValue(value) {
+                    scope.$apply(function () {
+                        controller.$setViewValue(value);
+                    })
+                }
+
+                function renderField(fieldDescription, isEditor) {
+                    if (!fieldDescription || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false && fieldScope) {
+                        if (fieldScope) {
+                            fieldScope.isEditor = isEditor;
+                        }
+                        return;
+                    }
+                    if (fieldScope) fieldScope.$destroy();
+                    if (!fieldDescription) return;
+                    fieldScope = scope.$new();
+                    if (isEditor || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false) {
+                        fieldScope.isEditor = isEditor;
+                        controller.$render = function () {
+                            transclude(scope, function (clone) { //TODO what scope for transclude?
+                                setFieldElement(fieldRenderingService.fieldEditor(fieldDescription, controller, updateValue, clone, fieldScope));
+                            });
+                        };
+                    } else {
+                        controller.$render = function () {
+                            var value = fieldRenderingService.readOnlyFieldRenderer(fieldDescription)(controller.$viewValue);
+
+                            var elem;
+                            if (value instanceof jQuery) {
+                                elem = $compile('<div class="form-control-static"></div>')(fieldScope);
+                                elem.append(value);
+                            } else {
+                                fieldScope.renderedText = value || '';
+                                elem = $compile('<div class="form-control-static">{{renderedText}}</div>')(fieldScope);
+                            }
+                            setFieldElement(elem);
+                        }
+                    }
+                    controller.$render();
+                }
+
+                scope.$watch(attrs.isEditor, function (isEditor) {
+                    renderField(scope.$eval(attrs[directiveName]), isEditor);
+                });
+                scope.$watch(attrs[directiveName], function (fd) {
+                    renderField(fd, scope.$eval(attrs.isEditor));
                 })
-            })
+            }
         }
-    }
-}]);
+    }];
+}
+allcountModule.directive("aField", fieldDirective("aField")); //TODO deprecated
+allcountModule.directive("lcField", fieldDirective("lcField"));
+
+function layoutDirective(directiveName) {
+    return ["rest", "fieldRenderingService", function (rest, fieldRenderingService) {
+        return {
+            restrict: 'A',
+            scope: false,
+            priority: 1000,
+            transclude: 'element',
+            link: function (scope, element, attrs, controller, transclude) {
+                var currentLayout, childScopes = [];
+
+                function allocateScope(field) {
+                    var childScope = scope.$new();
+                    childScope[attrs.field] = field;
+                    childScopes.push(childScope);
+                    return childScope;
+                }
+
+                function renderChild(layoutElem) {
+                    var containerId = layoutElem.containerId;
+                    if (containerId == 'field') {
+                        return transclude(allocateScope(layoutElem.params.field), function (clone) { //TODO: compact field format
+                            return clone;
+                        });
+                    }
+                    return fieldRenderingService.layoutRenderer(
+                        containerId,
+                        layoutElem.params,
+                        $(layoutElem.children).map(function (index, item) {
+                            return function () {
+                                return renderChild(item);
+                            }
+                        }),
+                        layoutElem.children
+                    );
+                }
+
+                scope.$watch(attrs[directiveName], function (entityTypeId) {
+                    rest.layout(entityTypeId, function (layout) {
+                        $(childScopes).each(function (index, item) {
+                            item.$destroy();
+                        });
+                        childScopes = [];
+                        if (currentLayout) {
+                            currentLayout.remove();
+                        }
+                        currentLayout = renderChild(layout);
+                        element.after(currentLayout);
+                    })
+                })
+            }
+        }
+    }];
+}
+
+allcountModule.directive("aLayout", layoutDirective("aLayout")); //TODO deprecated
+allcountModule.directive("lcLayout", layoutDirective("lcLayout"));
 
 function listDirective(directiveName, templateUrl) {
     return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
@@ -691,115 +708,121 @@ function listDirective(directiveName, templateUrl) {
     }]
 }
 
-allcountModule.directive("aGrid", listDirective('aGrid', '/assets/template/grid.html'));
+allcountModule.directive("aGrid", listDirective('aGrid', '/assets/template/grid.html')); //TODO deprecated
 allcountModule.directive("lcGrid", listDirective('lcGrid', '/assets/template/grid.html'));
 allcountModule.directive("lcList", listDirective('lcList'));
 
-allcountModule.directive("aPaging", ["rest", "$parse", function (rest, $parse) {
-    return {
-        restrict: 'A',
-        templateUrl: '/assets/template/paging.html',
-        scope: true,
-        link: function (scope, element, attrs) {
-            if (attrs.publishMethods) {
-                var publishMethodsTo = $parse(attrs.publishMethods);
-                publishMethodsTo.assign(scope.$parent, {
-                    refresh: function () { scope.refresh() }
-                })
-            }
-
-            scope.$parent.$watch(attrs.filtering, function (filtering) {
-                scope.filtering = filtering;
-                if (scope.reload) scope.reload();
-            }, true);
-
-            scope.$parent.$watch(attrs.aPaging, function (entityTypeId) {
-                scope.filtering = {};
-                scope.pageSize = 50;
-                scope.numPages = 10;
-                var pagingAssign;
-                if (attrs.paging) pagingAssign = $parse(attrs.paging).assign;
-
-                scope.refreshCount = function (onSuccess) {
-                    rest.findCount({entityTypeId: entityTypeId}, scope.filtering, function (countAndTotalRow) {
-                        scope.count = countAndTotalRow.count;
-                        var setTotalRow = attrs.totalRow && $parse(attrs.totalRow).assign;
-                        if (setTotalRow) {
-                            setTotalRow(scope.$parent, countAndTotalRow.totalRow);
+function pagingDirective(directiveName) {
+    return ["rest", "$parse", function (rest, $parse) {
+        return {
+            restrict: 'A',
+            templateUrl: '/assets/template/paging.html',
+            scope: true,
+            link: function (scope, element, attrs) {
+                if (attrs.publishMethods) {
+                    var publishMethodsTo = $parse(attrs.publishMethods);
+                    publishMethodsTo.assign(scope.$parent, {
+                        refresh: function () {
+                            scope.refresh()
                         }
-                        onSuccess();
-                    });
-                };
-
-                scope.refresh = function () {
-                    scope.refreshCount(function () {
-                        var start = Math.min(scope.currentPaging.start, scope.count - 1);
-                        scope.currentPaging = {
-                            start: start,
-                            count: Math.min(scope.pageSize, scope.count - start)
-                        };
                     })
-                };
+                }
 
-                scope.reload = function () {
-                    scope.refreshCount(function () {
-                        scope.currentPaging = {
-                            start: 0,
-                            count: Math.min(scope.pageSize, scope.count)
-                        };
-                    });
-                };
-
-                scope.reload();
-
-                scope.updatePaging = function (paging) {
-                    scope.pages = [];
-                    for (
-                        var i = Math.max(paging.start - scope.numPages * scope.pageSize, 0);
-                        i < Math.min(paging.start + scope.numPages * scope.pageSize, scope.count);
-                        i += scope.pageSize
-                        ) {
-                        scope.pages.push({start: i, count: Math.min(scope.count - i, scope.pageSize)});
-                    }
-                };
-
-                scope.nextPage = function () {
-                    var nextStart = Math.min(scope.currentPaging.start + scope.pageSize, scope.count);
-                    scope.currentPaging = {
-                        start: nextStart,
-                        count: Math.min(scope.count - nextStart, scope.pageSize)
-                    }
-                };
-
-                scope.hasNextPage = function () {
-                    return scope.currentPaging && scope.currentPaging.start + scope.pageSize < scope.count;
-                };
-
-                scope.prevPage = function () {
-                    var nextStart = Math.max(scope.currentPaging.start - scope.pageSize, 0);
-                    scope.currentPaging = {
-                        start: nextStart,
-                        count: Math.min(scope.count - nextStart, scope.pageSize)
-                    }
-                };
-
-                scope.hasPrevPage = function () {
-                    return scope.currentPaging && scope.currentPaging.start - scope.pageSize >= 0;
-                };
-
-                scope.setCurrentPage = function (page) {
-                    scope.currentPaging = page;
-                };
-
-                scope.$watch('currentPaging', function (paging) {
-                    if (pagingAssign) pagingAssign(scope.$parent, paging);
-                    if (paging)
-                        scope.updatePaging(paging);
+                scope.$parent.$watch(attrs.filtering, function (filtering) {
+                    scope.filtering = filtering;
+                    if (scope.reload) scope.reload();
                 }, true);
-            });
+
+                scope.$parent.$watch(attrs[directiveName], function (entityTypeId) {
+                    scope.filtering = {};
+                    scope.pageSize = 50;
+                    scope.numPages = 10;
+                    var pagingAssign;
+                    if (attrs.paging) pagingAssign = $parse(attrs.paging).assign;
+
+                    scope.refreshCount = function (onSuccess) {
+                        rest.findCount({entityTypeId: entityTypeId}, scope.filtering, function (countAndTotalRow) {
+                            scope.count = countAndTotalRow.count;
+                            var setTotalRow = attrs.totalRow && $parse(attrs.totalRow).assign;
+                            if (setTotalRow) {
+                                setTotalRow(scope.$parent, countAndTotalRow.totalRow);
+                            }
+                            onSuccess();
+                        });
+                    };
+
+                    scope.refresh = function () {
+                        scope.refreshCount(function () {
+                            var start = Math.min(scope.currentPaging.start, scope.count - 1);
+                            scope.currentPaging = {
+                                start: start,
+                                count: Math.min(scope.pageSize, scope.count - start)
+                            };
+                        })
+                    };
+
+                    scope.reload = function () {
+                        scope.refreshCount(function () {
+                            scope.currentPaging = {
+                                start: 0,
+                                count: Math.min(scope.pageSize, scope.count)
+                            };
+                        });
+                    };
+
+                    scope.reload();
+
+                    scope.updatePaging = function (paging) {
+                        scope.pages = [];
+                        for (
+                            var i = Math.max(paging.start - scope.numPages * scope.pageSize, 0);
+                            i < Math.min(paging.start + scope.numPages * scope.pageSize, scope.count);
+                            i += scope.pageSize
+                            ) {
+                            scope.pages.push({start: i, count: Math.min(scope.count - i, scope.pageSize)});
+                        }
+                    };
+
+                    scope.nextPage = function () {
+                        var nextStart = Math.min(scope.currentPaging.start + scope.pageSize, scope.count);
+                        scope.currentPaging = {
+                            start: nextStart,
+                            count: Math.min(scope.count - nextStart, scope.pageSize)
+                        }
+                    };
+
+                    scope.hasNextPage = function () {
+                        return scope.currentPaging && scope.currentPaging.start + scope.pageSize < scope.count;
+                    };
+
+                    scope.prevPage = function () {
+                        var nextStart = Math.max(scope.currentPaging.start - scope.pageSize, 0);
+                        scope.currentPaging = {
+                            start: nextStart,
+                            count: Math.min(scope.count - nextStart, scope.pageSize)
+                        }
+                    };
+
+                    scope.hasPrevPage = function () {
+                        return scope.currentPaging && scope.currentPaging.start - scope.pageSize >= 0;
+                    };
+
+                    scope.setCurrentPage = function (page) {
+                        scope.currentPaging = page;
+                    };
+
+                    scope.$watch('currentPaging', function (paging) {
+                        if (pagingAssign) pagingAssign(scope.$parent, paging);
+                        if (paging)
+                            scope.updatePaging(paging);
+                    }, true);
+                });
+            }
         }
-    }
-}]);
+    }];
+}
+allcountModule.directive("aPaging", pagingDirective("aPaging")); //TODO deprecated
+allcountModule.directive("lcPaging", pagingDirective("lcPaging"));
 
 allcountModule.directive("lcForm", ["rest", "fieldRenderingService", "$parse", function (rest, fieldRenderingService, $parse) {
     return {
@@ -896,40 +919,48 @@ allcountModule.directive("lcFormDefault", [function () {
     }
 }]);
 
-allcountModule.directive("aMessage", ["messages", function (messages) {
-    return {
-        restrict: 'A',
-        scope: false,
-        link: function (scope, element, attrs) {
-            $(element).text(messages(attrs.aMessage));
-        }
-    }
-}]);
-
-allcountModule.directive("aMenu", ["rest", function (rest) {
-    return {
-        restrict: 'C',
-        scope: true,
-        link: function (scope, element, attrs) {
-            rest.menus().then(function (menuItems) {
-                scope.menuItems = menuItems;
-            });
-
-            scope.onlyFirstLevel = function () {
-                if (scope.menuItems) {
-                    var onlyFirstLevel = true;
-                    $(scope.menuItems).each(function (index, item) {
-                        if (item.children && item.children.length > 0) {
-                            onlyFirstLevel = false;
-                        }
-                    });
-                    return onlyFirstLevel;
-                }
-                return false;
+function messageDirective(directiveName) {
+    return ["messages", function (messages) {
+        return {
+            restrict: 'A',
+            scope: false,
+            link: function (scope, element, attrs) {
+                $(element).text(messages(attrs[directiveName]));
             }
         }
-    }
-}]);
+    }];
+}
+allcountModule.directive("aMessage", messageDirective("aMessage")); //TODO deprecated
+allcountModule.directive("lcMessage", messageDirective("lcMessage"));
+
+function menuDirective() {
+    return ["rest", function (rest) {
+        return {
+            restrict: 'C',
+            scope: true,
+            link: function (scope, element, attrs) {
+                rest.menus().then(function (menuItems) {
+                    scope.menuItems = menuItems;
+                });
+
+                scope.onlyFirstLevel = function () {
+                    if (scope.menuItems) {
+                        var onlyFirstLevel = true;
+                        $(scope.menuItems).each(function (index, item) {
+                            if (item.children && item.children.length > 0) {
+                                onlyFirstLevel = false;
+                            }
+                        });
+                        return onlyFirstLevel;
+                    }
+                    return false;
+                }
+            }
+        }
+    }];
+}
+allcountModule.directive("aMenu", menuDirective()); //TODO deprecated
+allcountModule.directive("lcMenu", menuDirective());
 
 allcountModule.directive("lcActions", ["rest", "$location", "messages", function (rest, $location, messages) {
     return {
