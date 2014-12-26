@@ -33,7 +33,8 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
                 showInGrid: description.arrayPropertyValue('showInGrid'),
                 sorting: description.arrayPropertyValue('sorting'), //TODO additional structure checks,
                 actions: description.arrayPropertyValue('actions'),
-                title: description.propertyValue('title')
+                title: description.propertyValue('title'),
+                customView: description.stringPropertyValue('customView')
             });
         }
 
@@ -68,7 +69,8 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
                 permissions: evaluated.permissions,
                 sorting: evaluated.sorting,
                 actions: evaluated.actions,
-                title: evaluated.title
+                title: evaluated.title,
+                customView: evaluated.customView
             };
             var persistedFields = {};
             _.each(evaluated.evaluatedFields, function (field, fieldName) {

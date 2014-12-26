@@ -36,7 +36,8 @@ module.exports = function (
     menuRoute,
     actionsRoute,
     sessionMiddleware,
-    viewPaths
+    viewPaths,
+    repositoryService
     ) {
     return {
         startup: function (onReady) {
@@ -45,7 +46,6 @@ module.exports = function (
             app.engine('html', cons.just);
             app.engine('jade', jade.renderFile);
             app.set('port', port);
-            app.set('views', _.flatten(viewPaths));
             app.set('view engine', 'jade');
 
             app.use(function(req, res, next) {
@@ -74,6 +74,7 @@ module.exports = function (
             app.use(passport.session());
 
             appService.compile(function (errors) {
+                app.set('views', _.union(repositoryService.repositoryDir(), _.flatten(viewPaths)));
                 if (errors.length > 0) {
                     if (onReady) {
                         onReady(errors);

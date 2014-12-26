@@ -4,12 +4,12 @@ var fs = require('fs');
 var viewLookupCache = {};
 var p = require('path');
 
-module.exports = function (viewPaths) {
+module.exports = function (viewPaths, repositoryService) {
     var Parser = jade.Parser;
-    var paths = _.flatten(viewPaths);
 
     function AllcountJadeParser() {
         Parser.prototype.constructor.apply(this, arguments);
+        this.viewPaths = _.union(repositoryService.repositoryDir(), _.flatten(viewPaths));
     }
 
     AllcountJadeParser.prototype = _.extend(_.clone(Parser.prototype), {
@@ -18,7 +18,7 @@ module.exports = function (viewPaths) {
             if (!_.isUndefined(viewLookupCache[path])) {
                 return viewLookupCache[path];
             }
-            var viewPath = _.find(paths, function (viewPath) {
+            var viewPath = _.find(this.viewPaths, function (viewPath) {
                 return fs.existsSync(p.join(viewPath, path)); //TODO get rid of
             });
             if (viewPath) {

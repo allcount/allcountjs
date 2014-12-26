@@ -6,7 +6,8 @@ module.exports = function (templateVarService, entityDescriptionService) {
     entityRoutes.entity = function (req, res) {
         if (entityDescriptionService.userHasReadAccess({entityTypeId: req.params.entityTypeId}, req.user)) {
             templateVarService.setupLocals(req, res);
-            res.render('entity');
+            var entityDescription = entityDescriptionService.entityDescription(entityDescriptionService.entityTypeIdCrudId(req.params.entityTypeId));
+            res.render(entityDescription.customView ||'entity');
         } else {
             res.loginOrForbidden();
         }

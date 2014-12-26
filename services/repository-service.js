@@ -68,5 +68,10 @@ module.exports = function (gitRepoUrl, gitService, halt) {
         return deferred.promise;
     };
 
+    service.repositoryDir = function () {
+        checkRepoInitialized();
+        return repositoryDir;
+    };
+
     return service;
 };

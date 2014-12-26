@@ -540,155 +540,160 @@ allcountModule.directive("aLayout", ["rest", "fieldRenderingService", function (
     }
 }]);
 
-
-allcountModule.directive("aGrid", ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
-    return {
-        restrict: 'A',
-        templateUrl: '/assets/template/grid.html',
-        scope: true,
-        link: function (scope, element, attrs) {
-            scope.messages = messages;
-            scope.atomicCounter = 0;
-            scope.filtering = {};
-            if (attrs.publishMethods) {
-                var publishMethodsTo = $parse(attrs.publishMethods);
-                publishMethodsTo.assign(scope.$parent, {
-                    updateGrid: function () { if (scope.updateGrid) scope.updateGrid() },
-                    hasWritePermission: function () { return scope.permissions && scope.permissions.write }
-                })
-            }
-
-            scope.$parent.$watch(attrs.paging, function (paging) {
-                scope.paging = paging;
-                if (scope.updateGrid) scope.updateGrid();
-            }, true);
-
-            scope.$parent.$watch(attrs.totalRow, function (totalRow) { //TODO doubling
-                scope.totalRow = totalRow;
-            }, true);
-
-            scope.$parent.$watch(attrs.filtering, function (filtering) {
-                scope.filtering = filtering;
-                if (scope.updateGrid) scope.updateGrid();
-            }, true);
-
-            scope.$parent.$watch(attrs.aGrid, function (entityTypeId) {
-                if (typeof entityTypeId == "string")
-                    scope.entityCrudId = {entityTypeId: entityTypeId};
-                else
-                    scope.entityCrudId = entityTypeId;
-                rest.getFieldDescriptions(scope.entityCrudId, true, function (descriptions) {
-                    scope.fieldDescriptions = descriptions;
-                    scope.fieldRenderer = {};
-                    $(descriptions).each(function (index, desc) {
-                        scope.fieldRenderer[desc.field] = fieldRenderingService.readOnlyFieldRenderer(desc);
+function listDirective(directiveName, templateUrl) {
+    return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
+        return {
+            restrict: 'A',
+            templateUrl: templateUrl,
+            scope: true,
+            link: function (scope, element, attrs, ctrl) {
+                scope.messages = messages;
+                scope.atomicCounter = 0;
+                scope.filtering = {};
+                if (attrs.publishMethods) {
+                    var publishMethodsTo = $parse(attrs.publishMethods);
+                    publishMethodsTo.assign(scope.$parent, {
+                        updateGrid: function () { if (scope.updateGrid) scope.updateGrid() },
+                        hasWritePermission: function () { return scope.permissions && scope.permissions.write }
                     })
-                });
+                }
 
-                rest.permissions(scope.entityCrudId, function (permissions) {
-                    scope.permissions = permissions;
-                });
+                scope.$parent.$watch(attrs.paging, function (paging) {
+                    scope.paging = paging;
+                    if (scope.updateGrid) scope.updateGrid();
+                }, true);
 
-                scope.updateGrid = function () {
-                    if (!scope.paging) return;
-                    var next = ++scope.atomicCounter;
-                    setTimeout(function () {
-                        if (next !== scope.atomicCounter) {
-                            return;
-                        }
-                        rest.findRange(scope.entityCrudId , scope.filtering, scope.paging.start, scope.paging.count, function (items) {
-                            scope.items = items
+                scope.$parent.$watch(attrs.totalRow, function (totalRow) { //TODO doubling
+                    scope.totalRow = totalRow;
+                }, true);
+
+                scope.$parent.$watch(attrs.filtering, function (filtering) {
+                    scope.filtering = filtering;
+                    if (scope.updateGrid) scope.updateGrid();
+                }, true);
+
+                scope.$parent.$watch(attrs[directiveName], function (entityTypeId) {
+                    if (typeof entityTypeId == "string")
+                        scope.entityCrudId = {entityTypeId: entityTypeId};
+                    else
+                        scope.entityCrudId = entityTypeId;
+                    rest.getFieldDescriptions(scope.entityCrudId, true, function (descriptions) {
+                        scope.fieldDescriptions = descriptions;
+                        scope.fieldRenderer = {};
+                        $(descriptions).each(function (index, desc) {
+                            scope.fieldRenderer[desc.field] = fieldRenderingService.readOnlyFieldRenderer(desc);
                         })
-                    }, 200);
-                };
+                    });
 
-                scope.deleteEntity = function (entity) {
-                    function removeEntity() {
-                        scope.items.splice(scope.items.indexOf(entity), 1);
-                        if (scope.editingItem == entity) {
-                            scope.editingItem = undefined;
+                    rest.permissions(scope.entityCrudId, function (permissions) {
+                        scope.permissions = permissions;
+                    });
+
+                    scope.updateGrid = function () {
+                        if (!scope.paging) return;
+                        var next = ++scope.atomicCounter;
+                        setTimeout(function () {
+                            if (next !== scope.atomicCounter) {
+                                return;
+                            }
+                            rest.findRange(scope.entityCrudId , scope.filtering, scope.paging.start, scope.paging.count, function (items) {
+                                scope.items = items
+                            })
+                        }, 200);
+                    };
+
+                    scope.deleteEntity = function (entity) {
+                        function removeEntity() {
+                            scope.items.splice(scope.items.indexOf(entity), 1);
+                            if (scope.editingItem == entity) {
+                                scope.editingItem = undefined;
+                            }
                         }
-                    }
-                    if (entity.id) {
-                        rest.deleteEntity(scope.entityCrudId, entity.id, removeEntity);
-                    } else {
-                        removeEntity();
-                    }
-                };
-
-                scope.editEntity = function (entity) {
-                    if (scope.editingItem) {
-                        scope.saveEntity(function () {});
-                    }
-
-                    scope.originalEntity = angular.copy(entity);
-                    scope.editingItem = entity;
-                };
-
-                scope.navigate = function (entityId) {
-                    if (attrs.navigate) {
-                        scope.$parent.$eval(attrs.navigate, {$entityId: entityId});
-                    }
-                };
-
-                scope.headerClass = function (fd) {
-                    var cls = {};
-                    cls[fd.fieldTypeId + '-grid-header'] = true;
-                    return cls;
-                };
-
-                scope.saveEntity = function (success) {
-                    var entity = scope.editingItem;
-                    function onSuccess(id) {
-                        if (!entity.id) {
-                            entity.id = id;
-                        }
-                        if (success) {
-                            success();
+                        if (entity.id) {
+                            rest.deleteEntity(scope.entityCrudId, entity.id, removeEntity);
                         } else {
-                            scope.editingItem = undefined;
+                            removeEntity();
                         }
-                    }
-                    if (scope.editingItem.id) {
-                        rest.updateEntity(scope.entityCrudId, scope.entityForUpdate(), onSuccess);
-                    } else {
-                        rest.createEntity(scope.entityCrudId, entity, onSuccess);
-                    }
-                };
+                    };
 
-                scope.createEntity = function () {
-                    var item = {};
-                    scope.items.push(item);
-                    scope.editEntity(item);
-                };
-
-                scope.entityForUpdate = function () { //TODO doubling
-                    var forUpdate = {id: scope.editingItem.id};
-                    for (var field in scope.editingItem) {
-                        if (scope.editingItem.hasOwnProperty(field) && scope.isFieldChanged(field)) {
-                            forUpdate[field] = scope.editingItem[field] ? scope.editingItem[field] : null;
+                    scope.editEntity = function (entity) {
+                        if (scope.editingItem) {
+                            scope.saveEntity(function () {});
                         }
-                    }
-                    return forUpdate;
-                };
 
-                scope.isFieldChanged = function (field) { //TODO doubling
-                    return scope.editingItem && scope.originalEntity && !angular.equals(scope.editingItem[field], scope.originalEntity[field])
-                };
+                        scope.originalEntity = angular.copy(entity);
+                        scope.editingItem = entity;
+                    };
 
-                scope.updateGrid();
-            });
+                    scope.navigate = function (entityId) {
+                        if (attrs.navigate) {
+                            scope.$parent.$eval(attrs.navigate, {$entityId: entityId});
+                        }
+                    };
 
-            if (attrs.editMode)
-                scope.$parent.$watch(attrs.editMode, function (value) {
-                    scope.isInEditMode = value && scope.permissions && scope.permissions.write;
-                    if (!scope.isInEditMode) {
-                        scope.editEntity(undefined);
-                    }
-                })
+                    scope.headerClass = function (fd) {
+                        var cls = {};
+                        cls[fd.fieldTypeId + '-grid-header'] = true;
+                        return cls;
+                    };
+
+                    scope.saveEntity = function (success) {
+                        var entity = scope.editingItem;
+                        function onSuccess(id) {
+                            if (!entity.id) {
+                                entity.id = id;
+                            }
+                            if (success) {
+                                success();
+                            } else {
+                                scope.editingItem = undefined;
+                            }
+                        }
+                        if (scope.editingItem.id) {
+                            rest.updateEntity(scope.entityCrudId, scope.entityForUpdate(), onSuccess);
+                        } else {
+                            rest.createEntity(scope.entityCrudId, entity, onSuccess);
+                        }
+                    };
+
+                    scope.createEntity = function () {
+                        var item = {};
+                        scope.items.push(item);
+                        scope.editEntity(item);
+                    };
+
+                    scope.entityForUpdate = function () { //TODO doubling
+                        var forUpdate = {id: scope.editingItem.id};
+                        for (var field in scope.editingItem) {
+                            if (scope.editingItem.hasOwnProperty(field) && scope.isFieldChanged(field)) {
+                                forUpdate[field] = scope.editingItem[field] ? scope.editingItem[field] : null;
+                            }
+                        }
+                        return forUpdate;
+                    };
+
+                    scope.isFieldChanged = function (field) { //TODO doubling
+                        return scope.editingItem && scope.originalEntity && !angular.equals(scope.editingItem[field], scope.originalEntity[field])
+                    };
+
+                    scope.updateGrid();
+                });
+
+                if (attrs.editMode)
+                    scope.$parent.$watch(attrs.editMode, function (value) {
+                        scope.isInEditMode = value && scope.permissions && scope.permissions.write;
+                        if (!scope.isInEditMode) {
+                            scope.editEntity(undefined);
+                        }
+                    })
+            }
         }
-    }
-}]);
+    }]
+}
+
+allcountModule.directive("aGrid", listDirective('aGrid', '/assets/template/grid.html'));
+allcountModule.directive("lcGrid", listDirective('lcGrid', '/assets/template/grid.html'));
+allcountModule.directive("lcList", listDirective('lcList'));
 
 allcountModule.directive("aPaging", ["rest", "$parse", function (rest, $parse) {
     return {
@@ -1080,7 +1085,7 @@ allcountModule.directive("lcTooltip", ["$parse", "messages", function ($parse, m
         link: function (scope, element, attrs) {
             $(element).tooltip({
                 placement: 'bottom',
-                title: messages(attrs.lcTooltip)
+                title: messages(attrs.lcTooltip),
             });
         }
     }
