@@ -46,10 +46,20 @@ exports.inScopeTest = function (test) {
     injection.bindFactory("bar", function () {
         return 'bar';
     });
+    injection.bindFactory('dependent', function (foo) {
+        return foo;
+    });
     injection.inScope({
         foo: 'foo'
     }, function () {
         assert.equal(injection.inject('foo'), 'foo');
+        assert.equal(injection.inject('dependent'), 'foo');
+    });
+    injection.inScope({
+        foo: 'foo-foo'
+    }, function () {
+        assert.equal(injection.inject('foo'), 'foo-foo');
+        assert.equal(injection.inject('dependent'), 'foo-foo');
     });
     assert.equal(injection.inject('foo'), 'bar');
     test.done();

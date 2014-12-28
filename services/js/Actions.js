@@ -18,6 +18,14 @@ module.exports = function (crudService, googleExportService, actionContext) {
                 type: 'redirect',
                 url: exportActionResult
             })
+        },
+        refreshResult: function () {
+            return Q({
+                type: 'refresh'
+            })
+        },
+        selectedEntityId: function () {
+            return actionContext.entityId;
         }
     }
 };

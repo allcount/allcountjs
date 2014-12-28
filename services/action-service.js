@@ -11,31 +11,40 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
                     var id = action.propertyValue('id');
                     var actionTarget = action.propertyValue('actionTarget');
                     if (!name) {
-                        throw new appUtil.CompileError('Name for action %s of entity type "%s" is not defined', id || "with unknown id", entityTypeId);
+                        throw new appUtil.CompileError('`name` for action %s of entity type "%s" is not defined', id || "with unknown id", entityTypeId);
                     }
                     if (!actionTarget) {
-                        throw new appUtil.CompileError('Action target for action "%s" of "%s" is not defined', id || name, entityTypeId);
+                        throw new appUtil.CompileError('`actionTarget` for action "%s" of "%s" is not defined', id || name, entityTypeId);
                     }
                     if (!action.hasPropertyValue('perform')) {
-                        throw new appUtil.CompileError('Perform function for action "%s" of "%s" is not defined', id || name, entityTypeId);
+                        throw new appUtil.CompileError('`perform()` function for action "%s" of "%s" is not defined', id || name, entityTypeId);
                     }
                     return { //TODO permissions
                         id: id || ('action-' + actionIdCounter++),
                         name: name,
                         perform: function (selectedItemIds) {
                             if (actionTarget === 'all-items') {
-                                return injection.inScope({
-                                    actionContext: {
-                                        entityCrudId: entityDescriptionService.entityTypeIdCrudId(entityTypeId)
-                                    }
-                                }, function () {
-                                    return action.propertyValue('perform');
+                                return invokePerform({
+                                    entityCrudId: entityDescriptionService.entityTypeIdCrudId(entityTypeId)
+                                });
+                            } else if (actionTarget === 'single-item') {
+                                return invokePerform({
+                                    entityCrudId: entityDescriptionService.entityTypeIdCrudId(entityTypeId),
+                                    entityId: selectedItemIds[0]
                                 });
                             } else {
                                 throw new Error('Unknown actionTarget: ' + actionTarget);
                             }
                         },
                         actionTarget: actionTarget
+                    };
+
+                    function invokePerform(actionContext) {
+                        return injection.inScope({
+                            actionContext: actionContext
+                        }, function () {
+                            return action.propertyValue('perform');
+                        });
                     }
                 });
             });

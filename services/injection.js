@@ -65,7 +65,7 @@ exports.inject = function (serviceName) {
         } else {
             instance = factory;
         }
-        if (scoped) {
+        if (exports.scoped.length > 0) {
             exports.scoped[exports.scoped.length - 1].providers[serviceName] = instance;
             return instance;
         } else {

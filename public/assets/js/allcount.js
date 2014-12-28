@@ -966,6 +966,7 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", function
     return {
         restrict: 'A',
         scope: true,
+        priority: 1100,
         link: function (scope, element, attrs) {
             scope.$parent.$watch(attrs.lcActions, function (entityTypeOrCrudId) {
                 scope.entityCrudId = toEntityCrudId(entityTypeOrCrudId);
@@ -977,6 +978,12 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", function
                 refresh();
             });
 
+            scope.selectedItems = [];
+            attrs.selectedItems && scope.$parent.$watch(attrs.selectedItems, function (selectedItems) {
+                scope.selectedItems = selectedItems;
+                refresh();
+            }, true);
+
             refresh();
 
             function refresh() {
@@ -987,9 +994,15 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", function
                     rest.actions(scope.entityCrudId, scope.actionTarget).then(function (actions) {
                         scope.actions = _.map(actions, function (action) {
                             action.perform = function () {
-                                rest.performAction(entityCrudId, action.id).then(function (actionResult) {
+                                rest.performAction(entityCrudId, action.id, scope.selectedItems).then(function (actionResult) {
                                     if (actionResult.type === 'redirect') {
                                         window.location = actionResult.url;
+                                    } else if (actionResult.type === 'refresh') {
+                                        if (attrs.onRefresh) {
+                                            scope.$eval(attrs.onRefresh);
+                                        } else {
+                                            throw new Error('on-refresh is not defined for lc-actions');
+                                        }
                                     } else {
                                         throw new Error('Unknown actionResult type "' + actionResult.type +  '" for ' + JSON.stringify(actionResult));
                                     }

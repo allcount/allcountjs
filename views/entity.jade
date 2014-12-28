@@ -12,8 +12,7 @@ block content
                         i.glyphicon.glyphicon-pencil
                     button.btn.btn-default(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                         i.glyphicon.glyphicon-ok
-                    span(lc-actions='"' + entityTypeId + '"', action-target="'all-items'")
-                        button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()') {{action.name}}
+                    button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'all-items'", on-refresh="refreshOnAction()") {{action.name}}
                     span.entity-title= messages(entityTitle) || ' '
                 .pull-right.form-inline
                     input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
@@ -30,6 +29,7 @@ block content
                     i.glyphicon.glyphicon-pencil
                 button.btn.btn-default(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                     i.glyphicon.glyphicon-ok
+                button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
         .container.screen-container
             .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')
             .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm')

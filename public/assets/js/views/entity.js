@@ -46,5 +46,11 @@ function EntityViewController ($scope) {
     $scope.toCreate = function () {
         $scope.viewState.mode = 'create';
         $scope.createForm.reloadEntity();
-    }
+    };
+
+    $scope.refreshOnAction = function () {
+        $scope.pagingMethods.refresh();
+        $scope.gridMethods.updateGrid();
+        $scope.editForm.reloadEntity();
+    };
 }
