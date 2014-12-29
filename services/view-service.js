@@ -40,7 +40,16 @@ module.exports = function (repositoryService) {
             var superHeading = renderer.heading;
             renderer.heading = function (text, level, raw) {
                 addItemStack[addItemStack.length - 1]({level: level, text: text, anchor: raw.toLowerCase().replace(/[^\w]+/g, '-')});
-                return superHeading.apply(this, arguments);
+                return '<a class="shifted-anchor" id="'
+                    + this.options.headerPrefix
+                    + raw.toLowerCase().replace(/[^\w]+/g, '-')
+                    + '"></a><h'
+                    + level
+                    + '>'
+                    + text
+                    + '</h'
+                    + level
+                    + '>\n';
             };
             marked.setOptions({renderer: renderer});
             var compiled = marked(fileContent);
