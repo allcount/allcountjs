@@ -61,7 +61,8 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
             service.entityDescriptions[evaluated.entityTypeId] = {
                 fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileField(field, fieldName, evaluated.showInGrid) }),
                 tableDescription: {
-                    tableName: evaluated.persistenceEntityTypeId || evaluated.entityTypeId
+                    tableName: evaluated.persistenceEntityTypeId || evaluated.entityTypeId,
+                    entityTypeId: evaluated.entityTypeId
                 },
                 allFields: _.object(_.map(evaluated.evaluatedFields, function (field, fieldName) { return [fieldName, new CompiledField(field)] })),
                 referenceNameExpression: evaluated.referenceNameExpression,

@@ -1,10 +1,12 @@
 var _ = require('underscore');
-var mongo = require('mongodb');
-var MongoClient = require('mongodb').MongoClient;
-var GridStore = require('mongodb').GridStore;
 var Q = require('q');
 var moment = require('moment');
 var crypto = require('crypto');
+var mongoose = require('mongoose');
+var mongo = mongoose.mongo;
+var GridStore = mongo.GridStore;
+var Schema = mongoose.Schema;
+var ObjectId = mongoose.Types.ObjectId
 
 var UserCollectionName = "User";
 
@@ -12,10 +14,12 @@ module.exports = function (dbUrl) {
     var service = {};
     var db;
     var onConnectListeners = [];
+    var models = {};
 
-    MongoClient.connect(dbUrl, function(err, database) {
-        if(err) throw err;
-        db = database;
+    var connection = mongoose.createConnection(dbUrl);
+
+    connection.on('connected', function () {
+        db = connection.db;
         onConnectListeners.forEach(function (listener) {listener()});
     });
 
@@ -49,22 +53,60 @@ module.exports = function (dbUrl) {
         }
     };
 
+    service.mongooseConnection = function () {
+        return connection;
+    };
+
+    function modelFor(table) {
+        if (models[table.entityTypeId]) {
+            return models[table.entityTypeId];
+        }
+        var schema = new Schema(_.chain(getAllFields(table)).map(function (field, fieldName) {
+            if (field.fieldType.notPersisted) {
+                return undefined;
+            }
+            var fieldType;
+            if (field.fieldType.id === 'date') {
+                fieldType = Date;
+            } else if (field.fieldType.id === 'reference') {
+                fieldType = {id: Schema.ObjectId, name: String};
+            } else if (field.fieldType.id === 'attachment') {
+                fieldType = {fileId: Schema.ObjectId, name: String};
+            } else if (field.fieldType.id === 'integer' || field.fieldType.id === 'money') {
+                fieldType = Number;
+            } else if (field.fieldType.id === 'checkbox') {
+                if (field.fieldType.storeAsArrayField) {
+                    return [field.fieldType.storeAsArrayField, [String]];
+                } else {
+                    fieldType = Boolean;
+                }
+            } else {
+                fieldType = String;
+            }
+            return [fieldName, fieldType];
+        }).filter(_.identity).object().value(), {
+            collection: table.tableName
+        });
+        models[table.entityTypeId] = connection.model(table.entityTypeId, schema);
+        return models[table.entityTypeId];
+    }
+
     service.findCount = function (table, filteringAndSorting) {
         return onlyFilteringEnsureIndexes(table, filteringAndSorting).then(function () {
-            return toPromise(db.collection(table.tableName).find(queryFor(table, filteringAndSorting)), 'count');
+            return Q(modelFor(table).count(queryFor(table, filteringAndSorting)).exec());
         })
     };
 
     service.findAll = function (table, filteringAndSorting) {
         return ensureIndexes(table, filteringAndSorting).then(function () {
-            return toPromise(db.collection(table.tableName).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)), 'toArray')
+            return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).exec())
                 .then(function (result) { return result.map(fromBson(table.fields)) });
         });
     };
 
     service.findRange = function (table, filteringAndSorting, start, count) {
         return ensureIndexes(table, filteringAndSorting).then(function () {
-            return toPromise(db.collection(table.tableName).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).limit(count).skip(start), 'toArray')
+            return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).limit(count).skip(start).exec())
                 .then(function (result) { return result.map(fromBson(table.fields)) });
         });
     };
@@ -85,7 +127,7 @@ module.exports = function (dbUrl) {
 
     service.createUser = function (username, passwordHash, roles, isGuest) {
         var deferred = Q.defer();
-        var userId = new mongo.ObjectID();
+        var userId = new ObjectId();
         db.collection(UserCollectionName)
             .insert({_id: userId, username: username, passwordHash: passwordHash && passwordHash(userId.toString()) || undefined, roles: roles, isGuest: isGuest}, {}, deferredCallback(deferred));
         return deferred.promise.then(function (result) {
@@ -94,15 +136,15 @@ module.exports = function (dbUrl) {
     };
 
     function sortingFor(filteringAndSorting, fields) {
-        return _.union(filteringAndSorting && filteringAndSorting.sorting && filteringAndSorting.sorting.filter(function (i) { return !!fields[i[0]]}) || [], [['modifyTime', -1]]);
+        return _.object(_.union(filteringAndSorting && filteringAndSorting.sorting && filteringAndSorting.sorting.filter(function (i) { return !!fields[i[0]]}) || [], [['modifyTime', -1]]));
     }
 
     function ensureIndexes(table, filteringAndSorting) {
         var indexFieldHash = {};
         var indexes = [];
 
-        indexes = sortingFor(filteringAndSorting, table.fields);
-        indexes.forEach(function (i) { indexFieldHash[i[0]] = true });
+        indexes = _.map(sortingFor(filteringAndSorting, table.fields), function (order, fieldName) { return [fieldName, order]});
+        _.forEach(indexes, function (i) { indexFieldHash[i[0]] = true });
 
         var query = queryFor(table, filteringAndSorting);
         _.forEach(query, function (q, fieldName) {
@@ -149,6 +191,10 @@ module.exports = function (dbUrl) {
         }
     };
 
+    function getAllFields(table) {
+        return _.extend({}, table.fields, dateFields);
+    }
+
     function queryFor(table, filteringAndSorting) {
         var query = {};
         if (filteringAndSorting) {
@@ -159,7 +205,7 @@ module.exports = function (dbUrl) {
                 }
             }
             if (filteringAndSorting.filtering) {
-                var allFields = _.extend({}, table.fields, dateFields);
+                var allFields = getAllFields(table);
                 _.each(allFields, function (field, fieldName) {
                     if (_.isUndefined(filteringAndSorting.filtering[fieldName])) {
                         return;
@@ -197,19 +243,18 @@ module.exports = function (dbUrl) {
     service.queryFor = queryFor;
 
     service.createEntity = function (table, entity) {
-        var deferred = Q.defer();
-        var objectID = entity.id && toMongoId(entity.id) || new mongo.ObjectID();
+        var objectID = entity.id && toMongoId(entity.id) || new ObjectId();
         entity.id = (objectID).toString();
         var toInsert = toBson(table.fields)(entity);
         toInsert._id = objectID;
         toInsert.createTime = new Date();
         toInsert.modifyTime = new Date();
         setAuxiliaryFields(table.fields, toInsert, toInsert);
-        db.collection(table.tableName)
-            .insert(toInsert, {}, deferredCallback(deferred));
-        return deferred.promise.then(callEntityListeners(table, null, fromBson(table.fields)(toInsert))).then(function (result) {
-            return result[0]._id;
-        });
+        return Q(modelFor(table).create(toInsert))
+            .then(callEntityListeners(table, null, fromBson(table.fields)(toInsert)))
+            .then(function (result) {
+                return result._id;
+            });
     };
 
     service.aggregateQuery = function (table, aggregatePipeline) {
@@ -224,50 +269,37 @@ module.exports = function (dbUrl) {
     }
 
     function toMongoId(entityId) {
-        return new mongo.ObjectID(padId(entityId));
+        return new ObjectId(padId(entityId));
     }
 
     service.readEntity = function (table, entityId) {
-        return toPromise(db.collection(table.tableName).find({_id: toMongoId(entityId)}), 'toArray').then(function (result) {
-            if (result.length !== 1) {
-                throw new Error("Expected length 1 but got: " + result.length);
-            }
-            return fromBson(table.fields)(result[0]);
+        return Q(modelFor(table).findById(toMongoId(entityId)).exec()).then(function (result) {
+            return fromBson(table.fields)(result);
         });
     };
-
-    function promiseFindAndModify(tableName, query, sort, update, options) {
-        var deferred = Q.defer();
-        db.collection(tableName)
-            .findAndModify(query, sort, update, options, deferredCallback(deferred));
-        return deferred.promise;
-    }
 
     service.updateEntity = function (table, entity) {
         var toUpdate = toBson(table.fields)(entity);
         toUpdate.modifyTime = new Date();
 
         return service.readEntity(table, entity.id).then(function (oldEntity) {
-            var deferred = Q.defer();
-            db.collection(table.tableName)
-                .findAndModify({_id: toMongoId(entity.id)}, {}, {$set: toUpdate}, {}, deferredCallback(deferred));
-            return deferred.promise.then(callEntityListeners(table, oldEntity, fromBson(table.fields)(toUpdate))).then(function () { //TODO toUpdate doesn't have id
-                return service.readEntity(table, entity.id).then(function (result) {
-                    var update = {};
-                    setAuxiliaryFields(table.fields, result, update);
-                    return promiseFindAndModify(table.tableName, {_id: toMongoId(entity.id)}, {}, {$set: update}, {});
+            return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, toUpdate).exec())
+                .then(callEntityListeners(table, oldEntity, fromBson(table.fields)(toUpdate)))
+                .then(function () { //TODO toUpdate doesn't have id
+                    return service.readEntity(table, entity.id).then(function (result) {
+                        var update = {};
+                        setAuxiliaryFields(table.fields, result, update);
+                        return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, update).exec());
+                    });
+                }).then(function (result) {
+                    return fromBson(table.fields)(result);
                 });
-            }).then(function (result) {
-                return fromBson(table.fields)(result);
-            });
         });
     };
 
     service.deleteEntity = function (table, entityId) {
         return service.readEntity(table, entityId).then(function (oldEntity) {
-            var deferred = Q.defer();
-            db.collection(table.tableName).findAndRemove({_id: toMongoId(entityId)}, {}, {}, deferredCallback(deferred));
-            return deferred.promise.then(callEntityListeners(table, oldEntity, null));
+            return Q(modelFor(table).findOneAndRemove({_id: toMongoId(entityId)}).exec()).then(callEntityListeners(table, oldEntity, null));
         })
     };
 
@@ -391,7 +423,7 @@ module.exports = function (dbUrl) {
     };
 
     service.createFile = function (fileName, readableStream) {
-        var fileId = new mongo.ObjectID();
+        var fileId = new ObjectId();
         var gridStore = new GridStore(db, fileId, fileName, "w");
         var open = Q.nfbind(gridStore.open.bind(gridStore));
         return open().then(function (store) {
