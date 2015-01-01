@@ -91,6 +91,10 @@ module.exports = function (dbUrl) {
         return models[table.entityTypeId];
     }
 
+    service.setupModel = function (table) {
+        modelFor(table);
+    };
+
     service.findCount = function (table, filteringAndSorting) {
         return onlyFilteringEnsureIndexes(table, filteringAndSorting).then(function () {
             return Q(modelFor(table).count(queryFor(table, filteringAndSorting)).exec());

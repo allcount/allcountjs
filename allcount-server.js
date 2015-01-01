@@ -18,6 +18,7 @@ injection.bindMultiple('compileServices', [
     'viewService',
     'computedFieldService',
     'actionService',
+    'crudService',
     'entityDescriptionService',
     'securityService',
     'messagesService'
