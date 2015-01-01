@@ -15,6 +15,15 @@ module.exports = function (gitRepoUrl, gitService, halt) {
         return Q.nfcall(childProcess.exec, 'git clone ' + repoUrl + ' ' + repoDir, {cwd: process.cwd, timeout: 30000})
     };
 
+
+    function existsPromise(path) {
+        var deferred = Q.defer();
+        fs.exists(path, function (exists) {
+            deferred.resolve(exists);
+        });
+        return deferred.promise;
+    }
+
     service.configFiles = function (callback) {
         var hash = crypto.createHash('md5');
         hash.update(gitRepoUrl, 'utf8');
@@ -31,17 +40,29 @@ module.exports = function (gitRepoUrl, gitService, halt) {
                     }
                 }).done();
             }, 60000);
-            fs.readdir(repoDir, function (err, files) {
+            return repositoryDir;
+        }).catch(function (err) {
+            return existsPromise(gitRepoUrl).then(function (exists) {
+                if (exists) {
+                    console.log('Failed to fetch "' + gitRepoUrl + '". Trying to use as regular directory.');
+                    repositoryDir = gitRepoUrl;
+                    return repositoryDir;
+                } else {
+                    throw err;
+                }
+            })
+        }).then(function (repositoryDir) {
+            fs.readdir(repositoryDir, function (err, files) {
                 if (err) {
                     throw err; //TODO
                 }
                 Q.all(files.filter(function (file) {
-                    return file.indexOf('.js') === file.length - ".js".length;
-                }).map(function (file) {
-                    return Q.nfcall(fs.readFile, repoDir + '/' + file, "utf-8").then(function (content) {
-                        return {fileName: file, content: content};
+                        return file.indexOf('.js') === file.length - ".js".length;
+                    }).map(function (file) {
+                        return Q.nfcall(fs.readFile, repositoryDir + '/' + file, "utf-8").then(function (content) {
+                            return {fileName: file, content: content};
+                        })
                     })
-                })
                 ).then(callback).done();
             });
         }).done();
