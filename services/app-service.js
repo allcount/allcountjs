@@ -57,8 +57,8 @@ module.exports = function (compileServices, repositoryService, injection, appUti
                 result = appService.evaluateObject(injection.resolveFuncArgs(object, injection.lookup));
             } else if (_.isArray(object)) {
                 result = object.map(function (i) { return appService.evaluateObject(i)});
-            } else if (Q.isPromise(object)) {
-                result = object; //TODO .then(evaluateObject) ?
+            } else if (Q.isPromise(object) || object && object.then) {
+                result = Q(object); //TODO .then(evaluateObject) ?
             } else if (_.isObject(object)) {
                 result = new ConfigObject(object);
             }  else {
