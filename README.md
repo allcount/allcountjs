@@ -14,14 +14,15 @@ The main idea is to make application development fully declarative and reduce ap
 - [Extending](http://allcountjs.com/docs/server)
 
 # Install
-To install AllcountJS you should have npm installed. To install AllcountJS server you should run:
+Before we start you should install [Node.js](http://nodejs.org/) and [MongoDB](http://www.mongodb.org/).
+After that in order to install AllcountJS server you should run from CLI:
 
 ```
 npm install -g allcountjs
 ```
 
-*NOTE:* There could be an EACCES issue with bower install on Mac OS X.
-As workaround please remove bower cache (USER_HOME/.cache/bower) and run `npm install allcountjs` to pre load it.
+> *NOTE:* There could be an EACCES issue with bower install on Mac OS X.
+As workaround please remove bower cache with `bower cache clean` and run `npm install allcountjs` to pre load it.
 
 # Running Hello World
 AllcountJS server uses Git repositories to load app configurations from it and MongoDB to store application data.
