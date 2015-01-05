@@ -32,11 +32,7 @@ block content
                 button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
         .container.screen-container
             .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')
-            .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm')
-                .form-group(a-layout='"' + entityTypeId + '"', field='field')
-                    label.col-sm-3.control-label(ng-if='showLabel(field)') {{fieldToDesc[field].name}}
-                    div(ng-class='{"col-sm-9": showLabel(field), "col-sm-12": !showLabel(field)}')
-                        .form-control(a-field='fieldToDesc[field]', ng-model='entity[field]', is-editor='true')
+            .right-animation-screen.form-horizontal.lc-form-create(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm')
             div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0")
                 b= messages("entity.noRecords")
             .right-animation-screen.form-horizontal.lc-form-default(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='editForm', is-editor='viewState.isFormEditing')

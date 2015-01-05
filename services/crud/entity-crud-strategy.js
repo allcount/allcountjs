@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (entityDescriptionService, storageDriver, injection, queryPerformerService) {
+module.exports = function (entityDescriptionService, storageDriver, injection, queryPerformerService, validationService) {
     var service = {};
 
     service.crudHandlerFor = function (crudId) {
@@ -71,6 +71,7 @@ module.exports = function (entityDescriptionService, storageDriver, injection, q
                     return storageDriver.findRange(entityDescriptionService.tableDescription(crudId), filteringAndSorting, start, count);
                 },
                 createEntity: function (entity) {
+                    validationService.validateEntity(crudId, entity);
                     return getParentReferenceValue().then(function (parentReferenceValue) {
                         var bfField = backReferenceField();
                         if (!entity[bfField] || !_.isEqual(entity[bfField], parentReferenceValue)) {
@@ -83,12 +84,15 @@ module.exports = function (entityDescriptionService, storageDriver, injection, q
                     return storageDriver.readEntity(entityDescriptionService.tableDescription(crudId), entityId);
                 },
                 updateEntity: function (entity) {
-                    return getParentReferenceValue().then(function (parentReferenceValue) {
-                        var bfField = backReferenceField();
-                        if (!_.isUndefined(entity[bfField]) && !_.isEqual(entity[bfField], parentReferenceValue)) {
-                            entity[bfField] = parentReferenceValue;
-                        }
-                        return storageDriver.updateEntity(entityDescriptionService.tableDescription(crudId), entity);
+                    return this.readEntity(entity.id).then(function (oldEntity) {
+                        validationService.validateEntity(crudId, _.extend(oldEntity, entity));
+                        return getParentReferenceValue().then(function (parentReferenceValue) {
+                            var bfField = backReferenceField();
+                            if (!_.isUndefined(entity[bfField]) && !_.isEqual(entity[bfField], parentReferenceValue)) {
+                                entity[bfField] = parentReferenceValue;
+                            }
+                            return storageDriver.updateEntity(entityDescriptionService.tableDescription(crudId), entity);
+                        });
                     });
                 },
                 deleteEntity: function (entityId) {
@@ -110,13 +114,17 @@ module.exports = function (entityDescriptionService, storageDriver, injection, q
                 return storageDriver.findRange(entityDescriptionService.tableDescription(crudId), addDefaultFiltering(filteringAndSorting), start, count);
             },
             createEntity: function (entity) {
+                validationService.validateEntity(crudId, entity);
                 return storageDriver.createEntity(entityDescriptionService.tableDescription(crudId), entity);
             },
             readEntity: function (entityId) {
                 return storageDriver.readEntity(entityDescriptionService.tableDescription(crudId), entityId); //TODO default filtering for security
             },
             updateEntity: function (entity) {
-                return storageDriver.updateEntity(entityDescriptionService.tableDescription(crudId), entity); //TODO default filtering for security
+                return this.readEntity(entity.id).then(function (oldEntity) {
+                    validationService.validateEntity(crudId, _.extend(oldEntity, entity));
+                    return storageDriver.updateEntity(entityDescriptionService.tableDescription(crudId), entity); //TODO default filtering for security
+                })
             },
             deleteEntity: function (entityId) {
                 return storageDriver.deleteEntity(entityDescriptionService.tableDescription(crudId), entityId); //TODO default filtering for security

@@ -59,7 +59,7 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
 
         function compileEntityTypeByEvaluated(evaluated) {
             service.entityDescriptions[evaluated.entityTypeId] = {
-                fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileField(field, fieldName, evaluated.showInGrid) }),
+                fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileFieldForClient(field, fieldName, evaluated.showInGrid) }),
                 tableDescription: {
                     tableName: evaluated.persistenceEntityTypeId || evaluated.entityTypeId,
                     entityTypeId: evaluated.entityTypeId
@@ -82,7 +82,7 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
             service.entityDescriptions[evaluated.entityTypeId].tableDescription.fields = persistedFields;
         }
 
-        function compileField(field, fieldName, showInGrid) {
+        function compileFieldForClient(field, fieldName, showInGrid) {
             return {
                 field: fieldName,
                 name: field.name,

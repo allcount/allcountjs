@@ -63,7 +63,11 @@ allcountModule.factory("rest", ["$http", function ($http) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/create", {entityCrudId: entityCrudId, entity: entity}).success(successCallback);
+        var promise = $http.post("/rest/crud/create", {entityCrudId: entityCrudId, entity: entity});
+        if (successCallback) {
+            promise.success(successCallback);
+        }
+        return promise.then(getJson);
     };
 
     service.readEntity = function (entityCrudId, entityId, successCallback) {
@@ -77,7 +81,11 @@ allcountModule.factory("rest", ["$http", function ($http) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/update", {entityCrudId: entityCrudId, entity: entity}).success(successCallback);
+        var promise = $http.post("/rest/crud/update", {entityCrudId: entityCrudId, entity: entity});
+        if (successCallback) {
+            promise.success(successCallback);
+        }
+        return promise.then(getJson);
     };
 
     service.deleteEntity = function (entityCrudId, entityId, successCallback) {
@@ -134,11 +142,6 @@ allcountModule.factory("messages", ["messagesObj", function (messagesObj) {
 allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale", "rest", "messages", function ($filter, $compile, $locale, rest, messages) {
     var service = {};
 
-    var trueFalseNames = {
-        'en': ['Yes', 'No'],
-        'ru': ['Да', 'Нет']
-    };
-
     var fieldRenderers = {
         text: function (value) {
             return value;
@@ -153,8 +156,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             return renderCurrency(value);
         },
         checkbox: function (value) {
-            var names = trueFalseNames[$locale.id.split("-")[0]] || trueFalseNames['en'];
-            return value ? names[0] : names[1];
+            return value ? messages("Yes") : messages("No");
         },
         reference: function (value) {
             return value ? value.name : undefined;
@@ -557,6 +559,16 @@ function layoutDirective(directiveName) {
 allcountModule.directive("aLayout", layoutDirective("aLayout")); //TODO deprecated
 allcountModule.directive("lcLayout", layoutDirective("lcLayout"));
 
+function handleValidationErrorsCallback(scope) {
+    return function onError(err) {
+        if (err.status === 403) {
+            scope.validationErrors = err.data;
+        } else {
+            throw err;
+        }
+    }
+}
+
 function listDirective(directiveName, templateUrl) {
     return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
         return {
@@ -634,6 +646,7 @@ function listDirective(directiveName, templateUrl) {
                     };
 
                     scope.editEntity = function (entity) {
+                        scope.validationErrors = undefined;
                         if (scope.editingItem) {
                             scope.saveEntity(function () {});
                         }
@@ -657,6 +670,7 @@ function listDirective(directiveName, templateUrl) {
                     scope.saveEntity = function (success) {
                         var entity = scope.editingItem;
                         function onSuccess(id) {
+                            scope.validationErrors = undefined;
                             if (!entity.id) {
                                 entity.id = id;
                             }
@@ -667,9 +681,9 @@ function listDirective(directiveName, templateUrl) {
                             }
                         }
                         if (scope.editingItem.id) {
-                            rest.updateEntity(scope.entityCrudId, scope.entityForUpdate(), onSuccess);
+                            rest.updateEntity(scope.entityCrudId, scope.entityForUpdate()).then(onSuccess, handleValidationErrorsCallback(scope));
                         } else {
-                            rest.createEntity(scope.entityCrudId, entity, onSuccess);
+                            rest.createEntity(scope.entityCrudId, entity).then(onSuccess, handleValidationErrorsCallback(scope));
                         }
                     };
 
@@ -848,14 +862,27 @@ allcountModule.directive("lcForm", ["rest", "fieldRenderingService", "$parse", f
                     })
                 };
 
+                scope.$watch('entity', function (entity, oldEntity) {
+                    for (var field in scope.fieldToDesc) {
+                        if (scope.fieldToDesc.hasOwnProperty(field) && entity && oldEntity &&
+                            !angular.equals(entity[field], oldEntity[field]) && scope.validationErrors) {
+                            scope.validationErrors[field] = undefined;
+                        }
+                    }
+                }, true);
+
                 scope.createEntity = function (successCallback) {
-                    rest.createEntity(scope.entityCrudId, scope.entity, successCallback ? successCallback : function () {});
+                    return rest.createEntity(scope.entityCrudId, scope.entity).then(function () {
+                        scope.validationErrors = undefined;
+                        successCallback && successCallback();
+                    }, handleValidationErrorsCallback(scope))
                 };
 
                 scope.updateEntity = function (successCallback) {
-                    rest.updateEntity(scope.entityCrudId, scope.entityForUpdate(), function () { //TODO send only difference with original entity
+                    return rest.updateEntity(scope.entityCrudId, scope.entityForUpdate()).then(function () { //TODO send only difference with original entity
+                        scope.validationErrors = undefined;
                         if (successCallback) successCallback();
-                    })
+                    }, handleValidationErrorsCallback(scope))
                 };
 
                 scope.entityForUpdate = function () {
@@ -919,13 +946,24 @@ allcountModule.directive("lcFormDefault", [function () {
     }
 }]);
 
+allcountModule.directive("lcFormCreate", [function () {
+    return {
+        restrict: 'C',
+        scope: false,
+        templateUrl: '/assets/template/form-create.html',
+        transclude: false
+    }
+}]);
+
 function messageDirective(directiveName) {
     return ["messages", function (messages) {
         return {
             restrict: 'A',
             scope: false,
             link: function (scope, element, attrs) {
-                $(element).text(messages(attrs[directiveName]));
+                attrs.$observe(directiveName, function (messageValue) {
+                    $(element).text(messages(messageValue));
+                });
             }
         }
     }];

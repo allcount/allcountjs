@@ -1,4 +1,5 @@
 var util = require('util');
+var _ = require('underscore');
 
 module.exports = function () {
     function CompileError () {
@@ -9,5 +10,17 @@ module.exports = function () {
 
     util.inherits(CompileError, Error);
 
-    return {CompileError: CompileError};
+    function ValidationError (fieldNameToMessage) {
+        this.fieldNameToMessage = fieldNameToMessage;
+        this.message = JSON.stringify(fieldNameToMessage);
+        this.name = "ValidationError";
+        Error.captureStackTrace(this, arguments.callee);
+    }
+
+    util.inherits(ValidationError, Error);
+
+    return {
+        CompileError: CompileError,
+        ValidationError: ValidationError
+    };
 };

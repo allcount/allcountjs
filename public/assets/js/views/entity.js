@@ -23,8 +23,8 @@ function EntityViewController ($scope) {
     };
 
     $scope.doneEditing = function () {
-        $scope.viewState.isFormEditing = false;
         $scope.editForm.updateEntity(function () {
+            $scope.viewState.isFormEditing = false;
             $scope.editForm.reloadEntity();
         });
     };

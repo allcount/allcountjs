@@ -113,3 +113,8 @@ Field.prototype.addToTotalRow = function () {
     this.totalRowFun = 'sum';
     return this;
 };
+
+Field.prototype.required = function (isRequired) {
+    this.isRequired = _.isUndefined(isRequired) ? true : isRequired;
+    return this;
+};

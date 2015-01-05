@@ -37,7 +37,8 @@ module.exports = function (
     actionsRoute,
     sessionMiddleware,
     viewPaths,
-    repositoryService
+    repositoryService,
+    appUtil
     ) {
     return {
         startup: function (onReady) {
@@ -145,6 +146,20 @@ module.exports = function (
                     app.get('/logout', securityRoute.logout);
                     app.get('/js/messages.js', messages.messagesNgModule);
                     app.use(appAccessRouter);
+                    app.use(function (req, res, next) {
+                        templateVarService.setupLocals(req, res);
+                        res.status(404).render('not-found');
+                    });
+                    app.use(function (err, req, res, next) {
+                        templateVarService.setupLocals(req, res);
+                        if (err instanceof appUtil.ValidationError) {
+                            res.status(403).json(err.fieldNameToMessage);
+                        } else if (err) {
+                            console.error(err.stack);
+                            res.locals.error = err;
+                            res.status(500).render('error');
+                        }
+                    })
                 }
 
                 httpServer(function (req, res) {
