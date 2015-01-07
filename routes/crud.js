@@ -43,10 +43,19 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .done();
     };
 
+    function removeReadOnlyFieldValues (entityCrudId, entity) {
+        _.forEach(entityDescriptionService.entityDescription(entityCrudId).allFields, function (field, fieldName) {
+            if (field.readOnly()) {
+                delete entity[fieldName];
+            }
+        });
+        return entity;
+    }
+
     route.createEntity = function (req, res) {
         crudService
             .strategyForCrudId(req.body.entityCrudId)
-            .createEntity(req.body.entity)
+            .createEntity(removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity))
             .then(function (result) {
                 res.send(result.toString());
             })
@@ -66,7 +75,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     route.updateEntity = function (req, res) {
         crudService
             .strategyForCrudId(req.body.entityCrudId)
-            .updateEntity(req.body.entity)
+            .updateEntity(removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity))
             .then(function (result) {
                 res.json(result);
             })
