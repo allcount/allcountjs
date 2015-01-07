@@ -118,3 +118,8 @@ Field.prototype.required = function (isRequired) {
     this.isRequired = _.isUndefined(isRequired) ? true : isRequired;
     return this;
 };
+
+Field.prototype.readOnly = function (isReadOnly) {
+    this.isReadOnly = _.isUndefined(isReadOnly) ? true : isReadOnly;
+    return this;
+};

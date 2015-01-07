@@ -3,6 +3,32 @@ var _ = require('underscore');
 module.exports = function (queryParseService, securityService, fieldsApi) {
     var service = {};
 
+    function CompiledField(field) {
+        _.extend(this, field)
+    }
+
+    CompiledField.prototype.isForwardReference = function () {
+        return this.fieldType.id === 'reference';
+    };
+
+    CompiledField.prototype.isBackReference = function () {
+        return this.fieldType.id === 'relation';
+    };
+
+    CompiledField.prototype.readOnly = function () {
+        return this.isReadOnly || this.computeExpression;
+    };
+
+    CompiledField.prototype.referenceEntityTypeId = function () {
+        if (this.fieldType.id === 'reference') {
+            return this.fieldType.referenceEntityTypeId
+        } else if (this.fieldType.id === 'relation') {
+            return this.fieldType.relationEntityTypeId;
+        } else {
+            return undefined;
+        }
+    };
+
     service.compile = function(objects, errors) {
         service.entityDescriptions = {};
         objects.forEach(function (obj) {
@@ -59,7 +85,7 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
 
         function compileEntityTypeByEvaluated(evaluated) {
             service.entityDescriptions[evaluated.entityTypeId] = {
-                fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileFieldForClient(field, fieldName, evaluated.showInGrid) }),
+                fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileFieldForClient(new CompiledField(field), fieldName, evaluated.showInGrid) }),
                 tableDescription: {
                     tableName: evaluated.persistenceEntityTypeId || evaluated.entityTypeId,
                     entityTypeId: evaluated.entityTypeId
@@ -88,29 +114,8 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
                 name: field.name,
                 hideInGrid: field.hideInGrid || showInGrid && showInGrid.indexOf(fieldName) === -1,
                 fieldTypeId: field.fieldType.id, //TODO remove?
-                fieldType: field.fieldType
-            }
-        }
-
-        function CompiledField(field) {
-            _.extend(this, field)
-        }
-
-        CompiledField.prototype.isForwardReference = function () {
-            return this.fieldType.id === 'reference';
-        };
-
-        CompiledField.prototype.isBackReference = function () {
-            return this.fieldType.id === 'relation';
-        };
-
-        CompiledField.prototype.referenceEntityTypeId = function () {
-            if (this.fieldType.id === 'reference') {
-                return this.fieldType.referenceEntityTypeId
-            } else if (this.fieldType.id === 'relation') {
-                return this.fieldType.relationEntityTypeId;
-            } else {
-                return undefined;
+                fieldType: field.fieldType,
+                isReadOnly: field.readOnly()
             }
         }
     };
