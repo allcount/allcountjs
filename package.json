@@ -54,7 +54,8 @@
     "jade": "^1.8.1",
     "then-jade": "^2.2.1",
     "minimist": "^1.1.0",
-    "mongoose": "^3.8.21"
+    "mongoose": "^3.8.21",
+    "mongoose-long": "^0.0.2"
   },
   "license": "MIT",
   "readmeFilename": "README.md",

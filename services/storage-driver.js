@@ -6,7 +6,8 @@ var mongoose = require('mongoose');
 var mongo = mongoose.mongo;
 var GridStore = mongo.GridStore;
 var Schema = mongoose.Schema;
-var ObjectId = mongoose.Types.ObjectId
+var ObjectId = mongoose.Types.ObjectId;
+require('mongoose-long')(mongoose);
 
 var UserCollectionName = "User";
 
@@ -72,8 +73,10 @@ module.exports = function (dbUrl) {
                 fieldType = {id: Schema.ObjectId, name: String};
             } else if (field.fieldType.id === 'attachment') {
                 fieldType = {fileId: Schema.ObjectId, name: String};
-            } else if (field.fieldType.id === 'integer' || field.fieldType.id === 'money') {
+            } else if (field.fieldType.id === 'integer') {
                 fieldType = Number;
+            } else if (field.fieldType.id === 'money') {
+                fieldType = Schema.Types.Long;
             } else if (field.fieldType.id === 'checkbox') {
                 if (field.fieldType.storeAsArrayField) {
                     return [field.fieldType.storeAsArrayField, [String]];
