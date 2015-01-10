@@ -62,7 +62,7 @@ module.exports = function (dbUrl) {
         if (models[table.entityTypeId]) {
             return models[table.entityTypeId];
         }
-        var schema = new Schema(_.chain(getAllFields(table)).map(function (field, fieldName) {
+        var definition = _.chain(getAllFields(table)).map(function (field, fieldName) {
             if (field.fieldType.notPersisted) {
                 return undefined;
             }
@@ -87,7 +87,9 @@ module.exports = function (dbUrl) {
                 fieldType = String;
             }
             return [fieldName, fieldType];
-        }).filter(_.identity).object().value(), {
+        }).filter(_.identity).object().value();
+        definition.__textIndex = [String];
+        var schema = new Schema(definition, {
             collection: table.tableName
         });
         models[table.entityTypeId] = connection.model(table.entityTypeId, schema);
@@ -185,7 +187,7 @@ module.exports = function (dbUrl) {
         }
     }
 
-    var dateFields = {
+    var systemFields = {
         createTime: {
             fieldType: {
                 id: 'date'
@@ -199,7 +201,7 @@ module.exports = function (dbUrl) {
     };
 
     function getAllFields(table) {
-        return _.extend({}, table.fields, dateFields);
+        return _.extend({}, table.fields, systemFields);
     }
 
     function queryFor(table, filteringAndSorting) {
