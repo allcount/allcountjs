@@ -1,20 +1,33 @@
 var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload']);
 
-allcountModule.factory("rest", ["$http", function ($http) {
+allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
     var service = {};
+
+    function castToEntityCrudId(entityCrudId) {
+        if (typeof entityCrudId == "string") {
+            return {entityTypeId: entityCrudId};
+        } else {
+            return entityCrudId;
+        }
+    }
 
     service.getFieldDescriptions = function (entityCrudId, isGrid, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/field-descriptions", {entityCrudId: entityCrudId, isGrid: isGrid}).success(function (descriptions) {
-            successCallback($(descriptions).map(function (index, item) {
+        var httpPromise = $http.post("/rest/field-descriptions", {entityCrudId: castToEntityCrudId(entityCrudId), isGrid: isGrid}).then(getJson).then(function (descriptions) {
+            return $(descriptions).map(function (index, item) {
                 if (!isGrid || !item.hideInGrid) {
                     return item;
                 }
                 return undefined;
-            }));
+            })
         });
+
+        if (successCallback) {
+            httpPromise.then(successCallback);
+        }
+        return httpPromise;
     };
 
     service.permissions = function (entityCrudId, successCallback) {
@@ -81,7 +94,7 @@ allcountModule.factory("rest", ["$http", function ($http) {
         if (!entityCrudId) {
             return;
         }
-        var promise = $http.post("/rest/crud/update", {entityCrudId: entityCrudId, entity: entity});
+        var promise = $http.post("/rest/crud/update", {entityCrudId: castToEntityCrudId(entityCrudId), entity: entity});
         if (successCallback) {
             promise.success(successCallback);
         }
@@ -117,13 +130,20 @@ allcountModule.factory("rest", ["$http", function ($http) {
         if (!entityTypeId) {
             return;
         }
-        if (service.referenceValueCache[entityTypeId])
-            successCallback(service.referenceValueCache[entityTypeId]);
-        else
-            $http.get("/rest/reference/values/" + entityTypeId).success(function (referenceValues) {
+        var promise;
+        if (service.referenceValueCache[entityTypeId]) {
+            promise = $q.when(service.referenceValueCache[entityTypeId]);
+        }
+        else {
+            promise = $http.get("/rest/reference/values/" + entityTypeId).then(getJson).then(function (referenceValues) {
                 service.referenceValueCache[entityTypeId] = [{id: undefined, name: ""}].concat(referenceValues);
-                successCallback(service.referenceValueCache[entityTypeId]);
+                return service.referenceValueCache[entityTypeId];
             });
+        }
+        if (successCallback) {
+            promise.then(successCallback);
+        }
+        return promise;
     };
 
     service.referenceValueByEntityId = function (entityTypeId, entityId) {
@@ -574,6 +594,7 @@ function listDirective(directiveName, templateUrl) {
     return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
         return {
             restrict: 'A',
+            priority: 1100,
             templateUrl: templateUrl,
             scope: true,
             link: function (scope, element, attrs, ctrl) {
@@ -1168,7 +1189,7 @@ allcountModule.directive("lcTooltip", ["$parse", "messages", function ($parse, m
         link: function (scope, element, attrs) {
             $(element).tooltip({
                 placement: 'bottom',
-                title: messages(attrs.lcTooltip),
+                title: messages(attrs.lcTooltip)
             });
         }
     }

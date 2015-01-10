@@ -1,0 +1,39 @@
+extends main
+include mixins
+
+block vars
+    - var hasToolbar = true
+block content
+    .a-refresh-form-controller(ng-app='allcount-card-board', ng-controller='EntityViewController')
+        +defaultToolbar()
+        .container.screen-container
+            .left-animation-screen(
+            lc-list='"' + entityTypeId + '"',
+            filtering='viewState.filtering',
+            ng-show='viewState.mode == "list" && viewState.paging.count > 0',
+            edit-mode='viewState.editState',
+            navigate='navigateTo($entityId)',
+            paging='viewState.paging',
+            total-row='viewState.totalRow',
+            publish-methods='gridMethods',
+            ng-controller='BoardController',
+            ng-init="entityTypeId = '" + entityTypeId + "'"
+            )
+                div(ng-repeat="column in boardColumns", ng-class="boardColumnClasses()")
+                    h4(lc-message="{{column.name || 'Not set'}}")
+                    div(ui-sortable="{connectWith: '.board-column', dropOnEmpty: true, placeholder: 'panel panel-success col-xs-12', forcePlaceholderSize: true}", ng-model="boardItems[column.id || '']", style="min-height: 100px").board-column
+                        .panel.panel-default(ng-repeat="item in boardItems[column.id || '']").col-xs-12
+                            .panel-body
+                                button.btn.btn-default.btn-xs(lc-tooltip="View", ng-show="isInEditMode", ng-click="navigate(item.id)")
+                                    i.glyphicon.glyphicon-chevron-right
+                                | &nbsp;
+                                button.btn.btn-danger.btn-xs(lc-tooltip="Delete", ng-show="isInEditMode", ng-click="deleteEntity(item)")
+                                    i.glyphicon.glyphicon-trash
+                                | &nbsp;{{item[summaryField]}}
+            +noEntries()
+            +defaultEditAndCreateForms()
+
+    script(src='/assets/lib/js/jquery-ui/jquery-ui.js')
+    script(src='/assets/lib/js/angular-ui-sortable/sortable.js')
+    script(src='/assets/js/views/entity.js')
+    script(src='/assets/js/views/project/card-board.js')

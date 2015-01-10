@@ -1,0 +1,39 @@
+mixin defaultToolbar()
+    .toolbar-header
+        .container.form-inline(ng-show='viewState.mode == "list"')
+            .pull-left: .btn-toolbar
+                button.btn.btn-success(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                    i.glyphicon.glyphicon-plus
+                button.btn.btn-default(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                    i.glyphicon.glyphicon-pencil
+                button.btn.btn-default(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
+                    i.glyphicon.glyphicon-ok
+                button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'all-items'", on-refresh="refreshOnAction()") {{action.name}}
+                span.entity-title= messages(entityTitle) || ' '
+            .pull-right.form-inline
+                input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
+                span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')
+        .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
+            button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
+                i.glyphicon.glyphicon-chevron-left
+            button.btn.btn-default(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.create")
+                i.glyphicon.glyphicon-ok
+        .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
+            button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
+                i.glyphicon.glyphicon-chevron-left
+            button.btn.btn-default(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
+                i.glyphicon.glyphicon-pencil
+            button.btn.btn-default(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
+                i.glyphicon.glyphicon-ok
+            button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
+
+mixin noEntries()
+    div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0")
+        b= messages("entity.noRecords")
+
+mixin defaultEditAndCreateForms()
+    .right-animation-screen.form-horizontal.lc-form-create(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm')
+    .right-animation-screen.form-horizontal.lc-form-default(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='editForm', is-editor='viewState.isFormEditing')
+
+mixin defaultGrid()
+    .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')

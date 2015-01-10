@@ -22,5 +22,6 @@ module.exports = {
     "Delete": "Удалить",
     "Required": "Обязательное",
     "Yes": "Да",
-    "No": "Нет"
+    "No": "Нет",
+    "Not set": "Не задано"
 };

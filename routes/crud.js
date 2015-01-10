@@ -53,13 +53,12 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     }
 
     route.createEntity = function (req, res) {
-        crudService
-            .strategyForCrudId(req.body.entityCrudId)
-            .createEntity(removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity))
-            .then(function (result) {
-                res.send(result.toString());
-            })
-            .done();
+        var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
+        referenceService.resolveReferenceValues(req.body.entityCrudId, entity).then(function () {
+            return crudService.strategyForCrudId(req.body.entityCrudId).createEntity(entity);
+        }).then(function (result) {
+            res.send(result.toString());
+        }).done();
     };
 
     route.readEntity = function (req, res) {
@@ -73,13 +72,12 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     route.updateEntity = function (req, res) {
-        crudService
-            .strategyForCrudId(req.body.entityCrudId)
-            .updateEntity(removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity))
-            .then(function (result) {
-                res.json(result);
-            })
-            .done();
+        var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
+        referenceService.resolveReferenceValues(req.body.entityCrudId, entity).then(function () {
+            return crudService.strategyForCrudId(req.body.entityCrudId).updateEntity(entity);
+        }).then(function (result) {
+            res.json(result);
+        }).done();
     };
 
     route.deleteEntity = function (req, res) {
