@@ -282,6 +282,9 @@ module.exports = function (dbUrl) {
     }
 
     service.readEntity = function (table, entityId) {
+        if (!entityId) {
+            throw new Error('entityId should be defined for readEntity()');
+        }
         return Q(modelFor(table).findById(toMongoId(entityId)).exec()).then(function (result) {
             return fromBson(table.fields)(result);
         });
@@ -361,7 +364,7 @@ module.exports = function (dbUrl) {
     function convertEntity(fields, convertFun, entity) {
         var result = {};
         _.each(fields, function (field, fieldName) {
-            var value = convertFun(entity[fieldName], field, entity);
+            var value = convertFun(entity[fieldName], field, entity, fieldName);
             if (value && (value.$$push || value.$$pull)) {
                 var mergeOp = value.$$push || value.$$pull;
                 if (!result[mergeOp.field] || !_.isArray(result[mergeOp.field])) {
@@ -394,13 +397,16 @@ module.exports = function (dbUrl) {
         return value;
     }
 
-    function toBsonValue(value, field, entity) {
+    function toBsonValue(value, field, entity, fieldName) {
         if (field.fieldType.id == 'date' && value) {
             if (_.isDate(value)) {
                 return value;
             }
             return moment(value, 'YYYY-MM-DD').toDate(); //TODO move to REST layer?
         } else if (field.fieldType.id == 'reference' && value) {
+            if (!value.id) {
+                throw new Error("Reference value without id was passed for field '" + fieldName + "'");
+            }
             return {
                 id: toMongoId(value.id),
                 name: value.name
