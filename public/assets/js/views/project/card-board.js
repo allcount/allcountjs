@@ -9,7 +9,7 @@ function BoardController($scope, rest, $q) {
         return (_.isObject(fieldValue) ? fieldValue.id : fieldValue) || '';
     }
 
-    $scope.$watch('items', function (items) {
+    function updateBoardItems(items) {
         $scope.boardItems = {};
         initializeBoardItemArrays();
         _.forEach(items, function (item) {
@@ -18,19 +18,25 @@ function BoardController($scope, rest, $q) {
             $scope.boardItems[fieldValue] = $scope.boardItems[fieldValue] || [];
             $scope.boardItems[fieldValue].push(item);
         });
-    }, true);
+    }
+
+    $scope.$watch('items', updateBoardItems, true);
 
     $scope.$watch('boardItems', function (boardItems) {
         $q.all(_.chain(boardItems).map(function (column, columnId) {
             return _.map(column, function (item) {
                 if (statusFieldValue(item[$scope.statusField]) !== columnId) {
                     var update = {id: item.id};
-                    update[$scope.statusField] = {id: columnId || undefined};
+                    update[$scope.statusField] = columnId && {id: columnId} || null;
                     return rest.updateEntity($scope.entityTypeId, update);
                 }
             })
-        }).flatten().value()).then(function () {
-            $scope.gridMethods.updateGrid();
+        }).flatten().filter(_.identity).value()).then(function (results) {
+            if (results.length > 0) {
+                $scope.gridMethods.updateGrid();
+            }
+        }, function () {
+            updateBoardItems($scope.items);
         });
     }, true);
 

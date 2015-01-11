@@ -20,16 +20,19 @@ block content
             ng-init="entityTypeId = '" + entityTypeId + "'"
             )
                 div(ng-repeat="column in boardColumns", ng-class="boardColumnClasses()")
-                    h4(lc-message="{{column.name || 'Not set'}}")
-                    div(ui-sortable="{connectWith: '.board-column', dropOnEmpty: true, placeholder: 'panel panel-success col-xs-12', forcePlaceholderSize: true}", ng-model="boardItems[column.id || '']", style="min-height: 100px").board-column
-                        .panel.panel-default(ng-repeat="item in boardItems[column.id || '']").col-xs-12
-                            .panel-body
-                                button.btn.btn-default.btn-xs(lc-tooltip="View", ng-show="isInEditMode", ng-click="navigate(item.id)")
+                    h4
+                        span(lc-message="{{column.name || 'Not set'}}")
+                        span &nbsp;({{boardItems[column.id || ''].length}})
+                    div(ui-sortable="{connectWith: '.board-column', dropOnEmpty: true, placeholder: 'panel panel-success', forcePlaceholderSize: true}", ng-model="boardItems[column.id || '']", style="min-height: 100px").board-column
+                        .panel.panel-default(ng-repeat="item in boardItems[column.id || '']", ng-style="!isInEditMode && {cursor: 'move'}")
+                            .panel-heading(ng-if="isInEditMode")
+                                button.btn.btn-default.btn-xs(lc-tooltip="View", ng-click="navigate(item.id)")
                                     i.glyphicon.glyphicon-chevron-right
                                 | &nbsp;
-                                button.btn.btn-danger.btn-xs(lc-tooltip="Delete", ng-show="isInEditMode", ng-click="deleteEntity(item)")
+                                button.btn.btn-danger.btn-xs(lc-tooltip="Delete", ng-click="deleteEntity(item)")
                                     i.glyphicon.glyphicon-trash
-                                | &nbsp;{{item[summaryField]}}
+                            block panelBody
+                                .panel-body {{item[summaryField]}}
             +noEntries()
             +defaultEditAndCreateForms()
 
