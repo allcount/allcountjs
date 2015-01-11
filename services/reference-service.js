@@ -21,7 +21,7 @@ module.exports = function (entityDescriptionService, crudService) {
 
     service.resolveReferenceValues = function (crudId, entity) {
         return Q.all(entityDescriptionService.entityDescription(crudId).fields.map(function (field) {
-            if (field.fieldType.id === 'reference' && entity[field.field]) {
+            if (field.fieldType.id === 'reference' && entity[field.field] && entity[field.field].id) {
                 return service.referenceValueByEntityId(
                         entityDescriptionService.entityTypeIdCrudId(field.fieldType.referenceEntityTypeId),
                         entity[field.field].id
