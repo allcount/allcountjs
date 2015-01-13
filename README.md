@@ -14,12 +14,22 @@ The main idea is to make application development fully declarative and reduce ap
 - [Extending](http://allcountjs.com/docs/server)
 
 # Install
-Before we start you should install [Node.js](http://nodejs.org/) and [MongoDB](http://www.mongodb.org/).
+Before we start you should install [Node.js](http://nodejs.org/), [MongoDB](http://www.mongodb.org/) and [Git](http://git-scm.com/).
 After that in order to install AllcountJS server you should run from CLI:
+
+> *NOTE:* Preferred way to install and run allcountjs on Windows is to use Git-Bash.
 
 ```
 npm install -g allcountjs
 ```
+
+You could also install it locally in current dir using
+
+```
+npm install allcountjs
+```
+
+In this way you should run `node_modules/.bin/allcountjs` instead `allcountjs`.
 
 > *NOTE:* There could be an EACCES issue with bower install on Mac OS X.
 As workaround please remove bower cache with `bower cache clean` and run `npm install allcountjs` to pre load it.
