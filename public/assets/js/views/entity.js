@@ -1,10 +1,17 @@
-function EntityViewController ($scope) {
+function EntityViewController ($scope, track, $window) {
     $scope.viewState = {
         mode: 'list',
         filtering: {}
     };
 
+    track('allcount-entity-load', {
+        location: $window.location.href
+    });
+
     $scope.returnToGrid = function () {
+        track('allcount-entity-return-to-grid', {
+            location: $window.location.href
+        });
         $scope.viewState.mode = 'list';
         $scope.viewState.isFormEditing = false;
         $scope.pagingMethods.refresh();
@@ -12,17 +19,27 @@ function EntityViewController ($scope) {
     };
 
     $scope.navigateTo = function (entityId) {
+        track('allcount-entity-navigate-to', {
+            location: $window.location.href,
+            entityId: entityId
+        });
         $scope.viewState.formEntityId = entityId;
         $scope.viewState.mode = 'form';
     };
 
     $scope.startEditing = function () {
+        track('allcount-entity-start-editing', {
+            location: $window.location.href
+        });
         $scope.editForm.reloadEntity(function () {
             $scope.viewState.isFormEditing = true;
         });
     };
 
     $scope.doneEditing = function () {
+        track('allcount-entity-done-editing', {
+            location: $window.location.href
+        });
         $scope.editForm.updateEntity(function () {
             $scope.viewState.isFormEditing = false;
             $scope.editForm.reloadEntity();
@@ -30,10 +47,16 @@ function EntityViewController ($scope) {
     };
 
     $scope.startGridEditing = function() {
+        track('allcount-entity-start-grid-editing', {
+            location: $window.location.href
+        });
         $scope.viewState.editState = true;
     };
 
     $scope.doneGridEditing = function() {
+        track('allcount-entity-done-grid-editing', {
+            location: $window.location.href
+        });
         $scope.viewState.editState = false;
         setTimeout(function () {
             $scope.$evalAsync(function () {
@@ -44,6 +67,9 @@ function EntityViewController ($scope) {
     };
 
     $scope.toCreate = function () {
+        track('allcount-entity-create', {
+            location: $window.location.href
+        });
         $scope.viewState.mode = 'create';
         $scope.createForm.reloadEntity();
     };

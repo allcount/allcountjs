@@ -13,6 +13,7 @@ module.exports = function (viewPaths, repositoryService) {
     }
 
     AllcountJadeParser.prototype = _.extend(_.clone(Parser.prototype), {
+        constructor: AllcountJadeParser,
         resolvePath: function (path, purpose) {
             if ('.jade' != path.substr(-5)) path += '.jade';
             if (!_.isUndefined(viewLookupCache[path])) {

@@ -64,3 +64,15 @@ exports.inScopeTest = function (test) {
     assert.equal(injection.inject('foo'), 'bar');
     test.done();
 };
+
+exports.rebindTest = function (test) {
+    injection.resetInjection();
+    injection.bindFactory("foo", function () {
+        return "bar";
+    });
+    injection.rebindFactory("foo", "oldFoo", function (oldFoo) {
+        return oldFoo;
+    });
+    assert.equal(injection.inject('foo'), 'bar');
+    test.done();
+};

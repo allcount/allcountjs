@@ -10,5 +10,11 @@ module.exports = function () {
         });
     };
 
+    service.trackingTemplateVars = function () {
+        return {
+            googleAnalyticsId: service.googleAnalyticsId
+        }
+    };
+
     return service;
 };

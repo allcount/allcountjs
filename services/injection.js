@@ -21,6 +21,18 @@ exports.addNameMatcher = function (regex, replaceFun, requireFn) {
     exports.nameMatchers.unshift({regex: regex, replaceFun: replaceFun, requireFn: requireFn});
 };
 
+exports.resolveFactory = function (factory) {
+    var instance;
+    if (_.isFunction(factory)) {
+        instance = exports.resolveFuncArgs(factory, exports.inject);
+    } else if (_.isArray(factory)) {
+        instance = factory.map(exports.inject).reverse();
+    } else {
+        instance = factory;
+    }
+    return instance;
+};
+
 exports.inject = function (serviceName) {
     if (serviceName === 'injection') {
         return exports;
@@ -57,14 +69,7 @@ exports.inject = function (serviceName) {
         if (!factory) {
             throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
         }
-        var instance;
-        if (_.isFunction(factory)) {
-            instance = exports.resolveFuncArgs(factory, exports.inject);
-        } else if (_.isArray(factory)) {
-            instance = factory.map(exports.inject).reverse();
-        } else {
-            instance = factory;
-        }
+        var instance = exports.resolveFactory(factory);
         if (exports.scoped.length > 0) {
             exports.scoped[exports.scoped.length - 1].providers[serviceName] = instance;
             return instance;
@@ -85,6 +90,17 @@ function requireWithServiceNameMatcher(serviceName) {
 
 exports.bindFactory = function (serviceName, factory) {
     exports.factories[serviceName] = factory;
+};
+
+exports.rebindFactory = function (serviceName, renameOldServiceTo, factory) {
+    var oldService = exports.factories[serviceName];
+    var scope = {};
+    scope[renameOldServiceTo] = oldService;
+    exports.factories[serviceName] = function (injection) {
+        return injection.inScope(scope, function () {
+            return exports.resolveFactory(factory);
+        });
+    }
 };
 
 exports.inScope = function (serviceNameToFactory, fun) {

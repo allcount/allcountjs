@@ -1,5 +1,28 @@
 var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload']);
 
+allcountModule.factory('track', function () {
+    return lc.track;
+});
+
+allcountModule.config(["$httpProvider", function ($httpProvider) {
+    $httpProvider.interceptors.push(['$q', 'track', function($q, track) {
+        return {
+            responseError: function(rejection) {
+                if (rejection.status !== 403) {
+                    track("allcount-rest-error", {
+                        url: rejection.config.url,
+                        req: rejection.config.data,
+                        method: rejection.config.method,
+                        status: rejection.status,
+                        res: rejection.data
+                    });
+                }
+                return $q.reject(rejection);
+            }
+        };
+    }]);
+}]);
+
 allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
     var service = {};
 
@@ -283,10 +306,10 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
                     scope.referenceIdToValue = {};
                     $(scope.referenceValues).each(function (index, item) {
                         scope.referenceIdToValue[item.id] = item;
-                    })
-                });
-                scope.$watch('selectedReferenceId', function (referenceValueId) {
-                    controller.$setViewValue(referenceValueId ? scope.referenceIdToValue[referenceValueId] : undefined);
+                    });
+                    scope.$watch('selectedReferenceId', function (referenceValueId) {
+                        controller.$setViewValue(referenceValueId ? scope.referenceIdToValue[referenceValueId] : undefined);
+                    });
                 });
                 scope.selectedReferenceId = controller.$viewValue ? controller.$viewValue.id : undefined;
                 return $compile('<select ng-model="selectedReferenceId" ng-options="r.id as r.name for r in referenceValues" class="form-control"></select>')(scope);

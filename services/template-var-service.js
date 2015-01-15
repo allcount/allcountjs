@@ -14,7 +14,7 @@ module.exports = function (menuService, messagesService, securityService, themeS
             user: req.user,
             securityService: securityService,
             entityTitle: req.params.entityTypeId && entityDescriptionService.entityDescription(entityDescriptionService.entityTypeIdCrudId(req.params.entityTypeId)).title || undefined,
-            googleAnalyticsId: trackingService.googleAnalyticsId,
+            tracking: trackingService.trackingTemplateVars(),
             parser: jadeParserService,
             services: {
                 menuService: menuService,
