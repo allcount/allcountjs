@@ -26,7 +26,7 @@ exports.resolveFactory = function (factory) {
     if (_.isFunction(factory)) {
         instance = exports.resolveFuncArgs(factory, exports.inject);
     } else if (_.isArray(factory)) {
-        instance = factory.map(exports.inject).reverse();
+        instance = factory.map(exports.inject);
     } else {
         instance = factory;
     }

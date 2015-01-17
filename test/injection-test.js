@@ -34,7 +34,7 @@ exports.bindMultipleTest = function (test) {
         return plugins;
     });
     injection.bindMultiple('plugins', ['foo', 'bar']);
-    assert.deepEqual(injection.inject('host'), ['bar', {foo: 'bar'}]);
+    assert.deepEqual(injection.inject('host'), [{foo: 'bar'}, 'bar']);
     test.done();
 };
 

@@ -15,7 +15,7 @@ module.exports = function (appService, gitRepoUrl, proxyHandler, injection, http
                     injection.inScope({
                         app: function () { return app }
                     }, function () {
-                        injection.inject('appSetup').reverse().forEach(function (setup) { setup.setup() });
+                        injection.inject('appSetup').forEach(function (setup) { setup.setup() });
                     });
                 }
 

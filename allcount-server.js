@@ -15,17 +15,17 @@ injection.addNameMatcher(/(.*?)Setup/, function (serviceName) {
 
 injection.bindFactory('entityCrudStrategy', require('./services/crud/entity-crud-strategy'));
 injection.bindMultiple('compileServices', [
-    'migrationService',
-    'themeService',
-    'trackingService',
-    'menuService',
-    'viewService',
-    'computedFieldService',
-    'actionService',
-    'crudService',
-    'entityDescriptionService',
+    'messagesService',
     'securityService',
-    'messagesService'
+    'entityDescriptionService',
+    'crudService',
+    'actionService',
+    'computedFieldService',
+    'viewService',
+    'menuService',
+    'trackingService',
+    'themeService',
+    'migrationService'
 ]);
 injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
 injection.bindFactory('menuRoute', require('./routes/menu-route'));
