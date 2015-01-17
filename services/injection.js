@@ -92,7 +92,7 @@ exports.bindFactory = function (serviceName, factory) {
     exports.factories[serviceName] = factory;
 };
 
-exports.rebindFactory = function (serviceName, renameOldServiceTo, factory) {
+exports.overrideFactory = function (serviceName, renameOldServiceTo, factory) {
     var oldService = exports.factories[serviceName];
     var scope = {};
     scope[renameOldServiceTo] = oldService;

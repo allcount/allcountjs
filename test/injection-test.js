@@ -65,12 +65,12 @@ exports.inScopeTest = function (test) {
     test.done();
 };
 
-exports.rebindTest = function (test) {
+exports.overrideTest = function (test) {
     injection.resetInjection();
     injection.bindFactory("foo", function () {
         return "bar";
     });
-    injection.rebindFactory("foo", "oldFoo", function (oldFoo) {
+    injection.overrideFactory("foo", "oldFoo", function (oldFoo) {
         return oldFoo;
     });
     assert.equal(injection.inject('foo'), 'bar');

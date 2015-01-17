@@ -9,6 +9,10 @@ injection.addNameMatcher(/(.*?)Route/, function (serviceName) {
     return './routes/' + injection.camelHumpsToWireName(serviceName) + '.js';
 }, require);
 
+injection.addNameMatcher(/(.*?)Setup/, function (serviceName) {
+    return './services/config/' + injection.camelHumpsToWireName(serviceName) + '.js';
+}, require);
+
 injection.bindFactory('entityCrudStrategy', require('./services/crud/entity-crud-strategy'));
 injection.bindMultiple('compileServices', [
     'migrationService',
@@ -39,6 +43,7 @@ injection.bindFactory('defaultViewPathProvider', function () {
     return [path.join(__dirname, 'views')];
 });
 injection.bindFactory('express', function () { return require('express') });
+injection.bindFactory('passport', function () { return require('passport') });
 
 injection.bindFactory('keygrip', function () {
     return Keygrip([crypto.randomBytes(30).toString('hex')]); //TODO load rotating keys from somewhere
@@ -58,5 +63,20 @@ injection.bindFactory('halt', function (gitRepoUrl) {
     };
 });
 injection.bindMultiple('loginMethods', []);
+injection.bindMultiple('appSetup', [
+    'variablesSetup',
+    'viewEngineSetup',
+    'domainErrorHandlerSetup',
+    'requestParserSetup',
+    'resourcesSetup',
+    'sessionSetup',
+    'securitySetup',
+    'viewPathsSetup',
+    'routesSetup',
+    'errorHandlingSetup'
+]);
+injection.bindFactory('renderEngine', function () {
+    return require('jade').renderFile;
+});
 
 module.exports = injection;
