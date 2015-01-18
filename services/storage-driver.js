@@ -156,12 +156,15 @@ module.exports = function (dbUrl) {
         _.forEach(indexes, function (i) { indexFieldHash[i[0]] = true });
 
         var query = queryFor(table, filteringAndSorting);
-        _.forEach(query, function (q, fieldName) {
-            if (!indexFieldHash[fieldName]) {
+        function addIndexField(q, fieldName) {
+            if (fieldName === '$and' || fieldName === '$or') {
+                _.forEach(q, function (qObj) {_.forEach(qObj, addIndexField) });
+            } else if (!indexFieldHash[fieldName]) {
                 indexes.unshift([fieldName, 1]);
                 indexFieldHash[fieldName] = true;
             }
-        });
+        }
+        _.forEach(query, addIndexField);
 
         if (indexes.length > 0) {
             var collection = db.collection(table.tableName);
