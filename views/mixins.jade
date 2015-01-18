@@ -2,30 +2,30 @@ mixin defaultToolbar(withoutHeader)
     div(class=!withoutHeader ? 'toolbar-header' : '')
         .container.form-inline(ng-show='viewState.mode == "list"')
             .pull-left: .btn-toolbar
-                button.btn.btn-success(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
                     i.glyphicon.glyphicon-plus
-                button.btn.btn-default(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
                     i.glyphicon.glyphicon-pencil
-                button.btn.btn-default(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
+                button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                     i.glyphicon.glyphicon-ok
-                button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'all-items'", on-refresh="refreshOnAction()") {{action.name}}
+                button.btn.btn-default.ng-cloak(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'all-items'", on-refresh="refreshOnAction()") {{action.name}}
                 span.entity-title= messages(entityTitle) || ' '
             .pull-right.form-inline
                 input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
                 span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')
         .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
-            button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
+            button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                 i.glyphicon.glyphicon-chevron-left
-            button.btn.btn-default(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.create")
+            button.btn.btn-default.ng-cloak(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.create")
                 i.glyphicon.glyphicon-ok
         .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
-            button.btn.btn-default(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
+            button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                 i.glyphicon.glyphicon-chevron-left
-            button.btn.btn-default(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
+            button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
                 i.glyphicon.glyphicon-pencil
-            button.btn.btn-default(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
+            button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                 i.glyphicon.glyphicon-ok
-            button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
+            button.btn.btn-default.ng-cloak(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
 
 mixin noEntries()
     div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")
