@@ -76,3 +76,16 @@ exports.overrideTest = function (test) {
     assert.equal(injection.inject('foo'), 'bar');
     test.done();
 };
+
+exports.providerTest = function (test) {
+    injection.resetInjection();
+    var i = 1;
+    injection.bindFactory("foo", function () {
+        return new injection.Provider(function () {
+            return i++;
+        });
+    });
+    assert.equal(injection.inject('foo'), 1);
+    assert.equal(injection.inject('foo'), 2);
+    test.done();
+};

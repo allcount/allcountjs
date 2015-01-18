@@ -33,6 +33,10 @@ exports.resolveFactory = function (factory) {
     return instance;
 };
 
+exports.Provider = function (factory) {
+    this.get = factory;
+};
+
 exports.inject = function (serviceName) {
     if (serviceName === 'injection') {
         return exports;
@@ -42,7 +46,7 @@ exports.inject = function (serviceName) {
     }
     cycleDependencyGuardStack.push(serviceName);
     function resolve(serviceName) {
-        if (exports.providers[serviceName].get) {
+        if (exports.providers[serviceName] instanceof exports.Provider) {
             return exports.providers[serviceName].get();
         } else {
             return exports.providers[serviceName];

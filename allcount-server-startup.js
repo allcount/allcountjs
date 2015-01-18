@@ -1,6 +1,6 @@
 _ = require('underscore');
 
-module.exports = function (appService, gitRepoUrl, proxyHandler, injection, httpServer, express) {
+module.exports = function (appService, gitRepoUrl, proxyHandler, injection, httpServer, express, app, appSetup) {
     return {
         startup: function (onReady) {
             appService.compile(function (errors) {
@@ -10,13 +10,7 @@ module.exports = function (appService, gitRepoUrl, proxyHandler, injection, http
                     }
                     throw new Error(errors.join('\n'));
                 } else {
-                    var app = express();
-
-                    injection.inScope({
-                        app: function () { return app }
-                    }, function () {
-                        injection.inject('appSetup').forEach(function (setup) { setup.setup() });
-                    });
+                    appSetup.forEach(function (setup) { setup.setup() });
                 }
 
                 httpServer(function (req, res) {

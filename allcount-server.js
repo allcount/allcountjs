@@ -43,6 +43,7 @@ injection.bindFactory('defaultViewPathProvider', function () {
     return [path.join(__dirname, 'views')];
 });
 injection.bindFactory('express', function () { return require('express') });
+injection.bindFactory('app', function (express) { return express() });
 injection.bindFactory('passport', function () { return require('passport') });
 
 injection.bindFactory('keygrip', function () {
