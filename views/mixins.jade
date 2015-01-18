@@ -1,5 +1,5 @@
 mixin defaultToolbar(withoutHeader)
-    div(class=!withoutHeader ? 'toolbar-header' : '', ng-cloak)
+    div(class=!withoutHeader ? 'toolbar-header' : '')
         .container.form-inline(ng-show='viewState.mode == "list"')
             .pull-left: .btn-toolbar
                 button.btn.btn-success(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
@@ -28,7 +28,7 @@ mixin defaultToolbar(withoutHeader)
             button.btn.btn-default(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
 
 mixin noEntries()
-    div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0")
+    div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")
         b= messages("entity.noRecords")
 
 mixin defaultEditAndCreateForms()
@@ -36,4 +36,13 @@ mixin defaultEditAndCreateForms()
     .right-animation-screen.form-horizontal.lc-form-default(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='editForm', is-editor='viewState.isFormEditing')
 
 mixin defaultGrid()
-    .left-animation-screen(a-grid='"' + entityTypeId + '"', filtering='viewState.filtering', ng-show='viewState.mode == "list" && viewState.paging.count > 0', edit-mode='viewState.editState', navigate='navigateTo($entityId)', paging='viewState.paging', total-row='viewState.totalRow', publish-methods='gridMethods')
+    .left-animation-screen(
+    a-grid='"' + entityTypeId + '"',
+    filtering='viewState.filtering',
+    ng-show='viewState.mode == "list" && viewState.paging.count > 0 || viewState.editState',
+    edit-mode='viewState.editState',
+    navigate='navigateTo($entityId)',
+    paging='viewState.paging',
+    total-row='viewState.totalRow',
+    publish-methods='gridMethods'
+    )

@@ -433,8 +433,7 @@ function uploadDirective(directiveName) {
                             data.scope.replace(data.files, files);
                         } else if (data.errorThrown ||
                             data.textStatus === 'error') {
-                            data.files[0].error = data.errorThrown ||
-                                data.textStatus;
+                            data.files[0].error = data.errorThrown || data.textStatus;
                         }
                     }
                 };
@@ -670,9 +669,13 @@ function listDirective(directiveName, templateUrl) {
                             if (next !== scope.atomicCounter) {
                                 return;
                             }
-                            rest.findRange(scope.entityCrudId , scope.filtering, scope.paging.start, scope.paging.count, function (items) {
-                                scope.items = items
-                            })
+                            if (scope.paging.count === 0) {
+                                scope.items = [];
+                            } else {
+                                rest.findRange(scope.entityCrudId , scope.filtering, scope.paging.start, scope.paging.count, function (items) {
+                                    scope.items = items
+                                })
+                            }
                         }, 200);
                     };
 
@@ -812,7 +815,7 @@ function pagingDirective(directiveName) {
 
                     scope.refresh = function () {
                         scope.refreshCount(function () {
-                            var start = Math.min(scope.currentPaging.start, scope.count - 1);
+                            var start = Math.max(0, Math.min(scope.currentPaging.start, scope.count - 1));
                             scope.currentPaging = {
                                 start: start,
                                 count: Math.min(scope.pageSize, scope.count - start)
@@ -837,7 +840,7 @@ function pagingDirective(directiveName) {
                             var i = Math.max(paging.start - scope.numPages * scope.pageSize, 0);
                             i < Math.min(paging.start + scope.numPages * scope.pageSize, scope.count);
                             i += scope.pageSize
-                            ) {
+                        ) {
                             scope.pages.push({start: i, count: Math.min(scope.count - i, scope.pageSize)});
                         }
                     };
@@ -1155,7 +1158,7 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                     setValue(undefined);
                 };
 
-                    scope.referenceViewState.onCreate = function () {
+                scope.referenceViewState.onCreate = function () {
                     scope.referenceViewState.editForm.createEntity(function (entityId) { //TODO
                         rest.referenceValueByEntityId(entityTypeId, entityId).then(function (referenceValue) {
                             setValue(referenceValue);
