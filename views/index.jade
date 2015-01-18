@@ -9,7 +9,7 @@ block content
                     h1= menuService.appName()
     .dashboard
         .container.a-menu(ng-app='allcount')
-            .row(ng-repeat='menuItem in menuItems', ng-class='{"col-lg-4": onlyFirstLevel(), "col-sm-6": onlyFirstLevel()}')
+            .row(ng-repeat='menuItem in menuItems', ng-class='{"col-lg-4": onlyFirstLevel(), "col-sm-6": onlyFirstLevel()}', ng-cloak)
                 h2
                     i(class="fa fa-{{menuItem.icon || 'circle-thin'}} fa-fw")
                     a(ng-if='menuItem.entityTypeId', href='/entity/{{menuItem.entityTypeId}}') {{menuItem.name}}

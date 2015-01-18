@@ -1,5 +1,5 @@
 mixin defaultToolbar(withoutHeader)
-    div(class=!withoutHeader ? 'toolbar-header' : '')
+    div(class=!withoutHeader ? 'toolbar-header' : '', ng-cloak)
         .container.form-inline(ng-show='viewState.mode == "list"')
             .pull-left: .btn-toolbar
                 button.btn.btn-success(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')

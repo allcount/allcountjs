@@ -17,6 +17,7 @@ block content
             total-row='viewState.totalRow',
             publish-methods='gridMethods',
             ng-controller='BoardController',
+            ng-cloak,
             ng-init="entityTypeId = '" + entityTypeId + "'"
             )
                 div(ng-repeat="column in boardColumns", ng-class="boardColumnClasses()")

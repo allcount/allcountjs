@@ -6,7 +6,7 @@ block vars
 block content
     .a-refresh-form-controller(ng-app='allcount', ng-controller='EntityViewController')
         +defaultToolbar()
-        .container.screen-container
+        .container.screen-container(ng-cloak)
             +defaultGrid()
             +noEntries()
             +defaultEditAndCreateForms()
