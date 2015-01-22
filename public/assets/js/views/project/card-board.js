@@ -1,6 +1,6 @@
 var cardBoardModule = angular.module('allcount-card-board', ['allcount', 'ui.sortable']);
 
-function BoardController($scope, rest, $q) {
+cardBoardModule.controller('BoardController', ['$scope', 'rest', '$q', function ($scope, rest, $q) {
     $scope.boardItems = {};
     $scope.statusField = $scope.statusField || 'status';
     $scope.summaryField = $scope.summaryField || 'summary';
@@ -62,4 +62,4 @@ function BoardController($scope, rest, $q) {
     $scope.boardColumnClasses = function () {
         return 'col-xs-' + Math.max(1, Math.round(12 / ($scope.boardColumns.length || 1)));
     }
-}
+}]);

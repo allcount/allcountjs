@@ -1,4 +1,4 @@
-function EntityViewController ($scope, track, $window) {
+allcountModule.controller('EntityViewController', ['$scope', 'track', '$window', function ($scope, track, $window) {
     $scope.viewState = {
         mode: 'list',
         filtering: {}
@@ -79,4 +79,4 @@ function EntityViewController ($scope, track, $window) {
         $scope.gridMethods.updateGrid();
         $scope.editForm.reloadEntity();
     };
-}
+}]);

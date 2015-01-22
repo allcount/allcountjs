@@ -1,5 +1,7 @@
 var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload']);
 
+window.allcountModule = allcountModule;
+
 allcountModule.factory('track', function () {
     return lc.track;
 });

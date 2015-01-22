@@ -62,7 +62,11 @@ exports.inject = function (serviceName) {
         var factory;
         var scoped = exports.findInScope(serviceName);
         if (scoped) {
-            factory = scoped
+            if (_.isString(scoped)) {
+                factory = requireWithServiceNameMatcher(scoped);
+            } else {
+                factory = scoped
+            }
         } else if (exports.factories[serviceName]) {
             factory = exports.factories[serviceName];
         } else if (exports.multipleBindings[serviceName]) {
@@ -97,7 +101,7 @@ exports.bindFactory = function (serviceName, factory) {
 };
 
 exports.overrideFactory = function (serviceName, renameOldServiceTo, factory) {
-    var oldService = exports.factories[serviceName];
+    var oldService = exports.factories[serviceName] || serviceName;
     var scope = {};
     scope[renameOldServiceTo] = oldService;
     exports.factories[serviceName] = function (injection) {

@@ -36,8 +36,10 @@ block content
                                 .panel-body {{item[summaryField]}}
             +noEntries()
             +defaultEditAndCreateForms()
-
+            
     script(src='/assets/lib/js/jquery-ui/jquery-ui.js')
+
+block js
     script(src='/assets/lib/js/angular-ui-sortable/sortable.js')
     script(src='/assets/js/views/entity.js')
     script(src='/assets/js/views/project/card-board.js')

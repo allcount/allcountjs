@@ -50,16 +50,16 @@ exports.inScopeTest = function (test) {
         return foo;
     });
     injection.inScope({
-        foo: 'foo'
+        foo: { value: 'foo' }
     }, function () {
-        assert.equal(injection.inject('foo'), 'foo');
-        assert.equal(injection.inject('dependent'), 'foo');
+        assert.deepEqual(injection.inject('foo'), { value: 'foo' });
+        assert.deepEqual(injection.inject('dependent'), { value: 'foo' });
     });
     injection.inScope({
-        foo: 'foo-foo'
+        foo: { value: 'foo-foo' }
     }, function () {
-        assert.equal(injection.inject('foo'), 'foo-foo');
-        assert.equal(injection.inject('dependent'), 'foo-foo');
+        assert.deepEqual(injection.inject('foo'), { value: 'foo-foo' });
+        assert.deepEqual(injection.inject('dependent'), { value: 'foo-foo' });
     });
     assert.equal(injection.inject('foo'), 'bar');
     test.done();
@@ -74,6 +74,18 @@ exports.overrideTest = function (test) {
         return oldFoo;
     });
     assert.equal(injection.inject('foo'), 'bar');
+    test.done();
+};
+
+exports.overrideNotBoundTest = function (test) {
+    injection.resetInjection();
+    injection.addNameMatcher(/foo/, function (s) {
+        return s;
+    }, function (n) { return '+' + n });
+    injection.overrideFactory("foo", "oldFoo", function (oldFoo) {
+        return oldFoo;
+    });
+    assert.equal(injection.inject('foo'), '+foo');
     test.done();
 };
 
