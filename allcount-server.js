@@ -80,4 +80,12 @@ injection.bindFactory('renderEngine', function () {
     return require('jade').renderFile;
 });
 
+injection.bindFactory('expressStatic', function (express) {
+    return express.static;
+});
+
+injection.bindFactory('lessMiddleware', function () {
+    return require('less-middleware');
+});
+
 module.exports = injection;
