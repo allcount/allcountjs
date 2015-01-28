@@ -4,17 +4,17 @@ module.exports = function (templateVarService, keygrip, securityService, securit
     var routes = {};
 
     routes.login = function (req, res) {
-        if (req.user && !req.user.isGuest) {
+        if (req.user && (!req.user.isGuest || req.query.redirect_url)) {
             successLoginRedirect(req.user, req, res);
-        } else if (req.param('user_id') && keygrip.verify(req.param('user_id'), req.param('sign'))) {
-            securityService.loginUserWithIdIfExists(req, req.param('user_id')).then(function () {
+        } else if (req.query.user_id && keygrip.verify(req.query.user_id, req.query.sign)) {
+            securityService.loginUserWithIdIfExists(req, req.query.user_id).then(function () {
                 res.redirect('/');
             }, function () {
                 res.redirect('/login');
             }).done();
         } else {
             templateVarService.setupLocals(req, res, {
-                redirect_url: req.param('redirect_url'),
+                redirect_url: req.query.redirect_url,
                 loginMethods: loginMethods.map(function (method) {
                     return {
                         label: method.label,
@@ -27,9 +27,9 @@ module.exports = function (templateVarService, keygrip, securityService, securit
     };
 
     function successLoginRedirect(user, req, res) {
-        if (req.param('redirect_url')) {
+        if (req.query.redirect_url) {
             var userId = user.id.toString();
-            res.redirect(req.param('redirect_url') + "?" + [
+            res.redirect(req.query.redirect_url + "?" + [
                 ['user_id', userId],
                 ['sign', keygrip.sign(userId)]
             ].map(function (s) {
@@ -48,10 +48,10 @@ module.exports = function (templateVarService, keygrip, securityService, securit
                         successLoginRedirect(user, req, res);
                     });
                 } else {
-                    res.redirect('/login?redirect_url='+req.param('redirect_url'));
+                    res.redirect('/login?redirect_url='+req.query.redirect_url);
                 }
             }, function (err) {
-                res.redirect('/login?redirect_url='+req.param('redirect_url'));
+                res.redirect('/login?redirect_url='+req.query.redirect_url);
             }).done();
         };
     };
