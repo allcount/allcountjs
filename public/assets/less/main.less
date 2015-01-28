@@ -162,12 +162,17 @@ a.shifted-anchor {
 }
 
 .form-signin-container {
-  .form-control:first-child {
+  .form-control {
     margin-bottom: -1px;
+    border-radius: 0;
+  }
+  .form-control:first-child {
+    border-radius: @input-border-radius;
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
   }
   .form-control:last-child {
+    border-radius: @input-border-radius;
     margin-bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;

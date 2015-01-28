@@ -175,6 +175,10 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
         return $http.get("/rest/reference/values/" + entityTypeId + "/by-id/" + entityId).then(getJson);
     };
 
+    service.signUp = function (username, password) {
+        return $http.post('/rest/sign-up', {username: username, password: password});
+    };
+
     return service;
 }]);
 

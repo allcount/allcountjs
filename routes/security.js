@@ -1,10 +1,10 @@
 var Q = require('q');
 
-module.exports = function (templateVarService, keygrip, securityService, loginMethods) {
+module.exports = function (templateVarService, keygrip, securityService, securityConfigService, loginMethods) {
     var routes = {};
 
     routes.login = function (req, res) {
-        if (req.user) {
+        if (req.user && !req.user.isGuest) {
             successLoginRedirect(req.user, req, res);
         } else if (req.param('user_id') && keygrip.verify(req.param('user_id'), req.param('sign'))) {
             securityService.loginUserWithIdIfExists(req, req.param('user_id')).then(function () {
@@ -28,7 +28,7 @@ module.exports = function (templateVarService, keygrip, securityService, loginMe
 
     function successLoginRedirect(user, req, res) {
         if (req.param('redirect_url')) {
-            var userId = user._id.toString();
+            var userId = user.id.toString();
             res.redirect(req.param('redirect_url') + "?" + [
                 ['user_id', userId],
                 ['sign', keygrip.sign(userId)]
@@ -59,6 +59,16 @@ module.exports = function (templateVarService, keygrip, securityService, loginMe
     routes.logout = function (req, res) {
         req.logout();
         res.redirect('/');
+    };
+
+    routes.signUp = function (req, res, next) {
+        if (!securityConfigService.allowSignUp) {
+            res.sendStatus(403);
+        } else {
+            securityService.createUser(req.body.username, req.body.password, []).then(function () { //TODO use guest user if we have one
+                res.sendStatus(200);
+            }).catch(next);
+        }
     };
 
     return routes;

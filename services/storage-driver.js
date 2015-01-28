@@ -9,8 +9,6 @@ var Schema = mongoose.Schema;
 var ObjectId = mongoose.Types.ObjectId;
 require('mongoose-long')(mongoose);
 
-var UserCollectionName = "User";
-
 module.exports = function (dbUrl) {
     var service = {};
     var db;
@@ -86,6 +84,9 @@ module.exports = function (dbUrl) {
             } else {
                 fieldType = String;
             }
+            if (field.isUnique) {
+                fieldType = {type: fieldType, index: { unique: true }};
+            }
             return [fieldName, fieldType];
         }).filter(_.identity).object().value();
         definition.__textIndex = [String];
@@ -120,27 +121,17 @@ module.exports = function (dbUrl) {
         });
     };
 
-    service.findUser = function (username) {
-        return toPromise(db.collection(UserCollectionName).find({username: username}), 'toArray')
-            .then(function (result) {
-                return result[0];
-            });
-    };
-
-    service.findUserById = function (id) {
-        return toPromise(db.collection(UserCollectionName).find({_id: toMongoId(id)}), 'toArray')
-            .then(function (result) {
-                return result[0];
-            });
-    };
-
-    service.createUser = function (username, passwordHash, roles, isGuest) {
-        var deferred = Q.defer();
-        var userId = new ObjectId();
-        db.collection(UserCollectionName)
-            .insert({_id: userId, username: username, passwordHash: passwordHash && passwordHash(userId.toString()) || undefined, roles: roles, isGuest: isGuest}, {}, deferredCallback(deferred));
-        return deferred.promise.then(function (result) {
-            return result[0];
+    service.checkUserPassword = function (table, entityId, passwordField, password) {
+        if (!entityId) {
+            throw new Error('entityId should be defined for checkUserPassword()');
+        }
+        return Q(modelFor(table).findById(toMongoId(entityId)).exec()).then(function (user) {
+            if (!user) {
+                return false;
+            }
+            var userId = user._id.toString();
+            var digest = service.passwordHash(userId, password);
+            return digest === user.passwordHash ? fromBson(table.fields)(user) : false;
         });
     };
 
@@ -210,6 +201,9 @@ module.exports = function (dbUrl) {
     function queryFor(table, filteringAndSorting) {
         var query = {};
         if (filteringAndSorting) {
+            if (filteringAndSorting.query) {
+                _.extend(query, filteringAndSorting.query);
+            }
             if (filteringAndSorting.textSearch) {
                 var split = splitText(filteringAndSorting.textSearch);
                 if (split.length > 0) {
@@ -253,6 +247,10 @@ module.exports = function (dbUrl) {
     }
 
     service.queryFor = queryFor;
+
+    service.newEntityId = function () {
+        return (new ObjectId()).toString();
+    };
 
     service.createEntity = function (table, entity) {
         var objectID = entity.id && toMongoId(entity.id) || new ObjectId();

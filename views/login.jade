@@ -1,13 +1,24 @@
 extends main
 block content
-    .container
-        form.form-signin(role='form', action='/login' + (redirect_url ? "?redirect_url=" + redirect_url : ""), method='post')
+    .container(ng-app="allcount", ng-controller="LoginController").form-signin
+        form(role='form', action='/login' + (redirect_url ? "?redirect_url=" + redirect_url : ""), method='post')
             h2.form-signin-heading= messages('Please sign in')
             .form-signin-container
-                input.form-control(type='text', placeholder=messages("Login"), required='', autofocus='', name='username')
-                input.form-control(type='password', placeholder=messages("Password"), required='', name='password')
-            button.btn.btn-lg.btn-primary.btn-block(type='submit')= messages('Sign in')
-            if loginMethods.length > 0
-                .login-or= messages('Or')
-            each method in loginMethods
-                a.btn.btn-lg.btn-primary.btn-block(href=method.url, type='submit')= messages(method.label)
+                input.form-control(type='text', placeholder=messages("Login"), required='', autofocus='', name='username', ng-model="user.username")
+                input.form-control(type='password', placeholder=messages("Password"), required='', name='password', ng-model="user.password")
+                input.form-control(type='password', placeholder=messages("Repeat Password"), required='', name='password_repeat', ng-model="user.passwordRepeat", ng-if="isSignUp", ng-class="{'has-error': !passwordMatches()}")
+            if securityConfigService.allowSignUp
+                .checkbox
+                    label
+                        input(type='checkbox', ng-model="isSignUp")
+                        = messages('Sign Up')
+            button.btn.btn-lg.btn-primary.btn-block(type='submit', ng-if="!isSignUp")= messages('Sign in')
+        p.text-danger(ng-if="validationErrors", lc-message="{{validationErrors.username}}")
+        button.btn.btn-lg.btn-success.btn-block(ng-if="isSignUp", ng-click="$event.stopPropagation(); signUp()", ng-disabled="!passwordMatches()")= messages('Sign Up')
+        if loginMethods.length > 0
+            .login-or= messages('Or')
+        each method in loginMethods
+            a.btn.btn-lg.btn-primary.btn-block(href=method.url)= messages(method.label)
+
+block js
+    script(src="/assets/js/login.js")

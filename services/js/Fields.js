@@ -123,3 +123,9 @@ Field.prototype.readOnly = function (isReadOnly) {
     this.isReadOnly = _.isUndefined(isReadOnly) ? true : isReadOnly;
     return this;
 };
+
+Field.prototype.unique = function (isUnique) {
+    this.isUnique = _.isUndefined(isUnique) ? true : isUnique;
+    return this;
+};
+

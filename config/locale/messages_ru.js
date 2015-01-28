@@ -23,5 +23,8 @@ module.exports = {
     "Required": "Обязательное",
     "Yes": "Да",
     "No": "Нет",
-    "Not set": "Не задано"
+    "Not set": "Не задано",
+    "Sign Up": "Зарегистрироваться",
+    "Repeat Password": "Повторите пароль",
+    "User with provided user name already exists": "Пользователь с таким именем уже существует"
 };

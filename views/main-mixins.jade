@@ -41,7 +41,7 @@ mixin defaultNavBar()
                   ul.nav.navbar-nav
                       each i in menuService.menus(user)
                           +menu(true, i)
-                  if user
+                  if user && !user.isGuest
                       ul.nav.navbar-nav.navbar-right
                           li.dropdown
                               a.dropdown-toggle(href='#', data-toggle='dropdown')

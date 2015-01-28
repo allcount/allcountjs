@@ -1,10 +1,15 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityService, fieldsApi) {
+module.exports = function (queryParseService, securityConfigService, fieldsApi) {
     var service = {};
 
     function CompiledField(field) {
-        _.extend(this, field)
+        var self = this;
+        _.forEach(field, function (value, prop) {
+            if (field.hasOwnProperty(prop)) {
+                self[prop] = value;
+            }
+        });
     }
 
     CompiledField.prototype.isForwardReference = function () {
@@ -16,7 +21,7 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
     };
 
     CompiledField.prototype.readOnly = function () {
-        return this.isReadOnly || this.computeExpression;
+        return !!(this.isReadOnly || this.computeExpression);
     };
 
     CompiledField.prototype.referenceEntityTypeId = function () {
@@ -66,11 +71,12 @@ module.exports = function (queryParseService, securityService, fieldsApi) {
 
         function compileUserDescription () {
             var fields = {};
-            fields.username = fieldsApi.text('User name');
+            fields.username = fieldsApi.text('User name').unique();
             fields.passwordHash = fieldsApi.password('Password');
-            securityService.roles().forEach(function (role) {
-                fields[role] = fieldsApi.checkbox(role, 'roles');
+            securityConfigService.roles().forEach(function (role) {
+                fields['role_' + role] = fieldsApi.checkbox(role, 'roles');
             });
+            fields.isGuest = fieldsApi.checkbox('Guest');
             compileEntityTypeByEvaluated({
                 entityTypeId: 'User',
                 evaluatedFields: fields,

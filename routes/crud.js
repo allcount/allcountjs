@@ -20,11 +20,20 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
         }
     };
 
+    function filteringAndSorting(req) {
+        return {
+            textSearch: req.body.filtering.textSearch && req.body.filtering.textSearch || undefined,
+            filtering: req.body.filtering.filtering && req.body.filtering.filtering || undefined,
+            sorting: req.body.filtering.sorting && req.body.filtering.sorting || undefined
+        };
+    }
+
     route.findCount = function (req, res) {
         var strategyForCrudId = crudService.strategyForCrudId(req.body.entityCrudId);
+        var filtering = filteringAndSorting(req);
         Q.all([
-                strategyForCrudId.findCount(req.body.filtering),
-                strategyForCrudId.getTotalRow(req.body.filtering)
+                strategyForCrudId.findCount(filtering),
+                strategyForCrudId.getTotalRow(filtering)
             ]).spread(function (count, totalRow) {
             res.json({
                 count: count,
@@ -36,7 +45,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     route.findRange = function (req, res) {
         crudService
             .strategyForCrudId(req.body.entityCrudId)
-            .findRange(req.body.filtering, req.body.start, req.body.count)
+            .findRange(filteringAndSorting(req), req.body.start, req.body.count)
             .then(function (result) {
                 res.json(result);
             })

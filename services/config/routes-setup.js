@@ -83,6 +83,7 @@ module.exports = function (
                 })(req, res);
             })));
             app.get('/login', securityRoute.login);
+            app.post('/rest/sign-up', securityRoute.signUp);
             app.get('/logout', securityRoute.logout);
             app.get('/js/messages.js', messages.messagesNgModule);
             app.use(appAccessRouter);

@@ -1,42 +1,39 @@
-var crypto = require('crypto');
 var _ = require('underscore');
 var Q = require('q');
+var crypto = require('crypto');
 
-module.exports = function (storageDriver) {
+module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil) {
     var service = {};
 
-    var systemRoles;
+    var UserEntityTypeId = "User";
 
-    service.compile = function (objects, errors) {
-        systemRoles = ['admin'];
-        objects.forEach(function (obj) {
-            var onlyAuthenticated = obj.propertyValue('onlyAuthenticated');
-            if (onlyAuthenticated) {
-                service.onlyAuthenticated = onlyAuthenticated;
-            }
-            var roles = obj.propertyValue('roles');
-            roles && systemRoles.push.apply(systemRoles, roles);
-        });
-    };
+    service.__defineGetter__('onlyAuthenticated', function(){
+        return securityConfigService.onlyAuthenticated;
+    });
 
-    service.roles = function () {
-        return systemRoles;
-    };
+    function userTableDescription() {
+        return entityDescriptionService.tableDescription(entityDescriptionService.entityTypeIdCrudId(UserEntityTypeId));
+    }
+
+    function findUser(username) {
+        return storageDriver.findAll(userTableDescription(), {query: {username: username}}).then(function (user) {
+            user = user[0];
+            return user;
+        })
+    }
 
     service.authenticate = function(username, password, done) {
-        return storageDriver.findUser(username).then(function (user) {
+        var table = userTableDescription();
+        findUser(username).then(function (user) {
             if (!user) {
-                done(null, false);
-                return;
+                return false;
             }
-            var userId = user._id.toString();
-            var digest = storageDriver.passwordHash(userId, password);
-            done(null, digest === user.passwordHash ? user : false);
-        });
+            return storageDriver.checkUserPassword(table, user.id, 'passwordHash', password);
+        }).nodeify(done);
     };
 
     service.loginUserWithIdIfExists = function (req, userId) {
-        return storageDriver.findUserById(userId).then(function (user) {
+        return storageDriver.readEntity(userTableDescription(), userId).then(function (user) {
             if (user) {
                 var login = Q.nfbind(req.login.bind(req));
                 prepareUserForReq(user);
@@ -48,42 +45,65 @@ module.exports = function (storageDriver) {
 
     service.initDefaultUsers = function () {
         storageDriver.addOnConnectListener(function () {
-            storageDriver.findUser("admin").then(function (user) {
+            findUser("admin").then(function (user) {
                 if (!user) {
-                    return service.createUser("admin", "admin", ['admin']);
+                    return storageDriver.createEntity(userTableDescription(), {
+                        username: "admin",
+                        passwordHash: "admin",
+                        role_admin: true
+                    });
                 }
             })
         });
     };
 
     service.createUser = function (username, password, roles) {
-        return storageDriver.createUser(username, function (userId) {
-            return storageDriver.passwordHash(userId, password);
-        }, roles).then(prepareUserForReq);
+        if (!username || !password) {
+            throw new Error('Username and password required to create user');
+        }
+        var user = {
+            username: username,
+            passwordHash: password
+        };
+        _.forEach(roles, function (role) {
+            user['role_' + role] = true;
+        });
+        return storageDriver.createEntity(userTableDescription(), user).then(readAndPrepareUser).catch(function (err) {
+            if (err.message.indexOf("duplicate key error index") !== -1) {
+                throw new appUtil.ValidationError({username: 'User with provided user name already exists'});
+            }
+            throw err;
+        });
     };
 
     service.createGuestUser = function () {
-        return storageDriver.createUser('Guest', undefined, [], true).then(prepareUserForReq);
+        var id = storageDriver.newEntityId();
+        return storageDriver.createEntity(userTableDescription(), {
+            id: id,
+            username: "Guest-" + id,
+            isGuest: true
+        }).then(readAndPrepareUser);
     };
 
     service.serializeUser = function(user, done) {
-        done(null, user._id.toString());
+        done(null, user.id);
     };
 
     function prepareUserForReq(user) {
-        user.passwordHash = undefined;
         user.hasRole = function (role) {
-            return _.contains(this.roles, role) || _.contains(this.roles, 'admin');
+            return this['role_' + role] === true || this.role_admin === true;
         };
-        user.id = user._id.toString();
         return user;
     }
 
-    service.deserializeUser = function(userId, done) {
-        storageDriver.findUserById(userId).then(function (user) {
-            prepareUserForReq(user);
-            done(null, user);
+    function readAndPrepareUser(userId) {
+        return storageDriver.readEntity(userTableDescription(), userId).then(function (user) {
+            return prepareUserForReq(user);
         });
+    }
+
+    service.deserializeUser = function(userId, done) {
+        readAndPrepareUser(userId).nodeify(done);
     };
 
     return service;

@@ -16,7 +16,7 @@ injection.addNameMatcher(/(.*?)Setup/, function (serviceName) {
 injection.bindFactory('entityCrudStrategy', require('./services/crud/entity-crud-strategy'));
 injection.bindMultiple('compileServices', [
     'messagesService',
-    'securityService',
+    'securityConfigService',
     'entityDescriptionService',
     'crudService',
     'actionService',
