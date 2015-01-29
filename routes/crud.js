@@ -22,9 +22,9 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
 
     function filteringAndSorting(req) {
         return {
-            textSearch: req.body.filtering.textSearch && req.body.filtering.textSearch || undefined,
-            filtering: req.body.filtering.filtering && req.body.filtering.filtering || undefined,
-            sorting: req.body.filtering.sorting && req.body.filtering.sorting || undefined
+            textSearch: req.body.filtering && req.body.filtering.textSearch || undefined,
+            filtering: req.body.filtering && req.body.filtering.filtering || undefined,
+            sorting: req.body.filtering && req.body.filtering.sorting || undefined
         };
     }
 
