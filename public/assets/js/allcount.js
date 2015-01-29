@@ -503,7 +503,6 @@ function fieldDirective(directiveName) {
                 }
 
                 function renderField(fieldDescription, isEditor) {
-                    isEditor = fieldDescription.isReadOnly ? false : isEditor;
                     if (!fieldDescription || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false && fieldScope) {
                         if (fieldScope) {
                             fieldScope.isEditor = isEditor;
@@ -512,6 +511,7 @@ function fieldDirective(directiveName) {
                     }
                     if (fieldScope) fieldScope.$destroy();
                     if (!fieldDescription) return;
+                    isEditor = fieldDescription.isReadOnly ? false : isEditor;
                     fieldScope = scope.$new();
                     if (isEditor || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false) {
                         fieldScope.isEditor = isEditor;
