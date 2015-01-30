@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityConfigService, fieldsApi) {
+module.exports = function (queryParseService, securityConfigService, appUtil, injection) {
     var service = {};
 
     function CompiledField(field) {
@@ -34,6 +34,27 @@ module.exports = function (queryParseService, securityConfigService, fieldsApi) 
         }
     };
 
+    var DefaultDescriptions = {
+        User: new appUtil.ConfigObject({
+            referenceName: 'username',
+            permissions: {
+                read: ['admin']
+            },
+            title: 'Users',
+            fields: function (Fields) {
+                var fields = {};
+                fields.username = Fields.text('User name').unique();
+                fields.passwordHash = Fields.password('Password');
+                securityConfigService.roles().forEach(function (role) {
+                    fields['role_' + role] = Fields.checkbox(role, 'roles');
+                });
+                fields.isGuest = Fields.checkbox('Guest');
+                return fields;
+            }
+        })
+    };
+
+
     service.compile = function(objects, errors) {
         service.entityDescriptions = {};
         objects.forEach(function (obj) {
@@ -41,6 +62,9 @@ module.exports = function (queryParseService, securityConfigService, fieldsApi) 
                 return;
             }
             _.forEach(obj.propertyValue('entities').propertyValues(), function (description, entityTypeId) {
+                if (DefaultDescriptions[entityTypeId]) {
+                    description = description.withParent(DefaultDescriptions[entityTypeId]);
+                }
                 compileEntityTypeId(entityTypeId, description);
                 var views = description.propertyValue('views');
                 if (views) {
@@ -50,7 +74,11 @@ module.exports = function (queryParseService, securityConfigService, fieldsApi) 
                 }
             });
         });
-        compileUserDescription();
+        _.forEach(DefaultDescriptions, function (description, entityTypeId) {
+            if (!service.entityDescriptions[entityTypeId]) {
+                compileEntityTypeId(entityTypeId, description);
+            }
+        });
 
         function compileEntityTypeId(entityTypeId, description, persistenceEntityTypeId) {
             var permissions = description.propertyValue('permissions');
@@ -59,7 +87,10 @@ module.exports = function (queryParseService, securityConfigService, fieldsApi) 
                 evaluatedFields: description.propertyValue('fields').evaluateProperties(),
                 persistenceEntityTypeId: persistenceEntityTypeId,
                 referenceNameExpression: description.propertyValue('referenceName'),
-                filteringExpression: queryParseService.parseFiltering(description.propertyValue('filtering')),
+                filteringExpression: function () {
+                    var filteringValue = description.evaluatedValue('filtering');
+                    return _.isString(filteringValue) && queryParseService.prepareQuery(filteringValue) || filteringValue && {query: filteringValue};
+                },
                 permissions: permissions && permissions.evaluateProperties(),
                 showInGrid: description.arrayPropertyValue('showInGrid'),
                 sorting: description.arrayPropertyValue('sorting'), //TODO additional structure checks,
@@ -67,26 +98,6 @@ module.exports = function (queryParseService, securityConfigService, fieldsApi) 
                 title: description.propertyValue('title'),
                 customView: description.stringPropertyValue('customView')
             });
-        }
-
-        function compileUserDescription () {
-            var fields = {};
-            fields.username = fieldsApi.text('User name').unique();
-            fields.passwordHash = fieldsApi.password('Password');
-            securityConfigService.roles().forEach(function (role) {
-                fields['role_' + role] = fieldsApi.checkbox(role, 'roles');
-            });
-            fields.isGuest = fieldsApi.checkbox('Guest');
-            compileEntityTypeByEvaluated({
-                entityTypeId: 'User',
-                evaluatedFields: fields,
-                persistenceEntityTypeId: 'User',
-                referenceNameExpression: 'username',
-                permissions: {
-                    read: ['admin']
-                },
-                title: 'Users'
-            })
         }
 
         function compileEntityTypeByEvaluated(evaluated) {

@@ -61,7 +61,7 @@ exports.inject = function (serviceName) {
         }
         var factory;
         var scoped = exports.findInScope(serviceName);
-        if (scoped) {
+        if (!_.isUndefined(scoped)) {
             if (_.isString(scoped)) {
                 factory = requireWithServiceNameMatcher(scoped);
             } else {
@@ -74,7 +74,7 @@ exports.inject = function (serviceName) {
         } else {
             factory = requireWithServiceNameMatcher(serviceName);
         }
-        if (!factory) {
+        if (_.isUndefined(factory)) {
             throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
         }
         var instance = exports.resolveFactory(factory);

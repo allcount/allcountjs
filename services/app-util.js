@@ -1,7 +1,8 @@
 var util = require('util');
 var _ = require('underscore');
+var Q = require('q');
 
-module.exports = function () {
+module.exports = function (injection) {
     function CompileError () {
         this.message = util.format.apply(util.format, arguments);
         this.name = "CompileError";
@@ -19,8 +20,101 @@ module.exports = function () {
 
     util.inherits(ValidationError, Error);
 
-    return {
-        CompileError: CompileError,
-        ValidationError: ValidationError
+    function ConfigObject(obj) {
+        this.obj = obj;
+    }
+
+    function evaluateNext(next) {
+        if (_.isArray(next)) {
+            return next.map(evaluateNext);
+        } else if (next && next.obj) {
+            var result = {};
+            for (var prop in next.obj) {
+                if (next.obj.hasOwnProperty(prop)) {
+                    result[prop] = evaluateNext(next.propertyValue(prop));
+                }
+            }
+            return result;
+        } else {
+            return next;
+        }
+    }
+
+    ConfigObject.prototype = {
+        propertyValue: function (name) {
+            return appUtil.evaluateObject(this.obj[name]);
+        },
+
+        hasPropertyValue: function (name) {
+            return !!this.obj[name];
+        },
+
+        propertyValues: function () {
+            var self = this;
+            var results = {};
+            _.forEach(this.obj, function (prop, name) {
+                results[name] = self.propertyValue(name);
+            });
+            return results;
+        },
+
+        evaluateProperties: function () {
+            return evaluateNext(this);
+        },
+
+        withParent: function (configObject) {
+            function ViewConfigConstructor() {}
+            ViewConfigConstructor.prototype = configObject.obj;
+            var objWithParent = new ViewConfigConstructor();
+            return new ConfigObject(_.extend(objWithParent, this.obj));
+        },
+
+        arrayPropertyValue: function (name) {
+            return this.assertPropertyValue(name, _.isArray, 'Property value "%s" expected to be an array');
+        },
+
+        stringPropertyValue: function (name) {
+            return this.assertPropertyValue(name, _.isString, 'Property value "%s" expected to be a string');
+        },
+
+        evaluatedValue: function (name) {
+            return evaluateNext(this.propertyValue(name));
+        },
+
+        assertPropertyValue: function (name, assertFun, errorMsg) {
+            var propertyValue = this.propertyValue(name);
+            if (!propertyValue) {
+                return propertyValue;
+            }
+            if (!assertFun(propertyValue)) {
+                throw new appUtil.CompileError(errorMsg, name);
+            }
+            return propertyValue;
+        }
     };
+
+    var appUtil = {
+        CompileError: CompileError,
+        ValidationError: ValidationError,
+        ConfigObject: ConfigObject,
+        evaluateObject: function (object) {
+            var self = this;
+            var result;
+            if (_.isFunction(object)) {
+                result = self.evaluateObject(injection.resolveFuncArgs(object, injection.lookup));
+            } else if (_.isArray(object)) {
+                result = object.map(function (i) {
+                    return self.evaluateObject(i)
+                });
+            } else if (Q.isPromise(object) || object && object.then) {
+                result = Q(object); //TODO .then(evaluateObject) ?
+            } else if (_.isObject(object)) {
+                result = new self.ConfigObject(object);
+            } else {
+                result = object;
+            }
+            return result;
+        }
+    };
+    return appUtil;
 };

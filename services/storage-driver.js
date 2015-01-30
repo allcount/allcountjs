@@ -202,7 +202,7 @@ module.exports = function (dbUrl) {
         var query = {};
         if (filteringAndSorting) {
             if (filteringAndSorting.query) {
-                _.extend(query, filteringAndSorting.query);
+                query = _.clone(filteringAndSorting.query); //TODO merging filtering and query
             }
             if (filteringAndSorting.textSearch) {
                 var split = splitText(filteringAndSorting.textSearch);

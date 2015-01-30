@@ -33,6 +33,7 @@
     "cookie-parser": "^1.1.0",
     "consolidate": "0.10.0",
     "underscore": "1.6.0",
+    "lodash": "3.0.0",
     "just": "0.1.8",
     "mongodb": "^1.4.12",
     "q": "1.0.1",

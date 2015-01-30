@@ -40,6 +40,7 @@ module.exports = function (
                         next();
                     }
                 })
+                .use(crudRoute.withUserScope)
                 .get('/entity/:entityTypeId', entityRoute.entity)
                 .get('/rest/layout/:entityTypeId', fieldDescriptionsRoute.layout)
                 .post('/rest/field-descriptions', fieldDescriptionsRoute.fieldDescriptions)

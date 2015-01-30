@@ -39,5 +39,19 @@ module.exports = function () {
         return expr && valueExpression.parse(expr).value || undefined;
     };
 
+    service.prepareQuery = function (expr) {
+        var filtering = service.parseFiltering(expr);
+        if (filtering) {
+            var lvalue = filtering.args[0].id || filtering.args[1].id;
+            var rvalue = filtering.args[0].id ? filtering.args[1] : filtering.args[0];
+            var query = {};
+            if (lvalue) {
+                query[lvalue] = rvalue;
+            }
+            return { filtering: query };
+        }
+        return undefined;
+    };
+
     return service;
 };

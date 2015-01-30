@@ -87,14 +87,14 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/find-range", {start: start, count: count, filtering: trimFiltering(filtering), entityCrudId: entityCrudId}).success(successCallback);
+        return promiseWithCallback($http.post("/rest/crud/find-range", {start: start, count: count, filtering: trimFiltering(filtering), entityCrudId: entityCrudId}), successCallback);
     };
 
     service.findCount = function (entityCrudId, filtering, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/find-count", {entityCrudId: entityCrudId, filtering: trimFiltering(filtering)}).success(successCallback);
+        return promiseWithCallback($http.post("/rest/crud/find-count", {entityCrudId: entityCrudId, filtering: trimFiltering(filtering)}), successCallback);
     };
 
     service.createEntity = function (entityCrudId, entity, successCallback) {
@@ -144,6 +144,13 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
     service.performAction = function (entityCrudId, actionId, selectedItemIds) {
         return $http.post('/rest/actions/perform', {entityCrudId: entityCrudId, actionId: actionId, selectedItemIds: selectedItemIds}).then(getJson);
     };
+
+    function promiseWithCallback(promise, successCallback) {
+        if (successCallback) {
+            promise.success(successCallback);
+        }
+        return promise.then(getJson);
+    }
 
     function getJson(resp) {
         return resp.data;

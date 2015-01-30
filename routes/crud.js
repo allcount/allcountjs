@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver) {
+module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection) {
     var route = {};
 
     route.checkReadPermissionMiddleware = function (req, res, next) {
@@ -137,6 +137,10 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             }
             file.stream.pipe(res);
         }).done();
+    };
+
+    route.withUserScope = function (req, res, next) {
+        return injection.inScope({User: req.user || null}, next);
     };
 
     return route;

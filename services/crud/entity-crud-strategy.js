@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var Q = require('q');
 
 module.exports = function (entityDescriptionService, storageDriver, injection, queryPerformerService, validationService) {
@@ -18,13 +18,9 @@ module.exports = function (entityDescriptionService, storageDriver, injection, q
             }
 
             var entityDescription = entityDescriptionService.entityDescription(crudId);
-            var filtering = entityDescription.filtering;
+            var filtering = entityDescription.filtering();
             if (filtering) {
-                var lvalue = filtering.args[0].id || filtering.args[1].id;
-                var rvalue = filtering.args[0].id ? filtering.args[1] : filtering.args[0];
-                if (lvalue) {
-                    filteringAndSorting.filtering[lvalue] = rvalue;
-                }
+                _.merge(filteringAndSorting, filtering);
             }
             if (entityDescription.sorting) {
                 filteringAndSorting.sorting = entityDescription.sorting;
