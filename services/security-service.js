@@ -1,8 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
-var crypto = require('crypto');
 
-module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil) {
+module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil, injection) {
     var service = {};
 
     var UserEntityTypeId = "User";
@@ -61,6 +60,14 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         return prepareUserForReq({
             username: 'system',
             role_admin: true
+        });
+    };
+
+    service.asSystemUser = function (fn) {
+        return injection.inScope({
+            'User': service.getSystemUser()
+        }, function () {
+            return fn();
         });
     };
 

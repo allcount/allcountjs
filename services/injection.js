@@ -37,7 +37,7 @@ exports.Provider = function (factory) {
     this.get = factory;
 };
 
-exports.inject = function (serviceName) {
+exports.inject = function (serviceName, optional) {
     if (serviceName === 'injection') {
         return exports;
     }
@@ -75,6 +75,9 @@ exports.inject = function (serviceName) {
             factory = requireWithServiceNameMatcher(serviceName);
         }
         if (_.isUndefined(factory)) {
+            if (optional) {
+                return undefined;
+            }
             throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
         }
         var instance = exports.resolveFactory(factory);
@@ -187,7 +190,9 @@ exports.resetInjection = function () {
     }, require);
 
     exports.addNameMatcher(/^[A-Z]\w*$/, function (serviceName) {
-        return './js/' + serviceName + '.js';
+        if (fs.existsSync(path.join(__dirname, 'js', serviceName + '.js'))) {
+            return './js/' + serviceName + '.js';
+        }
     }, require);
 };
 
