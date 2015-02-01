@@ -21,6 +21,7 @@ injection.bindMultiple('compileServices', [
     'crudService',
     'actionService',
     'computedFieldService',
+    'layoutService',
     'viewService',
     'menuService',
     'trackingService',

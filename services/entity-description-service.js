@@ -96,7 +96,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 sorting: description.arrayPropertyValue('sorting'), //TODO additional structure checks,
                 actions: description.arrayPropertyValue('actions'),
                 title: description.propertyValue('title'),
-                customView: description.stringPropertyValue('customView')
+                customView: description.stringPropertyValue('customView'),
+                layout: description.evaluatedValue('layout')
             });
         }
 
@@ -114,7 +115,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 sorting: evaluated.sorting,
                 actions: evaluated.actions,
                 title: evaluated.title,
-                customView: evaluated.customView
+                customView: evaluated.customView,
+                layout: evaluated.layout
             };
             var persistedFields = {};
             _.each(evaluated.evaluatedFields, function (field, fieldName) {

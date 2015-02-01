@@ -566,19 +566,25 @@ function layoutDirective(directiveName) {
             priority: 1000,
             transclude: 'element',
             link: function (scope, element, attrs, controller, transclude) {
-                var currentLayout, childScopes = [];
+                var currentLayout;
+                var mainScope;
 
-                function allocateScope(field) {
-                    var childScope = scope.$new();
+                function allocateFieldScope(field, parentScope) {
+                    var childScope = parentScope.$new();
                     childScope[attrs.field] = field;
-                    childScopes.push(childScope);
                     return childScope;
                 }
 
-                function renderChild(layoutElem) {
+                function allocateScope(params, parentScope) {
+                    var childScope = parentScope.$new();
+                    _.extend(childScope, params);
+                    return childScope;
+                }
+
+                function renderChild(layoutElem, parentScope) {
                     var containerId = layoutElem.containerId;
                     if (containerId == 'field') {
-                        return transclude(allocateScope(layoutElem.params.field), function (clone) { //TODO: compact field format
+                        return transclude(allocateFieldScope(layoutElem.params.field, parentScope), function (clone) { //TODO: compact field format
                             return clone;
                         });
                     }
@@ -587,7 +593,7 @@ function layoutDirective(directiveName) {
                         layoutElem.params,
                         $(layoutElem.children).map(function (index, item) {
                             return function () {
-                                return renderChild(item);
+                                return renderChild(item, allocateScope(layoutElem.params, parentScope));
                             }
                         }),
                         layoutElem.children
@@ -596,17 +602,25 @@ function layoutDirective(directiveName) {
 
                 scope.$watch(attrs[directiveName], function (entityTypeId) {
                     rest.layout(entityTypeId, function (layout) {
-                        $(childScopes).each(function (index, item) {
-                            item.$destroy();
-                        });
-                        childScopes = [];
+                        if (mainScope) {
+                            mainScope.$destroy();
+                        }
+                        mainScope = scope.$new();
                         if (currentLayout) {
                             currentLayout.remove();
                         }
-                        currentLayout = renderChild(layout);
+                        currentLayout = renderChild(layout, mainScope);
                         element.after(currentLayout);
                     })
-                })
+                });
+
+                scope.labelWidthClass = function (labelWidth) {
+                    return 'col-sm-' + (labelWidth || 3);
+                };
+
+                scope.fieldWidthClass = function (labelWidth) {
+                    return 'col-sm-' + (12 - (labelWidth || 3));
+                }
             }
         }
     }];

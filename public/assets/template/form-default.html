@@ -1,6 +1,6 @@
 <div a-layout="entityTypeId" field="field" class="form-group" ng-class="{'has-warning': isFieldChanged(field), 'has-error': validationErrors[field]}">
-    <label class="col-sm-3 control-label" ng-if="showLabel(field)">{{fieldToDesc[field].name}}</label>
-    <div ng-class="{'col-sm-9': showLabel(field), 'col-sm-12': !showLabel(field)}">
+    <label class="control-label" ng-class="labelWidthClass(labelWidth)" ng-if="showLabel(field)">{{fieldToDesc[field].name}}</label>
+    <div ng-class="!showLabel(field) &amp;&amp; 'col-sm-12' || fieldWidthClass(labelWidth)">
         <div a-field="fieldToDesc[field]" ng-model="entity[field]" is-editor="isEditor"></div>
         <div class="text-danger" ng-if="validationErrors[field]" lc-message="{{validationErrors[field]}}"></div>
     </div>
