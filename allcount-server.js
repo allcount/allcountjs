@@ -4,6 +4,7 @@ var Keygrip = require('keygrip');
 var crypto = require('crypto');
 var http = require('http');
 var util = require('util');
+var Q = require('q');
 
 injection.addNameMatcher(/(.*?)Route/, function (serviceName) {
     return './routes/' + injection.camelHumpsToWireName(serviceName) + '.js';
@@ -88,5 +89,7 @@ injection.bindFactory('expressStatic', function (express) {
 injection.bindFactory('lessMiddleware', function () {
     return require('less-middleware');
 });
+
+injection.initializeScopedThen(Q);
 
 module.exports = injection;

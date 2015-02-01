@@ -90,6 +90,22 @@ exports.inject = function (serviceName) {
     }
 };
 
+exports.storeScope = function () {
+    return _.clone(exports.scoped);
+};
+
+exports.restoreScope = function (storedScope, fn) {
+    var oldScoped = exports.scoped;
+    exports.scoped = storedScope;
+    var result;
+    try {
+        result = fn();
+    } finally {
+        exports.scoped = oldScoped;
+    }
+    return result;
+};
+
 function requireWithServiceNameMatcher(serviceName) {
     var matcher = _.find(exports.nameMatchers, function (matcher) { return serviceName.match(matcher.regex)});
     var servicePath;
@@ -173,6 +189,20 @@ exports.resetInjection = function () {
     exports.addNameMatcher(/^[A-Z]\w*$/, function (serviceName) {
         return './js/' + serviceName + '.js';
     }, require);
+};
+
+exports.initializeScopedThen = function (Q) {
+    var superThen = Q.makePromise.prototype.then;
+    Q.makePromise.prototype.then = function () {
+        var storedScope = exports.storeScope();
+
+        return superThen.apply(this, _.map(arguments, function (fn) {
+            return _.isFunction(fn) && function () {
+                    var resolveArgs = arguments;
+                    return exports.restoreScope(storedScope, function () { return fn.apply(null, resolveArgs) });
+                } || fn;
+        }));
+    };
 };
 
 exports.resetInjection();

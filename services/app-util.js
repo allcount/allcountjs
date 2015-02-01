@@ -20,6 +20,13 @@ module.exports = function (injection) {
 
     util.inherits(ValidationError, Error);
 
+    function ForbiddenError (message) {
+        this.message = message;
+        Error.captureStackTrace(this, arguments.callee);
+    }
+
+    util.inherits(ForbiddenError, Error);
+
     function ConfigObject(obj) {
         this.obj = obj;
     }
@@ -97,6 +104,7 @@ module.exports = function (injection) {
         CompileError: CompileError,
         ValidationError: ValidationError,
         ConfigObject: ConfigObject,
+        ForbiddenError: ForbiddenError,
         evaluateObject: function (object) {
             var self = this;
             var result;

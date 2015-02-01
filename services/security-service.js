@@ -57,6 +57,13 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         });
     };
 
+    service.getSystemUser = function () {
+        return prepareUserForReq({
+            username: 'system',
+            role_admin: true
+        });
+    };
+
     service.createUser = function (username, password, roles) {
         if (!username || !password) {
             throw new Error('Username and password required to create user');
