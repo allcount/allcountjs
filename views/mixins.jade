@@ -36,7 +36,8 @@ mixin actions(actionTarget)
     on-refresh="refreshOnAction()",
     selected-items="[viewState.formEntityId]",
     ng-disabled="!action.isEnabled",
-    publish-methods="actionMethods"
+    publish-methods="actionMethods",
+    class!=attributes.class
     ) {{action.name}}
 
 mixin noEntries()
