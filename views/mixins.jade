@@ -8,7 +8,7 @@ mixin defaultToolbar(withoutHeader)
                     i.glyphicon.glyphicon-pencil
                 button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                     i.glyphicon.glyphicon-ok
-                button.btn.btn-default.ng-cloak(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'all-items'", on-refresh="refreshOnAction()") {{action.name}}
+                +actions('all-items')
                 span.entity-title= messages(entityTitle) || ' '
             .pull-right.form-inline
                 input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
@@ -25,7 +25,19 @@ mixin defaultToolbar(withoutHeader)
                 i.glyphicon.glyphicon-pencil
             button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                 i.glyphicon.glyphicon-ok
-            button.btn.btn-default.ng-cloak(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
+            +actions('single-item')
+
+mixin actions(actionTarget)
+    button.btn.btn-default.ng-cloak(
+    ng-repeat='action in actions',
+    ng-click='action.perform()',
+    lc-actions='"' + entityTypeId + '"',
+    action-target="'#{actionTarget}'",
+    on-refresh="refreshOnAction()",
+    selected-items="[viewState.formEntityId]",
+    ng-disabled="!action.isEnabled",
+    publish-methods="actionMethods"
+    ) {{action.name}}
 
 mixin noEntries()
     div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")

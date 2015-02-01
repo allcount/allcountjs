@@ -43,6 +43,7 @@ var EntityViewController = ['$scope', 'track', '$window', function ($scope, trac
         $scope.editForm.updateEntity(function () {
             $scope.viewState.isFormEditing = false;
             $scope.editForm.reloadEntity();
+            $scope.actionMethods.refresh();
         });
     };
 
@@ -62,6 +63,7 @@ var EntityViewController = ['$scope', 'track', '$window', function ($scope, trac
             $scope.$evalAsync(function () {
                 $scope.pagingMethods.refresh();
                 $scope.gridMethods.updateGrid();
+                $scope.actionMethods.refresh();
             });
         }, 400); //TODO delay for animation hack
     };

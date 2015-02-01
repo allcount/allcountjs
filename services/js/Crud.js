@@ -1,4 +1,4 @@
-module.exports = function (actionContext, crudService, entityDescriptionService) {
+module.exports = function (crudService, entityDescriptionService, injection) {
     function CrudFor(entityCrudId) {
         var crudStrategy = crudService.strategyForCrudId(entityCrudId);
 
@@ -23,7 +23,7 @@ module.exports = function (actionContext, crudService, entityDescriptionService)
 
     return {
         actionContextCrud: function () {
-            return CrudFor(actionContext.entityCrudId);
+            return CrudFor(injection.inject('actionContext').entityCrudId);
         },
         crudForEntityType: function (entityTypeId) {
             return CrudFor(entityDescriptionService.entityTypeIdCrudId(entityTypeId));

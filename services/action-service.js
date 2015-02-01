@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var crypto = require('crypto');
+var Q = require('q');
 
 module.exports = function (entityDescriptionService, injection, appUtil) {
     return {
@@ -36,6 +37,9 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
                                 throw new Error('Unknown actionTarget: ' + actionTarget);
                             }
                         },
+                        isEnabled: function () {
+                            return Q(action.hasPropertyValue('enabled') ? action.evaluatedValue('enabled') : true).then(function (v) { return !!v });
+                        },
                         actionTarget: actionTarget
                     };
 
@@ -50,14 +54,17 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
             });
         },
         actionListFor: function (entityCrudId, actionTarget) {
-            return entityDescriptionService.entityDescription(entityCrudId).actions.filter(function (action) { //TODO permission filtering
+            return Q.all(entityDescriptionService.entityDescription(entityCrudId).actions.filter(function (action) { //TODO permission filtering
                 return action.actionTarget === actionTarget;
             }).map(function (action) {
-                return {
-                    id: action.id,
-                    name: action.name
-                }
-            });
+                return action.isEnabled().then(function (isEnabled) {
+                    return {
+                        id: action.id,
+                        name: action.name,
+                        isEnabled: isEnabled
+                    }
+                });
+            }));
         },
         performAction: function (entityCrudId, actionId, selectedItemIds) {
             var action = _.find(entityDescriptionService.entityDescription(entityCrudId).actions, function (action) { //TODO permission filtering
@@ -65,6 +72,9 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
             });
             if (!action) {
                 throw new Error('Action with id "' + actionId + '" not found for entity crud id: ' + JSON.stringify(entityCrudId));
+            }
+            if (!action.isEnabled()) {
+                throw new Error('Action with id "' + actionId + '" is not enabled');
             }
             return action.perform(selectedItemIds);
         }

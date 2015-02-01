@@ -12,7 +12,7 @@ block content
                         i.glyphicon.glyphicon-pencil
                     button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                         i.glyphicon.glyphicon-ok
-                    button.btn.btn-default.ng-cloak(ng-repeat='action in actions', ng-click='action.perform()', lc-actions='"' + entityTypeId + '"', action-target="'single-item'", on-refresh="refreshOnAction()", selected-items="[viewState.formEntityId]") {{action.name}}
+                    +actions('single-item')
             .container.screen-container(ng-cloak)
                 +defaultEditAndCreateForms()
 

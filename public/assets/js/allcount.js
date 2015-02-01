@@ -1075,7 +1075,7 @@ function menuDirective() {
 allcountModule.directive("aMenu", menuDirective()); //TODO deprecated
 allcountModule.directive("lcMenu", menuDirective());
 
-allcountModule.directive("lcActions", ["rest", "$location", "messages", function (rest, $location, messages) {
+allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse", function (rest, $location, messages, $parse) {
     return {
         restrict: 'A',
         scope: true,
@@ -1126,6 +1126,13 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", function
                         });
                     });
                 }
+            }
+
+            if (attrs.publishMethods) {
+                var publishMethodsTo = $parse(attrs.publishMethods);
+                publishMethodsTo.assign(scope.$parent, {
+                    refresh: refresh
+                })
             }
         }
     }
