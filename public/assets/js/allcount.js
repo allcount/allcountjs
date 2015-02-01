@@ -615,11 +615,11 @@ function layoutDirective(directiveName) {
                 });
 
                 scope.labelWidthClass = function (labelWidth) {
-                    return 'col-sm-' + (labelWidth || 3);
+                    return 'col-md-' + (labelWidth || 3);
                 };
 
                 scope.fieldWidthClass = function (labelWidth) {
-                    return 'col-sm-' + (12 - (labelWidth || 3));
+                    return 'col-md-' + (12 - (labelWidth || 3));
                 }
             }
         }
