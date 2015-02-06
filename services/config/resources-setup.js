@@ -30,7 +30,7 @@ module.exports = function (app, securityService, expressStatic, lessMiddleware, 
                 mkdirp.sync(targetMainLessDir, 511 /* 0777 */);
                 fs.writeFileSync(targetMainLessPath, '@import "' + path.relative(targetMainLessDir, mainLessPath) + '";\n@import "' + path.relative(targetMainLessDir, fullThemePath) + '";');
             }
-            app.use(lessMiddleware({src: publicPath, dest: cssOutputPath}));
+            app.use(lessMiddleware(publicPath, {dest: cssOutputPath}));
             app.use(expressStatic(publicPath));
             app.use(expressStatic(cssOutputPath));
         }

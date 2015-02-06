@@ -28,7 +28,7 @@
   "dependencies": {
     "express": "^4.10.0",
     "ejs": "^1.0.0",
-    "less-middleware": "~0.1.15",
+    "less-middleware": "^1.0.4",
     "body-parser": "1.0.1",
     "cookie-parser": "^1.1.0",
     "consolidate": "0.10.0",
