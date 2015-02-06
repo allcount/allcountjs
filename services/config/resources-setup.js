@@ -1,7 +1,6 @@
 var path = require('path');
 var fs = require('fs');
 url = require('url');
-var Q = require('Q');
 var mkdirp = require('mkdirp');
 
 module.exports = function (app, securityService, expressStatic, lessMiddleware, repositoryService, themeService) {
