@@ -24,7 +24,7 @@ mixin pageTitle()
    title= menuService.appTitle || menuService.appName()
 
 mixin lessTheme()
-   link(href='/assets/less/' + services.themeService.mainCss(), rel='stylesheet')
+   link(href=services.themeService.mainCssPath(), rel='stylesheet')
 
 mixin defaultNavBar()
    .navbar.navbar-default.navbar-fixed-top(role='navigation')
