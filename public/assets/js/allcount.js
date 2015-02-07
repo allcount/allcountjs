@@ -199,8 +199,8 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
     var service = {};
 
     var fieldRenderers = {
-        text: function (value) {
-            return value;
+        text: function (value, fieldDescription) {
+            return fieldDescription.fieldType.isMultiline ? textareaRenderer(value) : value;
         },
         date: function (value) {
             return $filter('date')(value);
@@ -234,6 +234,15 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
 
     var dateRegex = /^(\d{4})-(\d\d)-(\d\d)$/;
 
+    function textareaRenderer(value) {
+        var elem = $('<p></p>');
+        var escapedText = elem.text(value).html();
+        elem.addClass("textarea-field-paragraph");
+        const escapedHtml = escapedText.split("\n").join('<br>');
+        elem.html(escapedHtml);
+        return elem;
+    }
+
     function parseDate(s) {
         if (!s) return undefined;
         var match;
@@ -247,6 +256,16 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
 
     function textInput(controller, updateValue) {
         var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+        input.val(controller.$viewValue);
+        input.on('input', function () {
+            var value = $.trim($(this).val());
+            updateValue(value.length > 0 ? value : undefined);
+        });
+        return input;
+    }
+
+    function textareaInput(controller, updateValue) {
+        var input = $('<textarea class="form-control"/>'); //TODO remove form-control?
         input.val(controller.$viewValue);
         input.on('input', function () {
             var value = $.trim($(this).val());
@@ -271,7 +290,8 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
 
     var fieldEditors = {
         text: function (fieldDescription, controller, updateValue, clone, scope) {
-            return textInput(controller, updateValue);
+            var inputFun = fieldDescription.fieldType.isMultiline ? textareaInput : textInput;
+            return inputFun(controller, updateValue);
         },
         password: function (fieldDescription, controller, updateValue, clone, scope) { //TODO doubling
             var input = $('<input type="password" class="form-control"/>'); //TODO remove form-control?
@@ -374,7 +394,9 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
     };
 
     service.readOnlyFieldRenderer = function (fieldDescription) {
-        return fieldRenderers[fieldDescription.fieldTypeId];
+        return function (value) {
+            return fieldRenderers[fieldDescription.fieldTypeId](value, fieldDescription);
+        };
     };
 
     service.fieldEditor = function (fieldDescription, controller, updateValue, clone, scope) {

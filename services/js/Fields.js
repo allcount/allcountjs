@@ -4,7 +4,18 @@ exports.text = function (name) {
     return new Field({
         name: name,
         fieldType: {
-            id: 'text'
+            id: 'text',
+            isMultiline: false
+        }
+    })
+};
+
+exports.textarea = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'text',
+            isMultiline: true
         }
     })
 };
