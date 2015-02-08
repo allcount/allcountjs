@@ -6,10 +6,10 @@ module.exports = function (viewService, repositoryService, templateVarService) {
 
     service.setupCustomViews = function (route) {
         _.forEach(viewService.views, function (viewConfig, path) {
-            repositoryService.loadFileFromRepo(viewConfig.fileName).then(function (viewContent) {
-                route.get(path, function (req, res) {
-                    templateVarService.setupLocals(req, res, _.extend(viewConfig.locals || {}, viewConfig.fileProcessor(viewContent)));
-                    res.render(viewConfig.view);
+            viewConfig.renderer.then(function (renderer) {
+                route.get(path, function (req, res, next) {
+                    templateVarService.setupLocals(req, res);
+                    renderer.render(req, res, next);
                 });
             }).done();
         });
