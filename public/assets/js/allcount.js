@@ -394,9 +394,9 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
     };
 
     service.readOnlyFieldRenderer = function (fieldDescription) {
-        return function (value) {
+        return fieldRenderers[fieldDescription.fieldTypeId] && function (value) {
             return fieldRenderers[fieldDescription.fieldTypeId](value, fieldDescription);
-        };
+        } || fieldRenderers[fieldDescription.fieldTypeId];
     };
 
     service.fieldEditor = function (fieldDescription, controller, updateValue, clone, scope) {
