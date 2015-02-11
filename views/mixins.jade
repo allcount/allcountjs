@@ -9,9 +9,9 @@ mixin defaultToolbar(withoutHeader)
                 button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                     i.glyphicon.glyphicon-ok
                 +actions('all-items')
-                span.entity-title= messages(entityTitle) || ' '
+                span.entity-title.hidden-xs.hidden-sm= messages(entityTitle) || ' '
             .pull-right.form-inline
-                input.form-control(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
+                input.form-control.hidden-xs(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))
                 span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')
         .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
             button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
