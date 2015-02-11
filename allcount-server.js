@@ -71,7 +71,7 @@ injection.bindMultiple('appSetup', [
     'viewEngineSetup',
     'domainErrorHandlerSetup',
     'requestParserSetup',
-    'resourcesSetup',
+    'assetsSetup',
     'sessionSetup',
     'securitySetup',
     'viewPathsSetup',
