@@ -254,8 +254,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
         return undefined;
     }
 
-    function textInput(controller, updateValue) {
-        var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+    function wireTextInputWithController(input, controller, updateValue) {
         input.val(controller.$viewValue);
         input.on('input', function () {
             var value = $.trim($(this).val());
@@ -264,13 +263,27 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
         return input;
     }
 
+    function textInput(controller, updateValue) {
+        var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+        return wireTextInputWithController(input, controller, updateValue);
+    }
+
     function textareaInput(controller, updateValue) {
         var input = $('<textarea class="form-control"/>'); //TODO remove form-control?
+        return wireTextInputWithController(input, controller, updateValue);
+    }
+
+    function maskedInput(controller, updateValue, mask) {
+        var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+        $(input).inputmask(mask);
         input.val(controller.$viewValue);
-        input.on('input', function () {
+        function listener() {
             var value = $.trim($(this).val());
-            updateValue(value.length > 0 ? value : undefined);
-        });
+            updateValue(value.length > 0 && $(input).inputmask("isComplete") ? value : undefined);
+        }
+        input.on('input', listener);
+        input.on('cleared', listener);
+        input.change(listener); //TODO triggers on blur but not always before save
         return input;
     }
 
@@ -290,8 +303,13 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
 
     var fieldEditors = {
         text: function (fieldDescription, controller, updateValue, clone, scope) {
-            var inputFun = fieldDescription.fieldType.isMultiline ? textareaInput : textInput;
-            return inputFun(controller, updateValue);
+            if (fieldDescription.fieldType.isMultiline) {
+                return textareaInput(controller, updateValue);
+            } else if (fieldDescription.fieldType.mask) {
+                return maskedInput(controller, updateValue, fieldDescription.fieldType.mask);
+            } else {
+                return textInput(controller, updateValue)
+            }
         },
         password: function (fieldDescription, controller, updateValue, clone, scope) { //TODO doubling
             var input = $('<input type="password" class="form-control"/>'); //TODO remove form-control?

@@ -4,8 +4,7 @@ exports.text = function (name) {
     return new Field({
         name: name,
         fieldType: {
-            id: 'text',
-            isMultiline: false
+            id: 'text'
         }
     })
 };
@@ -140,3 +139,7 @@ Field.prototype.unique = function (isUnique) {
     return this;
 };
 
+Field.prototype.masked = function (mask) {
+    this.fieldType.mask = mask;
+    return this;
+};
