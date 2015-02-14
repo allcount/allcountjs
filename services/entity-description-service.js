@@ -165,20 +165,24 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
         return service.entityDescription(entityCrudId).tableDescription;
     };
 
-    service.userHasReadAccess = function (entityCrudId, user) {
-        var permissions = service.entityDescription(entityCrudId).permissions;
-        return permissions && permissions.read && user && _.any(permissions.read, function (role) {
-            return user.hasRole(role);
-        }) || !permissions || !permissions.read;
-    };
+    service.userHasReadAccess = userHasAccessTo('read');
 
-    service.userHasWriteAccess = function (entityCrudId, user) {
-        var permissions = service.entityDescription(entityCrudId).permissions;
-        var writePermission = permissions && permissions.write && user && _.any(permissions.write, function (role) {
-            return user.hasRole(role);
-        }) || !permissions || !permissions.write;
-        return service.userHasReadAccess(entityCrudId, user) && writePermission;
-    };
+    service.userHasWriteAccess = userHasAccessTo('write', service.userHasReadAccess.bind(service));
+
+    service.userHasCreateAccess = userHasAccessTo('create', service.userHasWriteAccess.bind(service));
+
+    service.userHasUpdateAccess = userHasAccessTo('update', service.userHasWriteAccess.bind(service));
+
+    service.userHasDeleteAccess = userHasAccessTo('delete', service.userHasWriteAccess.bind(service));
+
+    function userHasAccessTo(permission, parentPermissionFn) {
+        return function (entityCrudId, user) {
+            var permissions = service.entityDescription(entityCrudId).permissions;
+            return (permissions && !_.isUndefined(permissions[permission])) ? !permissions[permission] || user && _.any(permissions[permission], function (role) {
+                return user.hasRole(role);
+            }) : (!parentPermissionFn || parentPermissionFn(entityCrudId, user));
+        }
+    }
 
     service.entityTypeIdCrudId = function (entityTypeId) {
         return {entityTypeId: entityTypeId};

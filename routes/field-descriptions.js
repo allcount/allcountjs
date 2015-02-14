@@ -10,7 +10,10 @@ module.exports = function (entityDescriptionService, layoutService) {
     route.permissions = function (req, res) {
         res.json({
             read: entityDescriptionService.userHasReadAccess(req.body.entityCrudId, req.user),
-            write: entityDescriptionService.userHasWriteAccess(req.body.entityCrudId, req.user)
+            write: entityDescriptionService.userHasWriteAccess(req.body.entityCrudId, req.user),
+            create: entityDescriptionService.userHasCreateAccess(req.body.entityCrudId, req.user),
+            update: entityDescriptionService.userHasUpdateAccess(req.body.entityCrudId, req.user),
+            delete: entityDescriptionService.userHasDeleteAccess(req.body.entityCrudId, req.user)
         })
     };
 

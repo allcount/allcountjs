@@ -61,28 +61,31 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
         var result = {};
         wrap(function () {
             var next = this;
-            checkReadPermission();
+            checkPermission('Read', 'userHasReadAccess');
             return next();
         }, ['findAll', 'findCount', 'getTotalRow', 'findRange', 'readEntity'], result, crudStrategy);
         wrap(function () {
             var next = this;
-            checkWritePermission();
+            checkPermission('Create', 'userHasCreateAccess');
             return next();
-        }, ['createEntity', 'updateEntity', 'deleteEntity'], result, crudStrategy);
+        }, ['createEntity'], result, crudStrategy);
+        wrap(function () {
+            var next = this;
+            checkPermission('Update', 'userHasUpdateAccess');
+            return next();
+        }, ['updateEntity'], result, crudStrategy);
+        wrap(function () {
+            var next = this;
+            checkPermission('Delete', 'userHasDeleteAccess');
+            return next();
+        }, ['deleteEntity'], result, crudStrategy);
 
         return result;
 
-        function checkReadPermission() {
+        function checkPermission(permissionName, permissionCheckMethod) {
             var user = injection.inject('User', true);
-            if (!entityDescriptionService.userHasReadAccess(crudId, user)) {
-                throw new appUtil.ForbiddenError('Read permission to ' + JSON.stringify(crudId) + ' denied for ' + user.username);
-            }
-        }
-
-        function checkWritePermission() {
-            var user = injection.inject('User', true);
-            if (!entityDescriptionService.userHasWriteAccess(crudId, user)) {
-                throw new appUtil.ForbiddenError('Write permission to ' + JSON.stringify(crudId) + ' denied for ' + user.username);
+            if (!entityDescriptionService[permissionCheckMethod](crudId, user)) {
+                throw new appUtil.ForbiddenError(permissionName + ' permission to ' + JSON.stringify(crudId) + ' denied for ' + user.username);
             }
         }
     }

@@ -2,9 +2,9 @@ mixin defaultToolbar(withoutHeader)
     div(class=!withoutHeader ? 'toolbar-header' : '')
         .container.form-inline(ng-show='viewState.mode == "list"')
             .pull-left: .btn-toolbar
-                button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.permissions().create')
                     i.glyphicon.glyphicon-plus
-                button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.hasWritePermission()')
+                button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.permissions().update || gridMethods.permissions().delete')
                     i.glyphicon.glyphicon-pencil
                 button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')
                     i.glyphicon.glyphicon-ok
@@ -21,7 +21,7 @@ mixin defaultToolbar(withoutHeader)
         .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
             button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                 i.glyphicon.glyphicon-chevron-left
-            button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.hasWritePermission()')
+            button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.permissions().update')
                 i.glyphicon.glyphicon-pencil
             button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                 i.glyphicon.glyphicon-ok

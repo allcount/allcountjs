@@ -694,7 +694,8 @@ function listDirective(directiveName, templateUrl) {
                     var publishMethodsTo = $parse(attrs.publishMethods);
                     publishMethodsTo.assign(scope.$parent, {
                         updateGrid: function () { if (scope.updateGrid) scope.updateGrid() },
-                        hasWritePermission: function () { return scope.permissions && scope.permissions.write }
+                        hasWritePermission: function () { return scope.permissions && scope.permissions.write },
+                        permissions: function () { return scope.permissions || {} }
                     })
                 }
 
@@ -725,6 +726,7 @@ function listDirective(directiveName, templateUrl) {
                         })
                     });
 
+                    scope.permissions = {};
                     rest.permissions(scope.entityCrudId, function (permissions) {
                         scope.permissions = permissions;
                     });
@@ -827,7 +829,7 @@ function listDirective(directiveName, templateUrl) {
 
                 if (attrs.editMode)
                     scope.$parent.$watch(attrs.editMode, function (value) {
-                        scope.isInEditMode = value && scope.permissions && scope.permissions.write;
+                        scope.isInEditMode = value;
                         if (!scope.isInEditMode) {
                             scope.editEntity(undefined);
                         }

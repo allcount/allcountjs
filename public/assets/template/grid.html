@@ -15,13 +15,13 @@
                 <button class="btn btn-default btn-xs" lc-tooltip="View" ng-show="!isInEditMode" ng-click="navigate(item.id)">
                     <i class="glyphicon glyphicon-chevron-right"></i>
                 </button>
-                <button class="btn btn-danger btn-xs" lc-tooltip="Delete" ng-show="isInEditMode" ng-click="deleteEntity(item)">
+                <button class="btn btn-danger btn-xs" lc-tooltip="Delete" ng-show="isInEditMode && permissions.delete" ng-click="deleteEntity(item)">
                     <i class="glyphicon glyphicon-trash"></i>
                 </button>
-                <button class="btn btn-default btn-xs" lc-tooltip="Edit" ng-show="isInEditMode &amp;&amp; editingItem !== item" ng-click="editEntity(item)">
+                <button class="btn btn-default btn-xs" lc-tooltip="Edit" ng-show="isInEditMode && editingItem !== item && permissions.update" ng-click="editEntity(item)">
                     <i class="glyphicon glyphicon-pencil"></i>
                 </button>
-                <button class="btn btn-default btn-xs" lc-tooltip="Save" ng-show="isInEditMode &amp;&amp; editingItem === item" ng-click="saveEntity()">
+                <button class="btn btn-default btn-xs" lc-tooltip="Save" ng-show="isInEditMode && editingItem === item" ng-click="saveEntity()">
                     <i class="glyphicon glyphicon-ok"></i>
                 </button>
             </td>
@@ -30,7 +30,7 @@
                 <div class="text-danger" ng-if="validationErrors[fd.field] &amp;&amp; editingItem === item" lc-message="{{validationErrors[fd.field]}}"></div>
             </td>
         </tr>
-        <tr ng-if="isInEditMode">
+        <tr ng-if="isInEditMode && permissions.create">
             <td class="action-grid-cell">
                 <button class="btn btn-success btn-xs" ng-click="createEntity()" lc-tooltip="Add">
                     <i class="glyphicon glyphicon-plus"></i>

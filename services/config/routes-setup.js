@@ -23,7 +23,6 @@ module.exports = function (
     return {
         setup: function () {
             var crudOperationsRouter = express.Router();
-            var crudWriteOperationsRouter = express.Router();
             var appAccessRouter = express.Router()
                 .use(function (req, res, next) {
                     res.loginOrForbidden = function () {
@@ -56,18 +55,16 @@ module.exports = function (
             }
 
             crudOperationsRouter.use(crudRoute.checkReadPermissionMiddleware);
-            crudWriteOperationsRouter.use(crudRoute.checkWritePermissionMiddleware);
             crudOperationsRouter.post('/rest/crud/find-count', crudRoute.findCount);
             crudOperationsRouter.post('/rest/crud/find-range', crudRoute.findRange);
-            crudWriteOperationsRouter.post('/rest/crud/create', crudRoute.createEntity);
+            crudOperationsRouter.post('/rest/crud/create', crudRoute.createEntity);
             crudOperationsRouter.post('/rest/crud/read', crudRoute.readEntity);
             crudOperationsRouter.get('/rest/download/:fileId', crudRoute.downloadFile);
-            crudWriteOperationsRouter.post('/rest/crud/update', crudRoute.updateEntity);
-            crudWriteOperationsRouter.post('/rest/crud/delete', crudRoute.deleteEntity);
-            crudWriteOperationsRouter.post('/rest/upload', busboy(), crudRoute.uploadFile);
+            crudOperationsRouter.post('/rest/crud/update', crudRoute.updateEntity);
+            crudOperationsRouter.post('/rest/crud/delete', crudRoute.deleteEntity);
+            crudOperationsRouter.post('/rest/upload', busboy(), crudRoute.uploadFile);
             crudOperationsRouter.post('/rest/actions', actionsRoute.actionList);
             crudOperationsRouter.post('/rest/actions/perform', actionsRoute.performAction);
-            crudOperationsRouter.use(crudWriteOperationsRouter);
             appAccessRouter.use(crudOperationsRouter);
             appAccessRouter.get('/rest/menus', menuRoute.menus);
 
