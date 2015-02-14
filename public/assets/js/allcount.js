@@ -1,4 +1,4 @@
-var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload']);
+var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload', 'ui.bootstrap']);
 
 window.allcountModule = allcountModule;
 
@@ -1115,7 +1115,7 @@ function menuDirective() {
 allcountModule.directive("aMenu", menuDirective()); //TODO deprecated
 allcountModule.directive("lcMenu", menuDirective());
 
-allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse", function (rest, $location, messages, $parse) {
+allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse", "$modal", function (rest, $location, messages, $parse, $modal) {
     return {
         restrict: 'A',
         scope: true,
@@ -1156,6 +1156,14 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse"
                                         } else {
                                             throw new Error('on-refresh is not defined for lc-actions');
                                         }
+                                    } else if (actionResult.type === 'modal') {
+                                        var modalScope = scope.$new();
+                                        modalScope.title = actionResult.title;
+                                        modalScope.message = actionResult.message;
+                                        $modal.open({
+                                            templateUrl: '/assets/template/modal.html',
+                                            scope: modalScope
+                                        })
                                     } else {
                                         throw new Error('Unknown actionResult type "' + actionResult.type +  '" for ' + JSON.stringify(actionResult));
                                     }

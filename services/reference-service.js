@@ -13,24 +13,11 @@ module.exports = function (entityDescriptionService, crudService) {
     };
 
     service.referenceValueByEntityId = function (crudId, entityId) { //TODO doubling
-        var referenceFieldName = entityDescriptionService.entityDescription(crudId).referenceNameExpression;
-        return crudService.strategyForCrudId(crudId).readEntity(entityId).then(function (e) {
-            return {id: e.id, name: e[referenceFieldName]};
-        });
+        return crudService.referenceValueByEntityId(crudId, entityId);
     };
 
     service.resolveReferenceValues = function (crudId, entity) {
-        return Q.all(entityDescriptionService.entityDescription(crudId).fields.map(function (field) {
-            if (field.fieldType.id === 'reference' && entity[field.field] && entity[field.field].id) {
-                return service.referenceValueByEntityId(
-                        entityDescriptionService.entityTypeIdCrudId(field.fieldType.referenceEntityTypeId),
-                        entity[field.field].id
-                    ).then(function (referenceValue) {
-                        entity[field.field] = referenceValue;
-                    });
-            }
-            return undefined;
-        }));
+        return crudService.resolveReferenceValues(crudId, entity);
     };
 
     return service;

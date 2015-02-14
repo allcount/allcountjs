@@ -63,9 +63,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
 
     route.createEntity = function (req, res) {
         var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
-        referenceService.resolveReferenceValues(req.body.entityCrudId, entity).then(function () {
-            return crudService.strategyForCrudId(req.body.entityCrudId).createEntity(entity);
-        }).then(function (result) {
+        crudService.strategyForCrudId(req.body.entityCrudId).createEntity(entity).then(function (result) {
             res.send(result.toString());
         }).done();
     };
@@ -82,9 +80,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
 
     route.updateEntity = function (req, res) {
         var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
-        referenceService.resolveReferenceValues(req.body.entityCrudId, entity).then(function () {
-            return crudService.strategyForCrudId(req.body.entityCrudId).updateEntity(entity);
-        }).then(function (result) {
+        crudService.strategyForCrudId(req.body.entityCrudId).updateEntity(entity).then(function (result) {
             res.json(result);
         }).done();
     };

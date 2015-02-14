@@ -24,6 +24,13 @@ module.exports = function (crudService, googleExportService, actionContext) {
                 type: 'refresh'
             })
         },
+        modalResult: function (title, message) {
+            return Q({
+                type: 'modal',
+                title: title,
+                message: message
+            })
+        },
         selectedEntityId: function () {
             return actionContext.entityId;
         }
