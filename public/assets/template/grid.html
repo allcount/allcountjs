@@ -12,7 +12,7 @@
     <tbody>
         <tr ng-repeat="item in items" class="animated-grid-row">
             <td class="action-grid-cell">
-                <button class="btn btn-default btn-xs" lc-tooltip="View" ng-show="!isInEditMode" ng-click="navigate(item.id)">
+                <button class="btn btn-default btn-xs" lc-tooltip="View" ng-show="!isInEditMode && hasNavigate" ng-click="navigate(item.id)">
                     <i class="glyphicon glyphicon-chevron-right"></i>
                 </button>
                 <button class="btn btn-danger btn-xs" lc-tooltip="Delete" ng-show="isInEditMode && permissions.delete" ng-click="deleteEntity(item)">

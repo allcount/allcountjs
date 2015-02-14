@@ -778,6 +778,8 @@ function listDirective(directiveName, templateUrl) {
                         }
                     };
 
+                    scope.hasNavigate = !!attrs.navigate;
+
                     scope.headerClass = function (fd) {
                         var cls = {};
                         cls[fd.fieldTypeId + '-grid-header'] = true;
