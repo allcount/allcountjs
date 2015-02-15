@@ -146,6 +146,14 @@ module.exports = function (dbUrl) {
         indexes = _.map(sortingFor(filteringAndSorting, table.fields), function (order, fieldName) { return [fieldName, order]});
         _.forEach(indexes, function (i) { indexFieldHash[i[0]] = true });
 
+        return ensureIndexesWith(indexes, indexFieldHash, table, filteringAndSorting);
+    }
+
+    function onlyFilteringEnsureIndexes(table, filteringAndSorting) {
+        return ensureIndexesWith([], {}, table, filteringAndSorting);
+    }
+
+    function ensureIndexesWith(indexes, indexFieldHash, table, filteringAndSorting) {
         var query = queryFor(table, filteringAndSorting);
         function addIndexField(q, fieldName) {
             if (fieldName === '$and' || fieldName === '$or') {
@@ -160,22 +168,6 @@ module.exports = function (dbUrl) {
         if (indexes.length > 0) {
             var collection = db.collection(table.tableName);
             return Q.nfbind(collection.ensureIndex.bind(collection))(indexes);
-        } else {
-            return Q(null);
-        }
-    }
-
-    function onlyFilteringEnsureIndexes(table, filteringAndSorting) {
-        var indexFieldHash = {};
-
-        var query = queryFor(table, filteringAndSorting);
-        _.forEach(query, function (q, fieldName) {
-            indexFieldHash[fieldName] = 1;
-        });
-
-        if (_.size(indexFieldHash) > 0) {
-            var collection = db.collection(table.tableName);
-            return Q.nfbind(collection.ensureIndex.bind(collection))(indexFieldHash);
         } else {
             return Q(null);
         }
