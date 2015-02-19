@@ -400,7 +400,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
                 } : undefined;
             });
 
-            return $compile('<div ng-show="entityCrudId" a-grid="entityCrudId" paging="{start: 0, count: 10}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
+            return $compile('<div ng-show="entityCrudId" lc-grid="entityCrudId" paging="{start: 0, count: 50}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
         },
         attachment: function (fieldDescription, controller, updateValue, clone, scope) {
             scope.fieldValue = controller.$viewValue;

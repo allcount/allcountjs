@@ -81,6 +81,10 @@ var EntityViewController = ['$scope', 'track', '$window', function ($scope, trac
         $scope.gridMethods.updateGrid();
         $scope.editForm.reloadEntity();
     };
+
+    $scope.showList = function () {
+        return $scope.viewState.mode === "list" && $scope.viewState.paging && $scope.viewState.paging.count > 0 || $scope.viewState.editState;
+    }
 }];
 
 allcountModule.controller('EntityViewController', EntityViewController);
