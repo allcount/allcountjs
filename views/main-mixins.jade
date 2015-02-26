@@ -54,10 +54,9 @@ mixin defaultNavBar()
                                           a(href='/entity/User')= messages('Users')
                                       a(href='/logout')= messages('Logout')
 mixin defaultHead()
-   head
-      +defaultMeta()
-      +defaultFavicon()
-      +pageTitle()
-      +lessTheme()
-      include head-scripts
-      include tracking
+    +defaultMeta()
+    +defaultFavicon()
+    +pageTitle()
+    +lessTheme()
+    include head-scripts
+    include tracking

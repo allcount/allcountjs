@@ -4,7 +4,8 @@ block vars
 
 doctype html
 html
-    +defaultHead()
+    head
+        +defaultHead()
 
     body(class=hasToolbar? 'has-toolbar' : '')
         +defaultNavBar()
