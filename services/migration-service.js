@@ -20,22 +20,23 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
         migrations = _.chain(objects).map(function (obj) {
             return obj.propertyValue('migrations') || [];
         }).flatten().map(function (m) { return m.evaluateProperties() }).value();
-        return storageDriver.findAll(migrationsTableDescription,
-            {
-                filtering: {
-                    op: "in",
-                    value: migrations.map(function (migration) {
-                        return migration.name;
-                    })
+        storageDriver.addOnConnectListener(function () {
+            return storageDriver.findAll(migrationsTableDescription,
+                {
+                    filtering: {
+                        op: "in",
+                        value: migrations.map(function (migration) {
+                            return migration.name;
+                        })
+                    }
                 }
-            }
-        ).then(function (alreadyRun) {
+            ).then(function (alreadyRun) {
                 var alreadyRunHash = {};
                 alreadyRun.forEach(function (migration) {
                     alreadyRunHash[migration.name] = migration;
                 });
                 var toRun = migrations.filter(function (m) {
-                   return !alreadyRunHash[m.name];
+                    return !alreadyRunHash[m.name];
                 });
                 return toRun.map(function (migration) {
                     return function () {
@@ -56,8 +57,8 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
                         throw new Error("Undefined operation id: '" + migration.operation.id + "'");
                     }
                 }).reduce(Q.when, Q(null));
-            })
-
+            }).done();
+        });
     };
 
     return service;
