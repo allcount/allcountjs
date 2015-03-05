@@ -1,4 +1,4 @@
-var nodegit = require('nodegit');
+//var nodegit = require('nodegit');
 var childProcess = require('child_process');
 var Q = require('q');
 
@@ -16,11 +16,10 @@ module.exports = function () {
     };
 
     function getRepositoryHeadSha(repositoryDir) {
-        return Q.nfcall(nodegit.Repository.open, repositoryDir + '/.git').then(function (repository) {
-            var getMasterCommit = Q.nfbind(repository.getMasterCommit.bind(repository));
-            return getMasterCommit().then(function (head) {
-                return head.id().toString();
-            });
+        return Q.nfcall(childProcess.exec, 'git log HEAD^..HEAD', {cwd: repositoryDir, timeout: 30000}).then(function (commitInfo) {
+            var commitId = commitInfo.toString().split('\n')[0];
+            console.log(commitId);
+            return commitId;
         });
     }
 
