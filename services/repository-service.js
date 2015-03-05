@@ -1,5 +1,4 @@
 var fs = require('fs');
-var nodegit = require('nodegit');
 var Q = require('q');
 var _ = require('underscore');
 var crypto = require('crypto');

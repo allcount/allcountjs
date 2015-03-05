@@ -16,10 +16,10 @@ module.exports = function () {
     };
 
     function getRepositoryHeadSha(repositoryDir) {
-        return Q.nfcall(nodegit.Repo.open, repositoryDir + '/.git').then(function (repository) {
-            var branch = Q.nfbind(repository.getBranch.bind(repository));
-            return branch('master').then(function (head) {
-                return head.sha();
+        return Q.nfcall(nodegit.Repository.open, repositoryDir + '/.git').then(function (repository) {
+            var getMasterCommit = Q.nfbind(repository.getMasterCommit.bind(repository));
+            return getMasterCommit().then(function (head) {
+                return head.id().toString();
             });
         });
     }
