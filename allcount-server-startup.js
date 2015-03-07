@@ -1,8 +1,10 @@
-_ = require('underscore');
+var _ = require('underscore');
+var Q = require('q');
 
-module.exports = function (appService, gitRepoUrl, proxyHandler, injection, httpServer, express, app, appSetup) {
+module.exports = function (appService, gitRepoUrl, proxyHandler, injection, httpServer, express, app, appSetup, storageDriver) {
     return {
         startup: function (onReady) {
+            var self = this;
             appService.compile(function (errors) {
                 if (errors.length > 0) {
                     if (onReady) {
@@ -13,7 +15,7 @@ module.exports = function (appService, gitRepoUrl, proxyHandler, injection, http
                     appSetup.forEach(function (setup) { setup.setup() });
                 }
 
-                httpServer(function (req, res) {
+                self.server = httpServer(function (req, res) {
                     proxyHandler(req, res, function () {
                         app(req, res);
                     });
@@ -23,6 +25,16 @@ module.exports = function (appService, gitRepoUrl, proxyHandler, injection, http
                         onReady();
                     }
                 });
+            });
+        },
+        stop: function () {
+            var defer = Q.defer();
+            this.server.close(function () {
+                console.log('Application server for "' + gitRepoUrl + '" on port ' + app.get('port') + ' has stopped');
+                defer.resolve(null);
+            });
+            return defer.promise.then(function () {
+                return storageDriver.closeConnection();
             });
         }
     }

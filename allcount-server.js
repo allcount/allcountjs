@@ -22,6 +22,7 @@ injection.bindMultiple('compileServices', [
     'crudService',
     'actionService',
     'computedFieldService',
+    'crudHookService',
     'layoutService',
     'viewService',
     'menuService',
@@ -54,7 +55,9 @@ injection.bindFactory('keygrip', function () {
 injection.bindFactory('sessionMiddleware', function (keygrip) { return require('cookie-session')({keys: keygrip}) });
 injection.bindFactory('httpServer', function (port) {
     return function (handler, onReady) {
-        http.createServer(handler).listen(port, onReady);
+        var server = http.createServer(handler);
+        server.listen(port, onReady);
+        return server;
     }
 });
 injection.bindFactory('proxyHandler', function () { return function (req, res, next) { next() } });

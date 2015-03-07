@@ -9,7 +9,7 @@ var Schema = mongoose.Schema;
 var ObjectId = mongoose.Types.ObjectId;
 require('mongoose-long')(mongoose);
 
-module.exports = function (dbUrl) {
+module.exports = function (dbUrl, injection) {
     var service = {};
     var db;
     var onConnectListeners = [];
@@ -19,7 +19,7 @@ module.exports = function (dbUrl) {
 
     connection.on('connected', function () {
         db = connection.db;
-        onConnectListeners.forEach(function (listener) {listener()});
+        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null));
     });
 
     function toPromise(query, method) {
@@ -245,18 +245,21 @@ module.exports = function (dbUrl) {
     };
 
     service.createEntity = function (table, entity) {
-        var objectID = entity.id && toMongoId(entity.id) || new ObjectId();
-        entity.id = (objectID).toString();
-        var toInsert = toBson(table.fields)(entity);
-        toInsert._id = objectID;
-        toInsert.createTime = new Date();
-        toInsert.modifyTime = new Date();
-        setAuxiliaryFields(table.fields, toInsert, toInsert);
-        return Q(modelFor(table).create(toInsert))
-            .then(callEntityListeners(table, null, fromBson(table.fields)(toInsert)))
-            .then(function (result) {
-                return result._id;
-            });
+        return callBeforeCrudListeners(table, null, entity).then(function () {
+            var objectID = entity.id && toMongoId(entity.id) || new ObjectId();
+            entity.id = (objectID).toString();
+            var toInsert = toBson(table.fields)(entity);
+            toInsert._id = objectID;
+            toInsert.createTime = new Date();
+            toInsert.modifyTime = new Date();
+            setAuxiliaryFields(table.fields, toInsert, toInsert);
+            return Q(modelFor(table).create(toInsert))
+                .then(callAfterCrudListeners(table, null, fromBson(table.fields)(toInsert)))
+                .then(function (result) {
+                    return result._id;
+                });
+        });
+
     };
 
     service.aggregateQuery = function (table, aggregatePipeline) {
@@ -284,36 +287,55 @@ module.exports = function (dbUrl) {
     };
 
     service.updateEntity = function (table, entity) {
-        var toUpdate = toBson(table.fields)(entity);
-        toUpdate.modifyTime = new Date();
-
         return service.readEntity(table, entity.id).then(function (oldEntity) {
-            return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, toUpdate).exec())
-                .then(callEntityListeners(table, oldEntity, fromBson(table.fields)(toUpdate)))
-                .then(function () { //TODO toUpdate doesn't have id
-                    return service.readEntity(table, entity.id).then(function (result) {
-                        var update = {};
-                        setAuxiliaryFields(table.fields, result, update);
-                        return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, update).exec());
+            var newEntity = _.extend(Object.create(oldEntity), entity);
+            return callBeforeCrudListeners(table, oldEntity, newEntity).then(function () {
+                var toUpdate = toBson(table.fields)(entity);
+                toUpdate.modifyTime = new Date();
+                return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, toUpdate).exec())
+                    .then(callAfterCrudListeners(table, oldEntity, newEntity)) //TODO REST layer should convert all data types
+                    .then(function () {
+                        return service.readEntity(table, entity.id).then(function (result) {
+                            var update = {};
+                            setAuxiliaryFields(table.fields, result, update);
+                            return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, update).exec());
+                        });
+                    }).then(function (result) {
+                        return fromBson(table.fields)(result);
                     });
-                }).then(function (result) {
-                    return fromBson(table.fields)(result);
-                });
+            });
         });
     };
 
     service.deleteEntity = function (table, entityId) {
         return service.readEntity(table, entityId).then(function (oldEntity) {
-            return Q(modelFor(table).findOneAndRemove({_id: toMongoId(entityId)}).exec()).then(callEntityListeners(table, oldEntity, null));
+            return callBeforeCrudListeners(table, oldEntity, null).then(function () {
+                return Q(modelFor(table).findOneAndRemove({_id: toMongoId(entityId)}).exec()).then(callAfterCrudListeners(table, oldEntity, null));
+            });
         })
     };
 
-    function callEntityListeners(table, oldEntity, newEntity) {
+    function callAfterCrudListeners(table, oldEntity, newEntity) {
         return function (result) {
-            return entityListeners[table.tableName] &&
-                Q.all(entityListeners[table.tableName].map(function (listener) { return listener(oldEntity, newEntity) })).then(function () { return result }) ||
-                result;
+            return invokeCrudListeners(afterCrudListeners[table.tableName], oldEntity, newEntity).thenResolve(result);
         }
+    }
+
+    function callBeforeCrudListeners(table, oldEntity, newEntity) {
+        return invokeCrudListeners(beforeCrudListeners[table.tableName], oldEntity, newEntity);
+    }
+
+    function invokeCrudListeners(listenerArray, oldEntity, newEntity) {
+        if (injection.inject('inCrudListener', true)) {
+            return Q(null);
+        }
+        return (listenerArray || []).map(function (listener) {
+            return function () {
+                return injection.inScope({inCrudListener: true}, function () {
+                    return listener(oldEntity, newEntity)
+                });
+            }
+        }).reduce(Q.when, Q(null));
     }
 
     function setAuxiliaryFields(fields, entity, toUpdate) {
@@ -473,13 +495,34 @@ module.exports = function (dbUrl) {
         return Q.nfbind(gridStore.unlink.bind(gridStore))();
     };
 
-    var entityListeners = {};
+    var afterCrudListeners = {};
+    var beforeCrudListeners = {};
 
-    service.addEntityListener = function (table, listener) {
-        if (!entityListeners[table.tableName]) {
-            entityListeners[table.tableName] = [];
+    //TODO addEntityListener -- deprecated
+    service.addEntityListener = service.addAfterCrudListener = function (table, listener) {
+        addCrudListener(afterCrudListeners, table, listener);
+
+    };
+
+    service.addBeforeCrudListener = function (table, listener) {
+        addCrudListener(beforeCrudListeners, table, listener);
+    };
+
+    function addCrudListener(listeners, table, listener) {
+        if (!listeners[table.tableName]) {
+            listeners[table.tableName] = [];
         }
-        entityListeners[table.tableName].push(listener);
+        listeners[table.tableName].push(listener);
+    }
+
+    service.closeConnection = function () {
+        var defer = Q.defer();
+        service.addOnConnectListener(function () {
+            connection.close(function () {
+                defer.resolve(null);
+            });
+        });
+        return defer.promise;
     };
 
     return service;

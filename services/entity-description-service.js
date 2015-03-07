@@ -97,8 +97,31 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 actions: description.arrayPropertyValue('actions'),
                 title: description.propertyValue('title'),
                 customView: description.stringPropertyValue('customView'),
-                layout: description.evaluatedValue('layout')
+                layout: description.evaluatedValue('layout'),
+                crudHooks: prepareCrudHooks(description)
             });
+        }
+
+        function prepareCrudHooks(description) {
+            var prefixes = ['before', 'after'];
+            var hookNames = ['Save', 'Create', 'Update', 'Delete'];
+            var hooks = prefixes.map(function (prefix) {
+                var methods = hookNames.map(function (method) {
+                    if (description.hasPropertyValue(prefix + method)) {
+                        return [method.toLowerCase(), function (scope) {
+                            return injection.inScope(scope, function () {
+                                return description.evaluatedValue(prefix + method);
+                            });
+                        }];
+                    }
+                }).filter(_.identity);
+                if (methods.length) {
+                    return [prefix, _.object(methods)]
+                }
+            }).filter(_.identity);
+            if (hooks.length) {
+                return _.object(hooks);
+            }
         }
 
         function compileEntityTypeByEvaluated(evaluated) {
@@ -116,7 +139,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 actions: evaluated.actions,
                 title: evaluated.title,
                 customView: evaluated.customView,
-                layout: evaluated.layout
+                layout: evaluated.layout,
+                crudHooks: evaluated.crudHooks
             };
             var persistedFields = {};
             _.each(evaluated.evaluatedFields, function (field, fieldName) {

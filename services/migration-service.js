@@ -57,7 +57,7 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
                         throw new Error("Undefined operation id: '" + migration.operation.id + "'");
                     }
                 }).reduce(Q.when, Q(null));
-            }).done();
+            });
         });
     };
 

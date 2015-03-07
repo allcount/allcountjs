@@ -31,18 +31,28 @@ exports.gutter = function (test) {
     });
 };
 
-exports.injection = function (test) {
-    injection.resetInjection();
-    setupConfigFiles('A.app(function (Fields) { return Fields; });');
+function replaceLookup() {
+    var oldLookup = injection.lookup;
     injection.lookup = function (serviceName) {
         return {service: serviceName};
     };
+    return oldLookup;
+}
 
+function revertLookup(oldLookup) {
+    injection.lookup = oldLookup;
+}
+
+exports.injection = function (test) {
+    injection.resetInjection();
+    setupConfigFiles('A.app(function (Fields) { return Fields; });');
+    var oldLookup = replaceLookup();
     ensureObjects(function (objects) {
         assert.equal(objects[0].propertyValue('service'), 'Fields');
     });
 
     injection.inject('appService').compile(function () {
+        revertLookup(oldLookup);
         test.done();
     })
 };
@@ -50,15 +60,13 @@ exports.injection = function (test) {
 exports.evaluateProperties = function (test) {
     injection.resetInjection();
     setupConfigFiles('A.app(function (Fields) { return {foo: {someField: function (Foo) {return [Foo];} }} });');
-    injection.lookup = function (serviceName) {
-        return {service: serviceName};
-    };
-
+    var oldLookup = replaceLookup();
     ensureObjects(function (objects) {
         assert.equal(objects[0].evaluateProperties().foo.someField[0].service, 'Foo');
     });
 
     injection.inject('appService').compile(function () {
+        revertLookup(oldLookup);
         test.done();
     })
 };
@@ -66,9 +74,7 @@ exports.evaluateProperties = function (test) {
 exports.withParentTest = function (test) {
     injection.resetInjection();
     setupConfigFiles('A.app(function (Fields) { return {foo: Fields, view: {bar: "Hello"} } });');
-    injection.lookup = function (serviceName) {
-        return {service: serviceName};
-    };
+    var oldLookup = replaceLookup();
 
     ensureObjects(function (objects) {
         var wParent = objects[0].propertyValue('view').withParent(objects[0]);
@@ -77,6 +83,7 @@ exports.withParentTest = function (test) {
     });
 
     injection.inject('appService').compile(function () {
+        revertLookup(oldLookup);
         test.done();
     })
 };
