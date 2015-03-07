@@ -12,7 +12,8 @@
   "version": "1.7.6",
   "scripts": {
     "start": "node app.js",
-    "postinstall": "./node_modules/.bin/bower-installer"
+    "postinstall": "./node_modules/.bin/bower-installer",
+    "test": "./node_modules/.bin/nodeunit test"
   },
   "devDependencies": {
     "nodeunit": "^0.9.0"
