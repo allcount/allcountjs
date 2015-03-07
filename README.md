@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/allcount/allcountjs.svg?branch=master)](https://travis-ci.org/allcount/allcountjs)
+
 # What is AllcountJS
 
 AllcountJS is an application framework aimed for rapid development of business applications.
