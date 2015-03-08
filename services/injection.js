@@ -197,6 +197,9 @@ exports.resetInjection = function () {
 };
 
 exports.initializeScopedThen = function (Q) {
+    if (Q.makePromise.prototype.scopedThenInitialized) {
+        return;
+    }
     var superThen = Q.makePromise.prototype.then;
     Q.makePromise.prototype.then = function () {
         var storedScope = exports.storeScope();
@@ -208,6 +211,7 @@ exports.initializeScopedThen = function (Q) {
                 } || fn;
         }));
     };
+    Q.makePromise.prototype.scopedThenInitialized = true;
 };
 
 exports.resetInjection();
