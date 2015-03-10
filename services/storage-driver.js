@@ -317,21 +317,23 @@ module.exports = function (dbUrl, injection) {
 
     function callAfterCrudListeners(table, oldEntity, newEntity) {
         return function (result) {
-            return invokeCrudListeners(afterCrudListeners[table.tableName], oldEntity, newEntity).thenResolve(result);
+            return invokeCrudListeners(table.tableName, afterCrudListeners[table.tableName], oldEntity, newEntity).thenResolve(result);
         }
     }
 
     function callBeforeCrudListeners(table, oldEntity, newEntity) {
-        return invokeCrudListeners(beforeCrudListeners[table.tableName], oldEntity, newEntity);
+        return invokeCrudListeners(table.tableName, beforeCrudListeners[table.tableName], oldEntity, newEntity);
     }
 
-    function invokeCrudListeners(listenerArray, oldEntity, newEntity) {
-        if (injection.inject('inCrudListener', true)) {
+    function invokeCrudListeners(tableName, listenerArray, oldEntity, newEntity) {
+        if (injection.inject('inCrudListener_' + tableName, true)) {
             return Q(null);
         }
         return (listenerArray || []).map(function (listener) {
             return function () {
-                return injection.inScope({inCrudListener: true}, function () {
+                var scope = {};
+                scope['inCrudListener_' + tableName] = true;
+                return injection.inScope(scope, function () {
                     return listener(oldEntity, newEntity)
                 });
             }
