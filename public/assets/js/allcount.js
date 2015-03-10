@@ -1299,10 +1299,15 @@ allcountModule.directive("lcTooltip", ["$parse", "messages", function ($parse, m
     return {
         restrict: 'A',
         link: function (scope, element, attrs) {
-            $(element).tooltip({
-                placement: 'bottom',
-                title: messages(attrs.lcTooltip)
-            });
+            function isTouchDevice(){
+                return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
+            }
+            if (!isTouchDevice()) {
+                $(element).tooltip({
+                    placement: 'bottom',
+                    title: messages(attrs.lcTooltip)
+                });
+            }
         }
     }
 }]);
