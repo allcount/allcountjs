@@ -14,7 +14,11 @@ module.exports = function (app, templateVarService, appUtil) {
                 } else if (err) {
                     console.error(err.stack);
                     res.locals.error = err;
-                    res.status(500).render('error');
+                    if (req.accepts('application/json')) {
+                        res.status(500).send(err.stack.toString());
+                    } else {
+                        res.status(500).render('error');
+                    }
                 }
             })
         }

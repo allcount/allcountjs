@@ -40,7 +40,7 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
         if (!entityCrudId) {
             return;
         }
-        var httpPromise = $http.post("/rest/field-descriptions", {entityCrudId: castToEntityCrudId(entityCrudId), isGrid: isGrid}).then(getJson).then(function (descriptions) {
+        var httpPromise = $http.get(entityUrl(castToEntityCrudId(entityCrudId), "/field-descriptions", {isGrid: isGrid})).then(getJson).then(function (descriptions) {
             return $(descriptions).map(function (index, item) {
                 if (!isGrid || !item.hideInGrid) {
                     return item;
@@ -59,21 +59,30 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/permissions", {entityCrudId: entityCrudId}).success(successCallback);
+        return promiseWithCallback(
+            $http.get(entityUrl(entityCrudId, "/permissions")),
+            successCallback
+        );
     };
 
     service.layout = function (entityTypeId, successCallback) {
         if (!entityTypeId) {
             return;
         }
-        $http.get("/rest/layout/" + entityTypeId).success(successCallback);
+        return promiseWithCallback(
+            $http.get(entityUrl({entityTypeId: entityTypeId}, '/layout')),
+            successCallback
+        );
     };
 
     service.findAll = function (entityCrudId, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/find", {entityCrudId: entityCrudId}).success(successCallback);
+        return promiseWithCallback(
+            $http.get(entityUrl(entityCrudId)),
+            successCallback
+        );
     };
 
     function trimFiltering(filtering) { //TODO should be trimmed in control
@@ -87,63 +96,86 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
         if (!entityCrudId) {
             return;
         }
-        return promiseWithCallback($http.post("/rest/crud/find-range", {start: start, count: count, filtering: trimFiltering(filtering), entityCrudId: entityCrudId}), successCallback);
+        return promiseWithCallback($http.get(entityUrl(entityCrudId, '', {start: start, count: count, filtering: trimFiltering(filtering)})), successCallback);
     };
 
     service.findCount = function (entityCrudId, filtering, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        return promiseWithCallback($http.post("/rest/crud/find-count", {entityCrudId: entityCrudId, filtering: trimFiltering(filtering)}), successCallback);
+        return promiseWithCallback($http.get(entityUrl(entityCrudId, '/count', {filtering: trimFiltering(filtering)})), successCallback);
     };
 
     service.createEntity = function (entityCrudId, entity, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        var promise = $http.post("/rest/crud/create", {entityCrudId: entityCrudId, entity: entity});
-        if (successCallback) {
-            promise.success(successCallback);
-        }
-        return promise.then(getJson);
+        return promiseWithCallback(
+            $http.post(entityUrl(entityCrudId), entity),
+            successCallback
+        );
     };
 
     service.readEntity = function (entityCrudId, entityId, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/read", {entityCrudId: entityCrudId, entityId: entityId}).success(successCallback);
+        return promiseWithCallback(
+            $http.get(entityUrl(entityCrudId, '/' +entityId)),
+            successCallback
+        );
     };
 
     service.updateEntity = function (entityCrudId, entity, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        var promise = $http.post("/rest/crud/update", {entityCrudId: castToEntityCrudId(entityCrudId), entity: entity});
-        if (successCallback) {
-            promise.success(successCallback);
-        }
-        return promise.then(getJson);
+        return promiseWithCallback(
+            $http.put(entityUrl(castToEntityCrudId(entityCrudId)), entity),
+            successCallback
+        );
     };
 
     service.deleteEntity = function (entityCrudId, entityId, successCallback) {
         if (!entityCrudId) {
             return;
         }
-        $http.post("/rest/crud/delete", {entityCrudId: entityCrudId, entityId: entityId}).success(successCallback);
+        return promiseWithCallback(
+            $http.delete(entityUrl(entityCrudId, '/' + entityId)),
+            successCallback
+        )
     };
 
     service.menus = function () {
-        return $http.get("/rest/menus").then(getJson);
+        return $http.get("/api/menus").then(getJson);
     };
 
     service.actions = function (entityCrudId, actionTarget) {
-        return $http.post('/rest/actions', {entityCrudId: entityCrudId, actionTarget: actionTarget}).then(getJson);
+        return $http.get(entityUrl(entityCrudId, '/actions', {actionTarget: actionTarget})).then(getJson);
     };
 
     service.performAction = function (entityCrudId, actionId, selectedItemIds) {
-        return $http.post('/rest/actions/perform', {entityCrudId: entityCrudId, actionId: actionId, selectedItemIds: selectedItemIds}).then(getJson);
+        return $http.post(entityUrl(entityCrudId, '/actions/' + actionId), {selectedItemIds: selectedItemIds}).then(getJson);
     };
+
+    function entityUrl(entityCrudId, suffix, paramsToEncode) {
+        var url;
+        suffix = suffix || '';
+        if (entityCrudId.entityTypeId && _.size(entityCrudId) === 1) {
+            url = '/api/entity/' + entityCrudId.entityTypeId + suffix;
+        } else {
+            url = '/api/entity/crud' + suffix;
+            paramsToEncode = paramsToEncode || {};
+            paramsToEncode.entityCrudId = entityCrudId;
+        }
+        var query = _.chain(paramsToEncode).map(function (value, property) {
+            if (_.isObject(value)) {
+                value = JSON.stringify(value);
+            }
+            return value != null && (property + "=" + value) || undefined;
+        }).filter(_.identity).value().join('&');
+        return url + (query.length ? ('?' + query) : '');
+    }
 
     function promiseWithCallback(promise, successCallback) {
         if (successCallback) {
@@ -167,7 +199,7 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
             promise = $q.when(service.referenceValueCache[entityTypeId]);
         }
         else {
-            promise = $http.get("/rest/reference/values/" + entityTypeId).then(getJson).then(function (referenceValues) {
+            promise = $http.get("/api/entity/" + entityTypeId + '/reference-values').then(getJson).then(function (referenceValues) {
                 service.referenceValueCache[entityTypeId] = [{id: undefined, name: ""}].concat(referenceValues);
                 return service.referenceValueCache[entityTypeId];
             });
@@ -179,11 +211,11 @@ allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
     };
 
     service.referenceValueByEntityId = function (entityTypeId, entityId) {
-        return $http.get("/rest/reference/values/" + entityTypeId + "/by-id/" + entityId).then(getJson);
+        return $http.get("/api/entity/" + entityTypeId + "/reference-values/" + entityId).then(getJson);
     };
 
     service.signUp = function (username, password) {
-        return $http.post('/rest/sign-up', {username: username, password: password});
+        return $http.post('/api/sign-up', {username: username, password: password});
     };
 
     return service;
@@ -226,7 +258,7 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
                 return undefined;
             }
             var elem = $('<a></a>');
-            elem.attr('href', '/rest/download/' + value.fileId);
+            elem.attr('href', '/api/file/download/' + value.fileId);
             elem.text(value.name);
             return  elem;
         }
@@ -477,7 +509,7 @@ function uploadDirective(directiveName) {
             link: function (scope, element, attrs) {
                 var fieldValueGetter = $parse(attrs[directiveName]);
                 scope.options = {
-                    url: '/rest/upload',
+                    url: '/api/file/upload',
                     autoUpload: true,
                     handleResponse: function (e, data) {
                         var files = data.result && data.result.files;
@@ -1207,8 +1239,8 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                 var bloodhound = new Bloodhound({
                     datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
                     queryTokenizer: Bloodhound.tokenizers.whitespace,
-                    prefetch: "/rest/reference/values/" + entityTypeId + '/top',
-                    remote: "/rest/reference/values/" + entityTypeId + '/queries/%QUERY'
+                    prefetch: "/api/entity/" + entityTypeId + '/reference-values',
+                    remote: "/api/entity/" + entityTypeId + '/reference-values?query=%QUERY'
                 });
 
                 bloodhound.initialize();

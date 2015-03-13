@@ -41,13 +41,8 @@ module.exports = function (
                 })
                 .use(crudRoute.withUserScope)
                 .get('/entity/:entityTypeId', entityRoute.entity)
-                .get('/rest/layout/:entityTypeId', fieldDescriptionsRoute.layout)
-                .post('/rest/field-descriptions', fieldDescriptionsRoute.fieldDescriptions)
-                .post('/rest/permissions', fieldDescriptionsRoute.permissions)
-                .get('/rest/reference/values/:entityTypeId', crudRoute.referenceValues)
-                .get('/rest/reference/values/:entityTypeId/top', crudRoute.referenceValues)
-                .get('/rest/reference/values/:entityTypeId/queries/:queryText', crudRoute.referenceValues)
-                .get('/rest/reference/values/:entityTypeId/by-id/:entityId', crudRoute.referenceValueByEntityId);
+                .get('/api/entity/:entityTypeId/permissions', fieldDescriptionsRoute.permissions);
+
 
             customViewsRoute.setupCustomViews(appAccessRouter);
             if (!viewService.views['/']) {
@@ -55,18 +50,27 @@ module.exports = function (
             }
 
             crudOperationsRouter.use(crudRoute.checkReadPermissionMiddleware);
-            crudOperationsRouter.post('/rest/crud/find-count', crudRoute.findCount);
-            crudOperationsRouter.post('/rest/crud/find-range', crudRoute.findRange);
-            crudOperationsRouter.post('/rest/crud/create', crudRoute.createEntity);
-            crudOperationsRouter.post('/rest/crud/read', crudRoute.readEntity);
-            crudOperationsRouter.get('/rest/download/:fileId', crudRoute.downloadFile);
-            crudOperationsRouter.post('/rest/crud/update', crudRoute.updateEntity);
-            crudOperationsRouter.post('/rest/crud/delete', crudRoute.deleteEntity);
-            crudOperationsRouter.post('/rest/upload', busboy(), crudRoute.uploadFile);
-            crudOperationsRouter.post('/rest/actions', actionsRoute.actionList);
-            crudOperationsRouter.post('/rest/actions/perform', actionsRoute.performAction);
+
+            crudOperationsRouter.get('/api/file/download/:fileId', crudRoute.downloadFile);
+            crudOperationsRouter.post('/api/file/upload', busboy(), crudRoute.uploadFile);
+
+            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values', crudRoute.referenceValues);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values/:entityId', crudRoute.referenceValueByEntityId);
+
+            crudOperationsRouter.get('/api/entity/:entityTypeId/layout', fieldDescriptionsRoute.layout);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/field-descriptions', fieldDescriptionsRoute.fieldDescriptions);
+            crudOperationsRouter.post('/api/entity/:entityTypeId/actions/:actionId', actionsRoute.performAction);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/actions', actionsRoute.actionList);
+
+            crudOperationsRouter.get('/api/entity/:entityTypeId/count', crudRoute.findCount);
+            crudOperationsRouter.get('/api/entity/:entityTypeId', crudRoute.findRange);
+            crudOperationsRouter.post('/api/entity/:entityTypeId', crudRoute.createEntity);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/:entityId', crudRoute.readEntity);
+            crudOperationsRouter.put('/api/entity/:entityTypeId', crudRoute.updateEntity);
+            crudOperationsRouter.delete('/api/entity/:entityTypeId/:entityId', crudRoute.deleteEntity);
+
             appAccessRouter.use(crudOperationsRouter);
-            appAccessRouter.get('/rest/menus', menuRoute.menus);
+            appAccessRouter.get('/api/menus', menuRoute.menus);
 
             injection.inScope({
                 app: function () { return app },
@@ -81,7 +85,7 @@ module.exports = function (
                 })(req, res);
             })));
             app.get('/login', securityRoute.login);
-            app.post('/rest/sign-up', securityRoute.signUp);
+            app.post('/api/sign-up', securityRoute.signUp);
             app.get('/logout', securityRoute.logout);
             app.get('/js/messages.js', messages.messagesNgModule);
             app.use(appAccessRouter);

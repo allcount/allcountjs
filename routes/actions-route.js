@@ -1,11 +1,11 @@
-module.exports = function (actionService) {
+module.exports = function (actionService, routeUtil) {
     return {
         actionList: function (req, res) {
             actionService
-                .actionListFor(req.body.entityCrudId, req.body.actionTarget).then(function (actions) { return res.json(actions) }).done();
+                .actionListFor(routeUtil.extractEntityCrudId(req), req.query.actionTarget).then(function (actions) { return res.json(actions) }).done();
         },
         performAction: function (req, res) {
-            actionService.performAction(req.body.entityCrudId, req.body.actionId, req.body.selectedItemIds).then(function (actionResult) {
+            actionService.performAction(routeUtil.extractEntityCrudId(req), req.params.actionId, req.body.selectedItemIds).then(function (actionResult) {
                 res.json(actionResult);
             }).done();
         }

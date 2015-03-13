@@ -1,19 +1,29 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection) {
+module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil) {
     var route = {};
 
+    var extractEntityCrudId = routeUtil.extractEntityCrudId;
+
     route.checkReadPermissionMiddleware = function (req, res, next) {
-        if (req.body.entityCrudId && !entityDescriptionService.userHasReadAccess(req.body.entityCrudId, req.user)) {
+        var entityCrudId = extractEntityCrudId(req);
+        if (entityCrudId && !entityDescriptionService.userHasReadAccess(entityCrudId, req.user)) {
             res.send(403, 'Permission denied');
         } else {
             next();
         }
     };
 
+    /**
+     * @deprecated
+     * @param req
+     * @param res
+     * @param next
+     */
     route.checkWritePermissionMiddleware = function (req, res, next) {
-        if (req.body.entityCrudId && !entityDescriptionService.userHasWriteAccess(req.body.entityCrudId, req.user)) {
+        var entityCrudId = extractEntityCrudId(req);
+        if (entityCrudId && !entityDescriptionService.userHasWriteAccess(entityCrudId, req.user)) {
             res.send(403, 'Permission denied');
         } else {
             next();
@@ -21,15 +31,16 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     function filteringAndSorting(req) {
+        var filtering = req.query.filtering && JSON.parse(req.query.filtering) || {};
         return {
-            textSearch: req.body.filtering && req.body.filtering.textSearch || undefined,
-            filtering: req.body.filtering && req.body.filtering.filtering || undefined,
-            sorting: req.body.filtering && req.body.filtering.sorting || undefined
+            textSearch: filtering.textSearch,
+            filtering: filtering.filtering,
+            sorting: filtering.sorting
         };
     }
 
     route.findCount = function (req, res) {
-        var strategyForCrudId = crudService.strategyForCrudId(req.body.entityCrudId);
+        var strategyForCrudId = crudService.strategyForCrudId(extractEntityCrudId(req));
         var filtering = filteringAndSorting(req);
         Q.all([
                 strategyForCrudId.findCount(filtering),
@@ -44,8 +55,8 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
 
     route.findRange = function (req, res) {
         crudService
-            .strategyForCrudId(req.body.entityCrudId)
-            .findRange(filteringAndSorting(req), req.body.start, req.body.count)
+            .strategyForCrudId(extractEntityCrudId(req))
+            .findRange(filteringAndSorting(req), req.query.start, req.query.count)
             .then(function (result) {
                 res.json(result);
             })
@@ -62,16 +73,18 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     }
 
     route.createEntity = function (req, res) {
-        var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
-        crudService.strategyForCrudId(req.body.entityCrudId).createEntity(entity).then(function (result) {
+        var entityCrudId = extractEntityCrudId(req);
+        var entity = removeReadOnlyFieldValues(entityCrudId, req.body);
+        crudService.strategyForCrudId(entityCrudId).createEntity(entity).then(function (result) {
             res.send(result.toString());
         }).done();
     };
 
     route.readEntity = function (req, res) {
+        var entityCrudId = extractEntityCrudId(req);
         crudService
-            .strategyForCrudId(req.body.entityCrudId)
-            .readEntity(req.body.entityId)
+            .strategyForCrudId(entityCrudId)
+            .readEntity(req.params.entityId)
             .then(function (result) {
                 res.json(result);
             })
@@ -79,16 +92,18 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     route.updateEntity = function (req, res) {
-        var entity = removeReadOnlyFieldValues(req.body.entityCrudId, req.body.entity);
-        crudService.strategyForCrudId(req.body.entityCrudId).updateEntity(entity).then(function (result) {
+        var entityCrudId = extractEntityCrudId(req);
+        var entity = removeReadOnlyFieldValues(entityCrudId, req.body);
+        crudService.strategyForCrudId(entityCrudId).updateEntity(entity).then(function (result) {
             res.json(result);
         }).done();
     };
 
     route.deleteEntity = function (req, res) {
+        var entityCrudId = extractEntityCrudId(req);
         crudService
-            .strategyForCrudId(req.body.entityCrudId)
-            .deleteEntity(req.body.entityId)
+            .strategyForCrudId(entityCrudId)
+            .deleteEntity(req.params.entityId)
             .then(function (result) {
                 res.json(result);
             })
@@ -96,7 +111,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     route.referenceValues = function (req, res) { //TODO support reference TOP values
-        referenceService.referenceValues({entityTypeId: req.params.entityTypeId}, req.params.queryText).then(function (result) {
+        referenceService.referenceValues({entityTypeId: req.params.entityTypeId}, req.query.query).then(function (result) {
             res.json(result);
         });
     };

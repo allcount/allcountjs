@@ -93,6 +93,7 @@ function configure() {
     injection.bindFactory('lessMiddleware', function () {
         return require('less-middleware');
     });
+    injection.bindFactory('routeUtil', require('./routes/route-util'));
 }
 
 configure();
