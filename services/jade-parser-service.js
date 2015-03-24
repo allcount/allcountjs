@@ -9,7 +9,7 @@ module.exports = function (viewPaths, repositoryService) {
 
     function AllcountJadeParser() {
         Parser.prototype.constructor.apply(this, arguments);
-        this.viewPaths = _.union(repositoryService.repositoryDir(), _.flatten(viewPaths));
+        this.viewPaths = _.union([repositoryService.repositoryDir()], _.flatten(viewPaths));
     }
 
     AllcountJadeParser.prototype = _.extend(_.clone(Parser.prototype), {
