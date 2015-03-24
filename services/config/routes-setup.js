@@ -27,11 +27,7 @@ module.exports = function (
                 .use(securityRoute.authenticateWithTokenMiddleware)
                 .use(function (req, res, next) {
                     function notAuthenticated() {
-                        if (req.accepts('application/json')) {
-                            res.status(403).send("Not authenticated");
-                        } else {
-                            res.redirect('/login');
-                        }
+                        res.redirect('/login');
                     }
                     res.loginOrForbidden = function () {
                         if (!req.user) {
