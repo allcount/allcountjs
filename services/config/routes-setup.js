@@ -24,6 +24,7 @@ module.exports = function (
         setup: function () {
             var crudOperationsRouter = express.Router();
             var appAccessRouter = express.Router()
+                .use(securityRoute.authenticateWithTokenMiddleware)
                 .use(function (req, res, next) {
                     res.loginOrForbidden = function () {
                         if (!req.user) {
@@ -58,6 +59,7 @@ module.exports = function (
             crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values/:entityId', crudRoute.referenceValueByEntityId);
 
             crudOperationsRouter.get('/api/entity/:entityTypeId/layout', fieldDescriptionsRoute.layout);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/entity-description', fieldDescriptionsRoute.entityDescription);
             crudOperationsRouter.get('/api/entity/:entityTypeId/field-descriptions', fieldDescriptionsRoute.fieldDescriptions);
             crudOperationsRouter.post('/api/entity/:entityTypeId/actions/:actionId', actionsRoute.performAction);
             crudOperationsRouter.get('/api/entity/:entityTypeId/actions', actionsRoute.actionList);
@@ -71,6 +73,7 @@ module.exports = function (
 
             appAccessRouter.use(crudOperationsRouter);
             appAccessRouter.get('/api/menus', menuRoute.menus);
+            appAccessRouter.get('/api/app-info', menuRoute.appInfo);
 
             injection.inScope({
                 app: function () { return app },
@@ -86,6 +89,7 @@ module.exports = function (
             })));
             app.get('/login', securityRoute.login);
             app.post('/api/sign-up', securityRoute.signUp);
+            app.post('/api/sign-in', securityRoute.apiSignIn);
             app.get('/logout', securityRoute.logout);
             app.get('/js/messages.js', messages.messagesNgModule);
             app.use(appAccessRouter);

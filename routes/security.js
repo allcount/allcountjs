@@ -62,12 +62,48 @@ module.exports = function (templateVarService, keygrip, securityService, securit
     };
 
     routes.signUp = function (req, res, next) {
+        routes.setAccessControlHeaders(res);
         if (!securityConfigService.allowSignUp) {
             res.sendStatus(403);
         } else {
             securityService.createUser(req.body.username, req.body.password, []).then(function () { //TODO use guest user if we have one
                 res.sendStatus(200);
             }).catch(next);
+        }
+    };
+
+    routes.apiSignIn = function (req, res, next) {
+        routes.setAccessControlHeaders(res);
+        securityService.authenticateAndGenerateToken(req.body.username, req.body.password).then(function (token) {
+            if (token) {
+                res.json({token: token})
+            } else {
+                res.status(403).send("Not authenticated");
+            }
+        }).catch(next);
+    };
+
+    routes.setAccessControlHeaders = function (res) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, X-Access-Token");
+        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
+    };
+
+    routes.authenticateWithTokenMiddleware = function (req, res, next) {
+        if (req.method === 'OPTIONS') {
+            routes.setAccessControlHeaders(res);
+            res.status(200).send();
+        } else if (req.header('X-Access-Token')) {
+            securityService.loginWithToken(req, req.header('X-Access-Token')).then(function (user) {
+                if (user) {
+                    routes.setAccessControlHeaders(res);
+                    next();
+                } else {
+                    res.status(403).send("Not authenticated");
+                }
+            }).catch(next);
+        } else {
+            next();
         }
     };
 

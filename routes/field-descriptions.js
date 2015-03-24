@@ -21,5 +21,13 @@ module.exports = function (entityDescriptionService, layoutService, routeUtil) {
         res.json(layoutService.layoutFor(req.params.entityTypeId));
     };
 
+    route.entityDescription = function (req, res) { //TODO load all descriptions in one round-trip?
+        var entityDescription = entityDescriptionService.entityDescription(routeUtil.extractEntityCrudId(req));
+        res.json({
+            title: entityDescription.title,
+            referenceNameExpression: entityDescription.referenceNameExpression
+        })
+    };
+
     return route;
 };

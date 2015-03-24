@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil, injection) {
+module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil, injection, keygrip) {
     var service = {};
 
     var UserEntityTypeId = "User";
@@ -23,7 +23,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
 
     service.authenticate = function(username, password, done) {
         var table = userTableDescription();
-        findUser(username).then(function (user) {
+        return findUser(username).then(function (user) {
             if (!user) {
                 return false;
             }
@@ -31,12 +31,36 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         }).nodeify(done);
     };
 
+    service.authenticateAndGenerateToken = function (username, password) {
+        return service.authenticate(username, password).then(function (user) {
+            if (!user) {
+                return false;
+            } else {
+                return service.generateToken(user);
+            }
+        })
+    };
+
+    service.generateToken = function (user) {
+        return user.id + ':' + keygrip.sign(user.id);
+    };
+
+    service.loginWithToken = function (req, token) {
+        var split = token.split(':');
+        var userId = split[0], signed = split[1];
+        if (keygrip.verify(userId, signed)) {
+            return service.loginUserWithIdIfExists(req, userId);
+        } else {
+            return Q(null);
+        }
+    };
+
     service.loginUserWithIdIfExists = function (req, userId) {
         return storageDriver.readEntity(userTableDescription(), userId).then(function (user) {
             if (user) {
                 var login = Q.nfbind(req.login.bind(req));
                 prepareUserForReq(user);
-                return login(user);
+                return login(user).thenResolve(user);
             }
             return undefined;
         });
