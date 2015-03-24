@@ -26,16 +26,23 @@ module.exports = function (
             var appAccessRouter = express.Router()
                 .use(securityRoute.authenticateWithTokenMiddleware)
                 .use(function (req, res, next) {
+                    function notAuthenticated() {
+                        if (req.accepts('application/json')) {
+                            res.status(403).send("Not authenticated");
+                        } else {
+                            res.redirect('/login');
+                        }
+                    }
                     res.loginOrForbidden = function () {
                         if (!req.user) {
-                            res.redirect('/login');
+                            notAuthenticated();
                         } else {
                             templateVarService.setupLocals(req, res);
                             res.render('permission-denied');
                         }
                     };
                     if (!req.user && securityService.onlyAuthenticated) {
-                        res.redirect('/login');
+                        notAuthenticated();
                     } else {
                         next();
                     }

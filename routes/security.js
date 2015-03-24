@@ -90,13 +90,12 @@ module.exports = function (templateVarService, keygrip, securityService, securit
     };
 
     routes.authenticateWithTokenMiddleware = function (req, res, next) {
+        routes.setAccessControlHeaders(res); //TODO should be called only where appropriate
         if (req.method === 'OPTIONS') {
-            routes.setAccessControlHeaders(res);
             res.status(200).send();
         } else if (req.header('X-Access-Token')) {
             securityService.loginWithToken(req, req.header('X-Access-Token')).then(function (user) {
                 if (user) {
-                    routes.setAccessControlHeaders(res);
                     next();
                 } else {
                     res.status(403).send("Not authenticated");
