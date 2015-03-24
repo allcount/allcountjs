@@ -290,7 +290,7 @@ module.exports = function (dbUrl, injection) {
         return service.readEntity(table, entity.id).then(function (oldEntity) {
             var newEntity = _.extend(Object.create(oldEntity), entity);
             return callBeforeCrudListeners(table, oldEntity, newEntity).then(function () {
-                var toUpdate = toBson(table.fields)(entity);
+                var toUpdate = toBson(table.fields)(_.extendOwn({}, newEntity));
                 toUpdate.modifyTime = new Date();
                 return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, toUpdate).exec())
                     .then(callAfterCrudListeners(table, oldEntity, newEntity)) //TODO REST layer should convert all data types
