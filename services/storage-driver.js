@@ -355,7 +355,7 @@ module.exports = function (dbUrl, injection) {
     }
 
     function splitText(str) {
-        return _.filter(str.toLowerCase().split(/[1-9,.;:\- ]/), function (str) {
+        return _.filter(str.toLowerCase().split(/\s/), function (str) {
             return str.trim().length > 0;
         });
     }
