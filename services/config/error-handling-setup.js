@@ -14,7 +14,7 @@ module.exports = function (app, templateVarService, appUtil) {
                 } else if (err) {
                     console.error(err.stack);
                     res.locals.error = err;
-                    if (req.accepts('application/json')) {
+                    if (req.url.indexOf('/api/') === 0) {
                         res.status(500).send(err.stack.toString());
                     } else {
                         res.status(500).render('error');
