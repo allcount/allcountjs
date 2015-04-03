@@ -282,7 +282,7 @@ module.exports = function (dbUrl, injection) {
             throw new Error('entityId should be defined for readEntity()');
         }
         return Q(modelFor(table).findById(toMongoId(entityId)).exec()).then(function (result) {
-            return fromBson(table.fields)(result);
+            return result && fromBson(table.fields)(result) || result;
         });
     };
 
