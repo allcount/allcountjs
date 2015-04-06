@@ -81,6 +81,7 @@ module.exports = function (
             appAccessRouter.use(crudOperationsRouter);
             appAccessRouter.get('/api/menus', menuRoute.menus);
             appAccessRouter.get('/api/app-info', menuRoute.appInfo);
+            app.get('/api/messages', messages.messagesObj);
 
             injection.inScope({
                 app: function () { return app },
