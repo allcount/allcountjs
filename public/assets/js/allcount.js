@@ -1183,7 +1183,9 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse"
                     rest.actions(scope.entityCrudId, scope.actionTarget).then(function (actions) {
                         scope.actions = _.map(actions, function (action) {
                             action.perform = function () {
+                                action.isPerforming = true;
                                 rest.performAction(entityCrudId, action.id, scope.selectedItems).then(function (actionResult) {
+                                    action.isPerforming = false;
                                     if (actionResult.type === 'redirect') {
                                         window.location = actionResult.url;
                                     } else if (actionResult.type === 'refresh') {
@@ -1203,6 +1205,8 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse"
                                     } else {
                                         throw new Error('Unknown actionResult type "' + actionResult.type +  '" for ' + JSON.stringify(actionResult));
                                     }
+                                }, function () {
+                                    action.isPerforming = false;
                                 });
                             };
                             action.name = messages(action.name);

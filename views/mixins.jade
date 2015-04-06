@@ -35,10 +35,12 @@ mixin actions(actionTarget)
     action-target="'#{actionTarget}'",
     on-refresh="refreshOnAction()",
     selected-items="[viewState.formEntityId]",
-    ng-disabled="!action.isEnabled",
+    ng-disabled="!action.isEnabled || action.isPerforming",
     publish-methods="actionMethods",
     class!=attributes.class
-    ) {{action.name}}
+    )
+        i.fa.fa-fw.fa-spin.fa-spinner(ng-if="action.isPerforming")
+        | {{action.name}}
 
 mixin noEntries()
     div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")
