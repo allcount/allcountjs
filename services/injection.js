@@ -56,9 +56,6 @@ exports.inject = function (serviceName, optional) {
         if (exports.scoped.length > 0 && exports.scoped[exports.scoped.length - 1].providers[serviceName]) {
             return exports.scoped[exports.scoped.length - 1].providers[serviceName];
         }
-        if (exports.providers[serviceName]) {
-            return resolve(serviceName);
-        }
         var factory;
         var scoped = exports.findInScope(serviceName);
         if (!_.isUndefined(scoped)) {
@@ -67,6 +64,8 @@ exports.inject = function (serviceName, optional) {
             } else {
                 factory = scoped
             }
+        } else if (exports.providers[serviceName]) {
+            return resolve(serviceName);
         } else if (exports.factories[serviceName]) {
             factory = exports.factories[serviceName];
         } else if (exports.multipleBindings[serviceName]) {

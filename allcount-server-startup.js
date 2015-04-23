@@ -11,20 +11,28 @@ module.exports = function (appService, gitRepoUrl, proxyHandler, injection, http
                         onReady(errors);
                     }
                     throw new Error(errors.join('\n'));
-                } else {
-                    appSetup.forEach(function (setup) { setup.setup() });
                 }
 
-                self.server = httpServer(function (req, res) {
-                    proxyHandler(req, res, function () {
-                        app(req, res);
-                    });
-                }, function() {
-                    console.log('Application server for "' + gitRepoUrl + '" listening on port ' + app.get('port'));
-                    if (onReady) {
-                        onReady();
-                    }
-                });
+                appSetup
+                    .map(function (setup) { return function () { return setup.setup() } })
+                    .reduce(Q.when, Q(null))
+                    .catch(function (error) {
+                        if (onReady) {
+                            onReady(error)
+                        }
+                        throw error;
+                    }).then (function () {
+                        self.server = httpServer(function (req, res) {
+                            proxyHandler(req, res, function () {
+                                app(req, res);
+                            });
+                        }, function() {
+                            console.log('Application server for "' + gitRepoUrl + '" listening on port ' + app.get('port'));
+                            if (onReady) {
+                                onReady();
+                            }
+                        });
+                    }).done();
             });
         },
         stop: function () {

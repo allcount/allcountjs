@@ -65,6 +65,26 @@ exports.inScopeTest = function (test) {
     test.done();
 };
 
+exports.inScopeOverrideTest = function (test) {
+    injection.providers = {};
+    injection.bindFactory("foo", function (bar) {
+        return bar;
+    });
+    injection.bindFactory("bar", function () {
+        return 'bar';
+    });
+    injection.bindFactory("scopedFoo", function (bar) {
+        return bar;
+    });
+    assert.deepEqual(injection.inject('foo'), 'bar');
+    injection.inScope({
+        bar: { value: 'foo' }
+    }, function () {
+        assert.deepEqual(injection.inject('scopedFoo'), { value: 'foo' });
+    });
+    test.done();
+};
+
 exports.overrideTest = function (test) {
     injection.resetInjection();
     injection.bindFactory("foo", function () {

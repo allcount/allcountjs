@@ -23,14 +23,17 @@ module.exports = function (gitRepoUrl, gitService, halt) {
         return deferred.promise;
     }
 
-    service.configFiles = function (callback) {
+    service.initializeRepository = function () {
+        if (repositoryDir) {
+            return Q(repositoryDir);
+        }
         var hash = crypto.createHash('md5');
         hash.update(gitRepoUrl, 'utf8');
         var repoDir = "tmp" + '/' + hash.digest('hex');
         if (fs.existsSync(repoDir)) {
             fsExtra.rmrfSync(repoDir);
         }
-        service.cloneRepo(gitRepoUrl, repoDir).then(function () {
+        return service.cloneRepo(gitRepoUrl, repoDir).then(function () {
             repositoryDir = repoDir;
             setInterval(function () {
                 gitService.checkForUpdates(process.cwd() + '/' + repositoryDir).then(function (changed) {
@@ -50,7 +53,11 @@ module.exports = function (gitRepoUrl, gitService, halt) {
                     throw err;
                 }
             })
-        }).then(function (repositoryDir) {
+        })
+    };
+
+    service.configFiles = function (callback) {
+        service.initializeRepository().then(function (repositoryDir) {
             fs.readdir(repositoryDir, function (err, files) {
                 if (err) {
                     throw err; //TODO
