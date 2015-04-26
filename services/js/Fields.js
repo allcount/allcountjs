@@ -110,6 +110,17 @@ exports.attachment = function (name) {
     });
 };
 
+exports.cloudinaryImage = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'attachment',
+            provider: 'cloudinary',
+            image: true
+        }
+    });
+};
+
 function Field(config) {
     _.extend(this, config);
 }

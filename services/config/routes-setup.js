@@ -61,6 +61,7 @@ module.exports = function (
 
             crudOperationsRouter.get('/api/file/download/:fileId', crudRoute.downloadFile);
             crudOperationsRouter.post('/api/file/upload', busboy(), crudRoute.uploadFile);
+            crudOperationsRouter.post('/api/file/upload/:provider', busboy(), crudRoute.uploadFile);
 
             crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values', crudRoute.referenceValues);
             crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values/:entityId', crudRoute.referenceValueByEntityId);

@@ -253,11 +253,27 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             return '';
         },
         relation: false,
-        attachment: function (value) {
+        attachment: function (value, fieldDescription) {
             if (!value) {
                 return undefined;
             }
-            var elem = $('<a></a>');
+            var elem;
+            if (fieldDescription.fieldType.image) {
+                var link = $('<a data-gallery></a>');
+                link.attr('href', value.secure_url);
+                elem = $('<img>');
+                elem.attr('src', value.secure_url.replace(/\/v\d+/, '/w_100,h_100,c_fill'));
+                link.append(elem);
+                link.click (function (e) {
+                    e.preventDefault();
+                    blueimp.Gallery(link, {event: e});
+                });
+                if (!$('#blueimp-gallery').length) {
+                    $('body').append('<div id="blueimp-gallery" class="blueimp-gallery"><div class="slides"></div><h3 class="title"></h3><a class="close">×</a></div>');
+                }
+                return link;
+            }
+            elem = $('<a></a>');
             elem.attr('href', '/api/file/download/' + value.fileId);
             elem.text(value.name);
             return  elem;
@@ -439,7 +455,8 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             scope.$watch('fieldValue', function (value) {
                 controller.$setViewValue(value);
             });
-            return $compile('<div lc-upload="fieldValue"></div>')(scope);
+            scope.provider = fieldDescription.fieldType.provider;
+            return $compile('<div lc-upload="fieldValue" provider="{{provider}}"></div>')(scope);
         }
     };
 
@@ -508,20 +525,22 @@ function uploadDirective(directiveName) {
             scope: true,
             link: function (scope, element, attrs) {
                 var fieldValueGetter = $parse(attrs[directiveName]);
-                scope.options = {
-                    url: '/api/file/upload',
-                    autoUpload: true,
-                    handleResponse: function (e, data) {
-                        var files = data.result && data.result.files;
-                        if (files) {
-                            fieldValueGetter.assign(scope.$parent, files[0]);
-                            data.scope.replace(data.files, files);
-                        } else if (data.errorThrown ||
-                            data.textStatus === 'error') {
-                            data.files[0].error = data.errorThrown || data.textStatus;
+                attrs.$observe('provider', function (provider) {
+                    scope.options = {
+                        url: ('/api/file/upload/' + provider) || '/api/file/upload',
+                        autoUpload: true,
+                        handleResponse: function (e, data) {
+                            var files = data.result && data.result.files;
+                            if (files) {
+                                fieldValueGetter.assign(scope.$parent, files[0]);
+                                data.scope.replace(data.files, files);
+                            } else if (data.errorThrown ||
+                                data.textStatus === 'error') {
+                                data.files[0].error = data.errorThrown || data.textStatus;
+                            }
                         }
-                    }
-                };
+                    };
+                });
 
                 scope.isNoFile = function (queue) {
                     return !fieldValueGetter(scope.$parent) && queue.length === 0;

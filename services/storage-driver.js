@@ -70,7 +70,7 @@ module.exports = function (dbUrl, injection) {
             } else if (field.fieldType.id === 'reference') {
                 fieldType = {id: Schema.ObjectId, name: String};
             } else if (field.fieldType.id === 'attachment') {
-                fieldType = {fileId: Schema.ObjectId, name: String};
+                fieldType = {}; // allow to save attachments in different storage providers
             } else if (field.fieldType.id === 'integer') {
                 fieldType = Number;
             } else if (field.fieldType.id === 'money') {

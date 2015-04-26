@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil) {
+module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil, cloudinaryService) {
     var route = {};
 
     var extractEntityCrudId = routeUtil.extractEntityCrudId;
@@ -125,8 +125,14 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     route.uploadFile = function (req, res) {
         req.pipe(req.busboy);
         req.busboy.on('file', function (fieldname, file, filename) {
-            storageDriver.createFile(filename, file).then(function (fileId) {
-                res.json({files: [{fileId: fileId, name: filename}]});
+            var uploadPromise;
+            if (req.params.provider === 'cloudinary') {
+                uploadPromise = cloudinaryService.upload(file, filename);
+            } else {
+                uploadPromise = storageDriver.createFile(filename, file).then(function (fileId) { return {fileId: fileId, name: filename} });
+            }
+            uploadPromise.then(function (result) {
+                res.json({files: [result]});
             }).done();
         });
     };

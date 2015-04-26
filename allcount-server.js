@@ -29,7 +29,8 @@ function configure() {
         'menuService',
         'trackingService',
         'themeService',
-        'migrationService'
+        'migrationService',
+        'cloudinaryService'
     ]);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));
