@@ -129,7 +129,11 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 fields: _.map(evaluated.evaluatedFields, function (field, fieldName) { return compileFieldForClient(new CompiledField(field), fieldName, evaluated.showInGrid) }),
                 tableDescription: {
                     tableName: evaluated.persistenceEntityTypeId || evaluated.entityTypeId,
-                    entityTypeId: evaluated.entityTypeId
+                    entityTypeId: evaluated.entityTypeId,
+                    fieldsToSelectForReferenceName: [evaluated.referenceNameExpression],
+                    referenceName: function (entity) {
+                        return entity[evaluated.referenceNameExpression];
+                    }
                 },
                 allFields: _.object(_.map(evaluated.evaluatedFields, function (field, fieldName) { return [fieldName, new CompiledField(field)] })),
                 referenceNameExpression: evaluated.referenceNameExpression,

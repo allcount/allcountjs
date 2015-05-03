@@ -12,11 +12,16 @@ if (!gitUrl || !dbUrl) {
     process.exit(0);
 }
 
+require('./allcount-server.js');
 injection.bindFactory('port', port);
 injection.bindFactory('dbUrl', dbUrl);
+if (dbUrl.indexOf('postgres') !== -1) {
+    injection.bindFactory('storageDriver', require('./services/sql-storage-driver'));
+    injection.bindFactory('dbClient', 'pg');
+}
 injection.bindFactory('gitRepoUrl', gitUrl);
 
-var server = require('./allcount-server.js').inject('allcountServerStartup');
+var server = injection.inject('allcountServerStartup');
 server.startup(function (errors) {
     if (errors) {
         throw new Error(errors.join('\n'));

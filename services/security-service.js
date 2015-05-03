@@ -68,7 +68,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
 
     service.initDefaultUsers = function () {
         storageDriver.addOnConnectListener(function () {
-            findUser("admin").then(function (user) {
+            return findUser("admin").then(function (user) {
                 if (!user) {
                     return storageDriver.createEntity(userTableDescription(), {
                         username: "admin",
