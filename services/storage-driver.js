@@ -167,7 +167,7 @@ module.exports = function (dbUrl, injection) {
 
         if (indexes.length > 0) {
             var collection = db.collection(table.tableName);
-            return Q.nfbind(collection.ensureIndex.bind(collection))(indexes);
+            return Q.nfbind(collection.ensureIndex.bind(collection))(indexes, {name: crypto.createHash('sha1').update(JSON.stringify(indexes)).digest('hex')});
         } else {
             return Q(null);
         }
