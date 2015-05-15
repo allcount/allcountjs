@@ -13,6 +13,9 @@ module.exports = function (crudService, googleExportService, actionContext) {
                 return googleExportService.exportToSpreadsheet(googleWebAppUrl, fileName, {rows: rows}, templateId, folderId);
             })
         },
+        exportToGoogleDoc: function (googleWebAppUrl, fileName, dataSource, templateId, folderId) {
+            return googleExportService.googleExport(googleWebAppUrl, fileName, dataSource, templateId, folderId);
+        },
         openGoogleDocument: function (exportActionResult) {
             return Q({
                 type: 'redirect',
