@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (entityDescriptionService, layoutService, routeUtil) {
+module.exports = function (entityDescriptionService, layoutService, routeUtil, menuService) {
     var route = {};
 
     route.fieldDescriptions = function (req, res) {
@@ -22,12 +22,22 @@ module.exports = function (entityDescriptionService, layoutService, routeUtil) {
     };
 
     route.entityDescription = function (req, res) { //TODO load all descriptions in one round-trip?
-        var entityDescription = entityDescriptionService.entityDescription(routeUtil.extractEntityCrudId(req));
+        var entityCrudId = routeUtil.extractEntityCrudId(req);
+        var entityDescription = entityDescriptionService.entityDescription(entityCrudId);
         res.json({
-            title: entityDescription.title,
+            title: entityDescription.title || entityCrudId.entityTypeId && findTitle(menuService.menus(req.user), entityCrudId.entityTypeId),
             referenceNameExpression: entityDescription.referenceNameExpression
         })
     };
+
+    function findTitle(menus, entityTypeId) {
+        var menu = _.find(menus, function (menu) {
+            return menu.entityTypeId === entityTypeId;
+        });
+        return menu && menu.name || menus.map(function (menu) {
+            return menu.children && findTitle(menu.children, entityTypeId)
+        }).filter(_.identity);
+    }
 
     return route;
 };
