@@ -36,7 +36,7 @@ module.exports = function (entityDescriptionService, layoutService, routeUtil, m
         });
         return menu && menu.name || menus.map(function (menu) {
             return menu.children && findTitle(menu.children, entityTypeId)
-        }).filter(_.identity);
+        }).filter(_.identity)[0];
     }
 
     return route;
