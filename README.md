@@ -13,7 +13,7 @@ The main idea is to make application development fully declarative and reduce ap
 
 - [Getting Started](http://allcountjs.com/docs/getting-started)
 - [Application Configuration](http://allcountjs.com/docs/apps)
-- [Extending](http://allcountjs.com/docs/server)
+- [Customizing](http://allcountjs.com/docs/server)
 
 # Install
 Before we start you should install [Node.js](http://nodejs.org/), [MongoDB](http://www.mongodb.org/) and [Git](http://git-scm.com/).
