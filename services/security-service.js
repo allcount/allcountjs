@@ -127,6 +127,12 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         done(null, user.id);
     };
 
+    service.userHasAnyRole = function (user, roles) {
+        return !roles || user && _.any(roles, function (role) {
+            return user.hasRole(role);
+        })
+    };
+
     function prepareUserForReq(user) {
         user.hasRole = function (role) {
             return this['role_' + role] === true || this.role_admin === true;
