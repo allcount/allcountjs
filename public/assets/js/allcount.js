@@ -1,4 +1,4 @@
-var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload', 'ui.bootstrap']);
+var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileupload', 'ui.bootstrap', 'allcount-base']);
 
 window.allcountModule = allcountModule;
 
@@ -25,452 +25,236 @@ allcountModule.config(["$httpProvider", function ($httpProvider) {
     }]);
 }]);
 
-allcountModule.factory("rest", ["$http", "$q", function ($http, $q) {
-    var service = {};
-
-    function castToEntityCrudId(entityCrudId) {
-        if (typeof entityCrudId == "string") {
-            return {entityTypeId: entityCrudId};
-        } else {
-            return entityCrudId;
-        }
-    }
-
-    service.getFieldDescriptions = function (entityCrudId, isGrid, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        var httpPromise = $http.get(entityUrl(castToEntityCrudId(entityCrudId), "/field-descriptions", {isGrid: isGrid})).then(getJson).then(function (descriptions) {
-            return $(descriptions).map(function (index, item) {
-                if (!isGrid || !item.hideInGrid) {
-                    return item;
-                }
-                return undefined;
-            })
-        });
-
-        if (successCallback) {
-            httpPromise.then(successCallback);
-        }
-        return httpPromise;
-    };
-
-    service.permissions = function (entityCrudId, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.get(entityUrl(entityCrudId, "/permissions")),
-            successCallback
-        );
-    };
-
-    service.layout = function (entityTypeId, successCallback) {
-        if (!entityTypeId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.get(entityUrl({entityTypeId: entityTypeId}, '/layout')),
-            successCallback
-        );
-    };
-
-    service.findAll = function (entityCrudId, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.get(entityUrl(entityCrudId)),
-            successCallback
-        );
-    };
-
-    function trimFiltering(filtering) { //TODO should be trimmed in control
-        if (!filtering) return filtering;
-        filtering = angular.copy(filtering);
-        filtering.textSearch = filtering.textSearch && filtering.textSearch.length > 0 ? filtering.textSearch : undefined;
-        return filtering;
-    }
-
-    service.findRange = function (entityCrudId, filtering, start, count, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback($http.get(entityUrl(entityCrudId, '', {start: start, count: count, filtering: trimFiltering(filtering)})), successCallback);
-    };
-
-    service.findCount = function (entityCrudId, filtering, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback($http.get(entityUrl(entityCrudId, '/count', {filtering: trimFiltering(filtering)})), successCallback);
-    };
-
-    service.createEntity = function (entityCrudId, entity, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.post(entityUrl(entityCrudId), entity),
-            successCallback
-        );
-    };
-
-    service.readEntity = function (entityCrudId, entityId, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.get(entityUrl(entityCrudId, '/' +entityId)),
-            successCallback
-        );
-    };
-
-    service.updateEntity = function (entityCrudId, entity, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.put(entityUrl(castToEntityCrudId(entityCrudId)), entity),
-            successCallback
-        );
-    };
-
-    service.deleteEntity = function (entityCrudId, entityId, successCallback) {
-        if (!entityCrudId) {
-            return;
-        }
-        return promiseWithCallback(
-            $http.delete(entityUrl(entityCrudId, '/' + entityId)),
-            successCallback
-        )
-    };
-
-    service.menus = function () {
-        return $http.get("/api/menus").then(getJson);
-    };
-
-    service.actions = function (entityCrudId, actionTarget) {
-        return $http.get(entityUrl(entityCrudId, '/actions', {actionTarget: actionTarget})).then(getJson);
-    };
-
-    service.performAction = function (entityCrudId, actionId, selectedItemIds) {
-        return $http.post(entityUrl(entityCrudId, '/actions/' + actionId), {selectedItemIds: selectedItemIds}).then(getJson);
-    };
-
-    function entityUrl(entityCrudId, suffix, paramsToEncode) {
-        var url;
-        suffix = suffix || '';
-        if (entityCrudId.entityTypeId && _.size(entityCrudId) === 1) {
-            url = '/api/entity/' + entityCrudId.entityTypeId + suffix;
-        } else {
-            url = '/api/entity/crud' + suffix;
-            paramsToEncode = paramsToEncode || {};
-            paramsToEncode.entityCrudId = entityCrudId;
-        }
-        var query = _.chain(paramsToEncode).map(function (value, property) {
-            if (_.isObject(value)) {
-                value = JSON.stringify(value);
-            }
-            return value != null && (property + "=" + value) || undefined;
-        }).filter(_.identity).value().join('&');
-        return url + (query.length ? ('?' + query) : '');
-    }
-
-    function promiseWithCallback(promise, successCallback) {
-        if (successCallback) {
-            promise.success(successCallback);
-        }
-        return promise.then(getJson);
-    }
-
-    function getJson(resp) {
-        return resp.data;
-    }
-
-    service.referenceValueCache = {};
-
-    service.referenceValues = function (entityTypeId, successCallback) {
-        if (!entityTypeId) {
-            return;
-        }
-        var promise;
-        if (service.referenceValueCache[entityTypeId]) {
-            promise = $q.when(service.referenceValueCache[entityTypeId]);
-        }
-        else {
-            promise = $http.get("/api/entity/" + entityTypeId + '/reference-values').then(getJson).then(function (referenceValues) {
-                service.referenceValueCache[entityTypeId] = [{id: undefined, name: ""}].concat(referenceValues);
-                return service.referenceValueCache[entityTypeId];
-            });
-        }
-        if (successCallback) {
-            promise.then(successCallback);
-        }
-        return promise;
-    };
-
-    service.referenceValueByEntityId = function (entityTypeId, entityId) {
-        return $http.get("/api/entity/" + entityTypeId + "/reference-values/" + entityId).then(getJson);
-    };
-
-    service.signUp = function (username, password) {
-        return $http.post('/api/sign-up', {username: username, password: password});
-    };
-
-    return service;
+/**
+ * Deprecated
+ */
+allcountModule.factory("rest", ["lcApi", function (lcApi) {
+    return lcApi;
 }]);
 
-allcountModule.factory("messages", ["messagesObj", function (messagesObj) {
-    return function (msg) {
-        return messagesObj[msg] || msg;
-    };
-}]);
+allcountModule.config(["fieldRenderingServiceProvider", function (fieldRenderingServiceProvider) {
+    fieldRenderingServiceProvider.defineFields(["$filter", "$compile", "$locale", "lcApi", "messages", function ($filter, $compile, $locale, rest, messages) {
 
-allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale", "rest", "messages", function ($filter, $compile, $locale, rest, messages) {
-    var service = {};
+        var dateRegex = /^(\d{4})-(\d\d)-(\d\d)$/;
 
-    var fieldRenderers = {
-        text: function (value, fieldDescription) {
-            return fieldDescription.fieldType.isMultiline ? textareaRenderer(value) : value;
-        },
-        date: function (value) {
-            return $filter('date')(value);
-        },
-        integer: function (value) {
-            return value;
-        },
-        money: function (value) {
-            return renderCurrency(value);
-        },
-        checkbox: function (value) {
-            return value ? messages("Yes") : messages("No");
-        },
-        reference: function (value) {
-            return value ? value.name : undefined;
-        },
-        password: function (value) {
-            return '';
-        },
-        relation: false,
-        attachment: function (value, fieldDescription) {
-            if (!value) {
-                return undefined;
-            }
-            var elem;
-            if (fieldDescription.fieldType.image) {
-                var link = $('<a data-gallery></a>');
-                link.attr('href', value.secure_url);
-                elem = $('<img>');
-                elem.attr('src', value.secure_url.replace(/\/v\d+/, '/w_100,h_100,c_fill'));
-                link.append(elem);
-                link.click (function (e) {
-                    e.preventDefault();
-                    blueimp.Gallery(link, {event: e});
-                });
-                if (!$('#blueimp-gallery').length) {
-                    $('body').append('<div id="blueimp-gallery" class="blueimp-gallery"><div class="slides"></div><h3 class="title"></h3><a class="close">×</a></div>');
-                }
-                return link;
-            }
-            elem = $('<a></a>');
-            elem.attr('href', '/api/file/download/' + value.fileId);
-            elem.text(value.name);
-            return  elem;
+        function textareaRenderer(value) {
+            var elem = $('<p></p>');
+            var escapedText = elem.text(value).html();
+            elem.addClass("textarea-field-paragraph");
+            const escapedHtml = escapedText.split("\n").join('<br>');
+            elem.html(escapedHtml);
+            return elem;
         }
-    };
 
-    var dateRegex = /^(\d{4})-(\d\d)-(\d\d)$/;
-
-    function textareaRenderer(value) {
-        var elem = $('<p></p>');
-        var escapedText = elem.text(value).html();
-        elem.addClass("textarea-field-paragraph");
-        const escapedHtml = escapedText.split("\n").join('<br>');
-        elem.html(escapedHtml);
-        return elem;
-    }
-
-    function parseDate(s) {
-        if (!s) return undefined;
-        var match;
-        if (match = s.match(dateRegex)) {
-            var date = new Date(0);
-            date.setFullYear(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
-            return date;
-        }
-        return undefined;
-    }
-
-    function wireTextInputWithController(input, controller, updateValue) {
-        input.val(controller.$viewValue);
-        input.on('input', function () {
-            var value = $.trim($(this).val());
-            updateValue(value.length > 0 ? value : undefined);
-        });
-        return input;
-    }
-
-    function textInput(controller, updateValue) {
-        var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
-        return wireTextInputWithController(input, controller, updateValue);
-    }
-
-    function textareaInput(controller, updateValue) {
-        var input = $('<textarea class="form-control"/>'); //TODO remove form-control?
-        return wireTextInputWithController(input, controller, updateValue);
-    }
-
-    function maskedInput(controller, updateValue, mask) {
-        var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
-        $(input).inputmask(mask);
-        input.val(controller.$viewValue);
-        function listener() {
-            var value = $.trim($(this).val());
-            updateValue(value.length > 0 && $(input).inputmask("isComplete") ? value : undefined);
-        }
-        input.on('input', listener);
-        input.on('cleared', listener);
-        input.change(listener); //TODO triggers on blur but not always before save
-        return input;
-    }
-
-    var currencyConfig = { //TODO
-        'alias': 'numeric',
-        'radixPoint': $locale.NUMBER_FORMATS.DECIMAL_SEP,
-        'groupSeparator': $locale.NUMBER_FORMATS.GROUP_SEP,
-        'autoGroup': true,
-        'digits': 2, //$locale.NUMBER_FORMATS.PATTERNS[1].maxFrac, //TODO could be other than 2?
-        'digitsOptional': false,
-        'placeholder': '0'
-    };
-
-    function renderCurrency(viewValue) {
-        return viewValue && $.inputmask.format(viewValue.slice(0, viewValue.length - 2) + currencyConfig.radixPoint + viewValue.slice(viewValue.length - 2), currencyConfig) || undefined;
-    }
-
-    var fieldEditors = {
-        text: function (fieldDescription, controller, updateValue, clone, scope) {
-            if (fieldDescription.fieldType.isMultiline) {
-                return textareaInput(controller, updateValue);
-            } else if (fieldDescription.fieldType.mask) {
-                return maskedInput(controller, updateValue, fieldDescription.fieldType.mask);
-            } else {
-                return textInput(controller, updateValue)
+        function parseDate(s) {
+            if (!s) return undefined;
+            var match;
+            if (match = s.match(dateRegex)) {
+                var date = new Date(0);
+                date.setFullYear(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
+                return date;
             }
-        },
-        password: function (fieldDescription, controller, updateValue, clone, scope) { //TODO doubling
-            var input = $('<input type="password" class="form-control"/>'); //TODO remove form-control?
+            return undefined;
+        }
+
+        function wireTextInputWithController(input, controller, updateValue) {
             input.val(controller.$viewValue);
             input.on('input', function () {
                 var value = $.trim($(this).val());
                 updateValue(value.length > 0 ? value : undefined);
             });
             return input;
-        },
-        money: function (fieldDescription, controller, updateValue, clone, scope) {
-            var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
-            var viewValue = controller.$viewValue;
-            viewValue = renderCurrency(viewValue);
-            input.val(viewValue);
-            input.on('input', function () {
-                var value = $.trim($(this).val()).replace(/[^0-9]/g, '');
-                updateValue(value.length > 0 ? value : undefined);
-            });
-            $(input).inputmask(currencyConfig);
-            return input;
-        },
-        date: function (fieldDescription, controller, updateValue, clone, scope) { //TODO
-            var input = $('<div class="input-group date"><input type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span></div>');
-            input.datepicker({
-                autoclose: true,
-                language: $locale.id.split("-")[0],
-                format: $locale.DATETIME_FORMATS.shortDate
-                    .replace("MMMM", "^^").replace("MMM", "^").replace("MM","mm").replace("M", "m").replace("^^", "MM").replace("^", "M")
-                    .replace("EEE", "D").replace("EEEE", "DD")
-            });
-            input.datepicker('update', parseDate(controller.$viewValue));
-            input.datepicker().on('changeDate', function (e) {
-                updateValue(e.date ? $filter('date')(e.date, 'yyyy-MM-dd') : undefined);
-            });
-            input.datepicker().on('clearDate', function (e) {
-                updateValue(undefined);
-            });
-            return input;
-        },
-        reference: function (fieldDescription, controller, updateValue, clone, scope) {
-            if (fieldDescription.fieldType.render === 'fixed') {
-                rest.referenceValues(fieldDescription.fieldType.referenceEntityTypeId, function (referenceValues) {
-                    scope.referenceValues = referenceValues;
-                    scope.referenceIdToValue = {};
-                    $(scope.referenceValues).each(function (index, item) {
-                        scope.referenceIdToValue[item.id] = item;
-                    });
-                    scope.$watch('selectedReferenceId', function (referenceValueId) {
-                        controller.$setViewValue(referenceValueId ? scope.referenceIdToValue[referenceValueId] : undefined);
-                    });
-                });
-                scope.selectedReferenceId = controller.$viewValue ? controller.$viewValue.id : undefined;
-                return $compile('<select ng-model="selectedReferenceId" ng-options="r.id as r.name for r in referenceValues" class="form-control"></select>')(scope);
-            } else {
-                scope.referenceEntityTypeId = fieldDescription.fieldType.referenceEntityTypeId;
-
-                scope.$watch('selectedReference.value', function (referenceValue) {
-                    controller.$setViewValue(referenceValue);
-                });
-                scope.selectedReference = {value: controller.$viewValue};
-
-                return $compile('<div ng-model="selectedReference.value" lc-reference="referenceEntityTypeId"></div>')(scope);
-
-            }
-        },
-        integer: function (fieldDescription, controller, updateValue, clone, scope) {
-            scope.integerValue = controller.$viewValue + "";
-            scope.pattern = /\d+/;
-            scope.$watch('integerValue', function (integerValue) {
-                controller.$setViewValue(integerValue && parseInt(integerValue, 10) || undefined);
-            });
-            return $compile('<input ng-model="integerValue" class="form-control" ng-pattern="pattern">')(scope);
-        },
-        checkbox: function (fieldDescription, controller, updateValue, clone, scope) {
-            scope.checkboxValue = controller.$viewValue;
-            scope.$watch('checkboxValue', function (checkboxValue) {
-                controller.$setViewValue(checkboxValue);
-            });
-            return $compile('<div class="checkbox"><label><input type="checkbox" ng-model="checkboxValue"></label></div>')(scope);
-        },
-        relation: function (fieldDescription, controller, updateValue, clone, scope) {
-            scope.$parent.$watch('entity', function (entity) {
-                scope.entityCrudId = entity.id ? {
-                    entityTypeId: scope.entityTypeId,
-                    relationField: fieldDescription.field,
-                    parentEntityId: entity.id
-                } : undefined;
-            });
-
-            return $compile('<div ng-show="entityCrudId" lc-grid="entityCrudId" paging="{start: 0, count: 50}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
-        },
-        attachment: function (fieldDescription, controller, updateValue, clone, scope) {
-            scope.fieldValue = controller.$viewValue;
-            scope.$watch('fieldValue', function (value) {
-                controller.$setViewValue(value);
-            });
-            scope.provider = fieldDescription.fieldType.provider;
-            return $compile('<div lc-upload="fieldValue" provider="{{provider}}"></div>')(scope);
         }
-    };
 
-    service.readOnlyFieldRenderer = function (fieldDescription) {
-        return fieldRenderers[fieldDescription.fieldTypeId] && function (value) {
-            return fieldRenderers[fieldDescription.fieldTypeId](value, fieldDescription);
-        } || fieldRenderers[fieldDescription.fieldTypeId];
-    };
+        function textInput(controller, updateValue) {
+            var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+            return wireTextInputWithController(input, controller, updateValue);
+        }
 
-    service.fieldEditor = function (fieldDescription, controller, updateValue, clone, scope) {
-        return fieldEditors[fieldDescription.fieldTypeId](fieldDescription, controller, updateValue, clone, scope);
-    };
+        function textareaInput(controller, updateValue) {
+            var input = $('<textarea class="form-control"/>'); //TODO remove form-control?
+            return wireTextInputWithController(input, controller, updateValue);
+        }
 
-    var layoutRenderers = {
+        function maskedInput(controller, updateValue, mask) {
+            var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+            $(input).inputmask(mask);
+            input.val(controller.$viewValue);
+            function listener() {
+                var value = $.trim($(this).val());
+                updateValue(value.length > 0 && $(input).inputmask("isComplete") ? value : undefined);
+            }
+            input.on('input', listener);
+            input.on('cleared', listener);
+            input.change(listener); //TODO triggers on blur but not always before save
+            return input;
+        }
+
+        var currencyConfig = { //TODO
+            'alias': 'numeric',
+            'radixPoint': $locale.NUMBER_FORMATS.DECIMAL_SEP,
+            'groupSeparator': $locale.NUMBER_FORMATS.GROUP_SEP,
+            'autoGroup': true,
+            'digits': 2, //$locale.NUMBER_FORMATS.PATTERNS[1].maxFrac, //TODO could be other than 2?
+            'digitsOptional': false,
+            'placeholder': '0'
+        };
+
+        function renderCurrency(viewValue) {
+            return viewValue && $.inputmask.format(viewValue.slice(0, viewValue.length - 2) + currencyConfig.radixPoint + viewValue.slice(viewValue.length - 2), currencyConfig) || undefined;
+        }
+
+        return {
+            text: [function (value, fieldDescription) {
+                return fieldDescription.fieldType.isMultiline ? textareaRenderer(value) : value;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                if (fieldDescription.fieldType.isMultiline) {
+                    return textareaInput(controller, updateValue);
+                } else if (fieldDescription.fieldType.mask) {
+                    return maskedInput(controller, updateValue, fieldDescription.fieldType.mask);
+                } else {
+                    return textInput(controller, updateValue)
+                }
+            }],
+            date: [function (value) {
+                return $filter('date')(value);
+            }, function (fieldDescription, controller, updateValue, clone, scope) { //TODO
+                var input = $('<div class="input-group date"><input type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span></div>');
+                input.datepicker({
+                    autoclose: true,
+                    language: $locale.id.split("-")[0],
+                    format: $locale.DATETIME_FORMATS.shortDate
+                        .replace("MMMM", "^^").replace("MMM", "^").replace("MM","mm").replace("M", "m").replace("^^", "MM").replace("^", "M")
+                        .replace("EEE", "D").replace("EEEE", "DD")
+                });
+                input.datepicker('update', parseDate(controller.$viewValue));
+                input.datepicker().on('changeDate', function (e) {
+                    updateValue(e.date ? $filter('date')(e.date, 'yyyy-MM-dd') : undefined);
+                });
+                input.datepicker().on('clearDate', function (e) {
+                    updateValue(undefined);
+                });
+                return input;
+            }],
+            integer: [function (value) {
+                return value;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.integerValue = controller.$viewValue + "";
+                scope.pattern = /\d+/;
+                scope.$watch('integerValue', function (integerValue) {
+                    controller.$setViewValue(integerValue && parseInt(integerValue, 10) || undefined);
+                });
+                return $compile('<input ng-model="integerValue" class="form-control" ng-pattern="pattern">')(scope);
+            }],
+            money: [function (value) {
+                return renderCurrency(value);
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                var input = $('<input type="text" class="form-control"/>'); //TODO remove form-control?
+                var viewValue = controller.$viewValue;
+                viewValue = renderCurrency(viewValue);
+                input.val(viewValue);
+                input.on('input', function () {
+                    var value = $.trim($(this).val()).replace(/[^0-9]/g, '');
+                    updateValue(value.length > 0 ? value : undefined);
+                });
+                $(input).inputmask(currencyConfig);
+                return input;
+            }],
+            checkbox: [function (value) {
+                return value ? messages("Yes") : messages("No");
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.checkboxValue = controller.$viewValue;
+                scope.$watch('checkboxValue', function (checkboxValue) {
+                    controller.$setViewValue(checkboxValue);
+                });
+                return $compile('<div class="checkbox"><label><input type="checkbox" ng-model="checkboxValue"></label></div>')(scope);
+            }],
+            reference: [function (value) {
+                return value ? value.name : undefined;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                if (fieldDescription.fieldType.render === 'fixed') {
+                    rest.referenceValues(fieldDescription.fieldType.referenceEntityTypeId, function (referenceValues) {
+                        scope.referenceValues = referenceValues;
+                        scope.referenceIdToValue = {};
+                        $(scope.referenceValues).each(function (index, item) {
+                            scope.referenceIdToValue[item.id] = item;
+                        });
+                        scope.$watch('selectedReferenceId', function (referenceValueId) {
+                            controller.$setViewValue(referenceValueId ? scope.referenceIdToValue[referenceValueId] : undefined);
+                        });
+                    });
+                    scope.selectedReferenceId = controller.$viewValue ? controller.$viewValue.id : undefined;
+                    return $compile('<select ng-model="selectedReferenceId" ng-options="r.id as r.name for r in referenceValues" class="form-control"></select>')(scope);
+                } else {
+                    scope.referenceEntityTypeId = fieldDescription.fieldType.referenceEntityTypeId;
+
+                    scope.$watch('selectedReference.value', function (referenceValue) {
+                        controller.$setViewValue(referenceValue);
+                    });
+                    scope.selectedReference = {value: controller.$viewValue};
+
+                    return $compile('<div ng-model="selectedReference.value" lc-reference="referenceEntityTypeId"></div>')(scope);
+
+                }
+            }],
+            password: [function (value) {
+                return '';
+            }, function (fieldDescription, controller, updateValue, clone, scope) { //TODO doubling
+                var input = $('<input type="password" class="form-control"/>'); //TODO remove form-control?
+                input.val(controller.$viewValue);
+                input.on('input', function () {
+                    var value = $.trim($(this).val());
+                    updateValue(value.length > 0 ? value : undefined);
+                });
+                return input;
+            }],
+            relation: [false, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.$parent.$watch('entity', function (entity) {
+                    scope.entityCrudId = entity.id ? {
+                        entityTypeId: scope.entityTypeId,
+                        relationField: fieldDescription.field,
+                        parentEntityId: entity.id
+                    } : undefined;
+                });
+
+                return $compile('<div ng-show="entityCrudId" lc-grid="entityCrudId" paging="{start: 0, count: 50}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
+            }],
+            attachment: [function (value) {
+                if (!value) {
+                    return undefined;
+                }
+                var elem;
+                if (fieldDescription.fieldType.image) {
+                    var link = $('<a data-gallery></a>');
+                    link.attr('href', value.secure_url);
+                    elem = $('<img>');
+                    elem.attr('src', value.secure_url.replace(/\/v\d+/, '/w_100,h_100,c_fill'));
+                    link.append(elem);
+                    link.click (function (e) {
+                        e.preventDefault();
+                        blueimp.Gallery(link, {event: e});
+                    });
+                    if (!$('#blueimp-gallery').length) {
+                        $('body').append('<div id="blueimp-gallery" class="blueimp-gallery"><div class="slides"></div><h3 class="title"></h3><a class="close">×</a></div>');
+                    }
+                    return link;
+                }
+                elem = $('<a></a>');
+                elem.attr('href', '/api/file/download/' + value.fileId);
+                elem.text(value.name);
+                return elem;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.fieldValue = controller.$viewValue;
+                scope.$watch('fieldValue', function (value) {
+                    controller.$setViewValue(value);
+                });
+                scope.provider = fieldDescription.fieldType.provider;
+                return $compile('<div lc-upload="fieldValue" provider="{{provider}}"></div>')(scope);
+            }]
+        }
+    }]);
+
+    fieldRenderingServiceProvider.defineLayoutRenderers(function () { return {
         H: function (params, children) {
             var container = $('<div class="row"/>');
             var fraction = Math.floor(12.0 / children.length);
@@ -508,13 +292,21 @@ allcountModule.factory("fieldRenderingService", ["$filter", "$compile", "$locale
             container.append(paneContainer);
             return container;
         }
-    };
+    }});
 
-    service.layoutRenderer = function (containerId, params, children, childrenObjs) {
-        return layoutRenderers[containerId](params, children, childrenObjs);
-    };
-
-    return service;
+    fieldRenderingServiceProvider.setFormStaticTemplate(["$compile", function ($compile) {
+        return function (value, fieldScope) {
+            var elem;
+            if (value instanceof jQuery) {
+                elem = $compile('<div class="form-control-static"></div>')(fieldScope);
+                elem.append(value);
+            } else {
+                fieldScope.renderedText = value || '';
+                elem = $compile('<div class="form-control-static">{{renderedText}}</div>')(fieldScope);
+            }
+            return elem;
+        }
+    }])
 }]);
 
 function uploadDirective(directiveName) {
@@ -572,82 +364,7 @@ function uploadDirective(directiveName) {
 allcountModule.directive("aUpload", uploadDirective("aUpload")); //TODO deprecated
 allcountModule.directive("lcUpload", uploadDirective("lcUpload"));
 
-function fieldDirective(directiveName) {
-    return ["rest", "fieldRenderingService", "$compile", function (rest, fieldRenderingService, $compile) {
-        return {
-            restrict: 'A',
-            require: 'ngModel',
-            scope: false,
-            transclude: 'element',
-            link: function (scope, element, attrs, controller, transclude) {
-                var fieldElement, fieldScope;
-
-                function setFieldElement(elem) {
-                    if (fieldElement) {
-                        fieldElement.remove();
-                        fieldElement = undefined;
-                    }
-                    if (elem) {
-                        elem = $(elem);
-                        element.after(elem);
-                        fieldElement = elem;
-                    }
-                }
-
-                function updateValue(value) {
-                    scope.$apply(function () {
-                        controller.$setViewValue(value);
-                    })
-                }
-
-                function renderField(fieldDescription, isEditor) {
-                    if (!fieldDescription || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false && fieldScope) {
-                        if (fieldScope) {
-                            fieldScope.isEditor = isEditor;
-                        }
-                        return;
-                    }
-                    if (fieldScope) fieldScope.$destroy();
-                    if (!fieldDescription) return;
-                    isEditor = fieldDescription.isReadOnly ? false : isEditor;
-                    fieldScope = scope.$new();
-                    if (isEditor || fieldRenderingService.readOnlyFieldRenderer(fieldDescription) === false) {
-                        fieldScope.isEditor = isEditor;
-                        controller.$render = function () {
-                            transclude(scope, function (clone) { //TODO what scope for transclude?
-                                setFieldElement(fieldRenderingService.fieldEditor(fieldDescription, controller, updateValue, clone, fieldScope));
-                            });
-                        };
-                    } else {
-                        controller.$render = function () {
-                            var value = fieldRenderingService.readOnlyFieldRenderer(fieldDescription)(controller.$viewValue);
-
-                            var elem;
-                            if (value instanceof jQuery) {
-                                elem = $compile('<div class="form-control-static"></div>')(fieldScope);
-                                elem.append(value);
-                            } else {
-                                fieldScope.renderedText = value || '';
-                                elem = $compile('<div class="form-control-static">{{renderedText}}</div>')(fieldScope);
-                            }
-                            setFieldElement(elem);
-                        }
-                    }
-                    controller.$render();
-                }
-
-                scope.$watch(attrs.isEditor, function (isEditor) {
-                    renderField(scope.$eval(attrs[directiveName]), isEditor);
-                });
-                scope.$watch(attrs[directiveName], function (fd) {
-                    renderField(fd, scope.$eval(attrs.isEditor));
-                })
-            }
-        }
-    }];
-}
 allcountModule.directive("aField", fieldDirective("aField")); //TODO deprecated
-allcountModule.directive("lcField", fieldDirective("lcField"));
 
 function layoutDirective(directiveName) {
     return ["rest", "fieldRenderingService", function (rest, fieldRenderingService) {
@@ -720,181 +437,8 @@ function layoutDirective(directiveName) {
 allcountModule.directive("aLayout", layoutDirective("aLayout")); //TODO deprecated
 allcountModule.directive("lcLayout", layoutDirective("lcLayout"));
 
-function handleValidationErrorsCallback(scope) {
-    return function onError(err) {
-        if (err.status === 403) {
-            scope.validationErrors = err.data;
-        } else {
-            throw err;
-        }
-    }
-}
-
-function listDirective(directiveName, templateUrl) {
-    return ["rest", "fieldRenderingService", "$parse", "messages", function (rest, fieldRenderingService, $parse, messages) {
-        return {
-            restrict: 'A',
-            priority: 1100,
-            templateUrl: templateUrl,
-            scope: true,
-            link: function (scope, element, attrs, ctrl) {
-                scope.messages = messages;
-                scope.atomicCounter = 0;
-                scope.filtering = {};
-                if (attrs.publishMethods) {
-                    var publishMethodsTo = $parse(attrs.publishMethods);
-                    publishMethodsTo.assign(scope.$parent, {
-                        updateGrid: function () { if (scope.updateGrid) scope.updateGrid() },
-                        hasWritePermission: function () { return scope.permissions && scope.permissions.write },
-                        permissions: function () { return scope.permissions || {} }
-                    })
-                }
-
-                scope.$parent.$watch(attrs.paging, function (paging) {
-                    scope.paging = paging;
-                    if (scope.updateGrid) scope.updateGrid();
-                }, true);
-
-                scope.$parent.$watch(attrs.totalRow, function (totalRow) { //TODO doubling
-                    scope.totalRow = totalRow;
-                }, true);
-
-                scope.$parent.$watch(attrs.filtering, function (filtering) {
-                    scope.filtering = filtering;
-                    if (scope.updateGrid) scope.updateGrid();
-                }, true);
-
-                scope.$parent.$watch(attrs[directiveName], function (entityTypeId) {
-                    if (typeof entityTypeId == "string")
-                        scope.entityCrudId = {entityTypeId: entityTypeId};
-                    else
-                        scope.entityCrudId = entityTypeId;
-                    rest.getFieldDescriptions(scope.entityCrudId, true, function (descriptions) {
-                        scope.fieldDescriptions = descriptions;
-                        scope.fieldRenderer = {};
-                        $(descriptions).each(function (index, desc) {
-                            scope.fieldRenderer[desc.field] = fieldRenderingService.readOnlyFieldRenderer(desc);
-                        })
-                    });
-
-                    scope.permissions = {};
-                    rest.permissions(scope.entityCrudId, function (permissions) {
-                        scope.permissions = permissions;
-                    });
-
-                    scope.updateGrid = function () {
-                        if (!scope.paging) return;
-                        var next = ++scope.atomicCounter;
-                        setTimeout(function () {
-                            if (next !== scope.atomicCounter) {
-                                return;
-                            }
-                            if (scope.paging.count === 0) {
-                                scope.items = [];
-                            } else {
-                                rest.findRange(scope.entityCrudId , scope.filtering, scope.paging.start, scope.paging.count, function (items) {
-                                    scope.items = items
-                                })
-                            }
-                        }, 200);
-                    };
-
-                    scope.deleteEntity = function (entity) {
-                        function removeEntity() {
-                            scope.items.splice(scope.items.indexOf(entity), 1);
-                            if (scope.editingItem == entity) {
-                                scope.editingItem = undefined;
-                            }
-                        }
-                        if (entity.id) {
-                            rest.deleteEntity(scope.entityCrudId, entity.id, removeEntity);
-                        } else {
-                            removeEntity();
-                        }
-                    };
-
-                    scope.editEntity = function (entity) {
-                        scope.validationErrors = undefined;
-                        if (scope.editingItem) {
-                            scope.saveEntity(function () {});
-                        }
-
-                        scope.originalEntity = angular.copy(entity);
-                        scope.editingItem = entity;
-                    };
-
-                    scope.navigate = function (entityId) {
-                        if (attrs.navigate) {
-                            scope.$parent.$eval(attrs.navigate, {$entityId: entityId});
-                        }
-                    };
-
-                    scope.hasNavigate = !!attrs.navigate;
-
-                    scope.headerClass = function (fd) {
-                        var cls = {};
-                        cls[fd.fieldTypeId + '-grid-header'] = true;
-                        return cls;
-                    };
-
-                    scope.saveEntity = function (success) {
-                        var entity = scope.editingItem;
-                        function onSuccess(id) {
-                            scope.validationErrors = undefined;
-                            if (!entity.id) {
-                                entity.id = id;
-                            }
-                            if (success) {
-                                success();
-                            } else {
-                                scope.editingItem = undefined;
-                            }
-                        }
-                        if (scope.editingItem.id) {
-                            rest.updateEntity(scope.entityCrudId, scope.entityForUpdate()).then(onSuccess, handleValidationErrorsCallback(scope));
-                        } else {
-                            rest.createEntity(scope.entityCrudId, entity).then(onSuccess, handleValidationErrorsCallback(scope));
-                        }
-                    };
-
-                    scope.createEntity = function () {
-                        var item = {};
-                        scope.items.push(item);
-                        scope.editEntity(item);
-                    };
-
-                    scope.entityForUpdate = function () { //TODO doubling
-                        var forUpdate = {id: scope.editingItem.id};
-                        for (var field in scope.editingItem) {
-                            if (scope.editingItem.hasOwnProperty(field) && scope.isFieldChanged(field)) {
-                                forUpdate[field] = scope.editingItem[field] ? scope.editingItem[field] : null;
-                            }
-                        }
-                        return forUpdate;
-                    };
-
-                    scope.isFieldChanged = function (field) { //TODO doubling
-                        return scope.editingItem && scope.originalEntity && !angular.equals(scope.editingItem[field], scope.originalEntity[field])
-                    };
-
-                    scope.updateGrid();
-                });
-
-                if (attrs.editMode)
-                    scope.$parent.$watch(attrs.editMode, function (value) {
-                        scope.isInEditMode = value;
-                        if (!scope.isInEditMode) {
-                            scope.editEntity(undefined);
-                        }
-                    })
-            }
-        }
-    }]
-}
-
 allcountModule.directive("aGrid", listDirective('aGrid', '/assets/template/grid.html')); //TODO deprecated
 allcountModule.directive("lcGrid", listDirective('lcGrid', '/assets/template/grid.html'));
-allcountModule.directive("lcList", listDirective('lcList'));
 
 function pagingDirective(directiveName) {
     return ["rest", "$parse", function (rest, $parse) {
@@ -1008,105 +552,6 @@ function pagingDirective(directiveName) {
 allcountModule.directive("aPaging", pagingDirective("aPaging")); //TODO deprecated
 allcountModule.directive("lcPaging", pagingDirective("lcPaging"));
 
-allcountModule.directive("lcForm", ["rest", "fieldRenderingService", "$parse", function (rest, fieldRenderingService, $parse) {
-    return {
-        restrict: 'A',
-        scope: true,
-        link: function (scope, element, attrs) {
-            scope.entity = {}; //TODO should be filled by entity or template
-            scope.$watch(attrs.lcForm, function (entityTypeId) {
-                if (typeof entityTypeId == "string") {
-                    scope.entityCrudId = {entityTypeId: entityTypeId};
-                    scope.entityTypeId = entityTypeId;
-                } else {
-                    scope.entityCrudId = entityTypeId;
-                }
-                scope.reloadEntity = function (successCallback) {
-                    scope.entity = {}; //TODO should be filled by entity or template
-                    var entityId = scope.$parent.$eval(attrs.entityId);
-                    if (!entityId) return;
-                    rest.readEntity(scope.entityCrudId, entityId, function (entity) {
-                        scope.entity = entity;
-                        scope.originalEntity = angular.copy(entity);
-                        if (successCallback) successCallback();
-                    })
-                };
-
-                scope.$watch('entity', function (entity, oldEntity) {
-                    for (var field in scope.fieldToDesc) {
-                        if (scope.fieldToDesc.hasOwnProperty(field) && entity && oldEntity &&
-                            !angular.equals(entity[field], oldEntity[field]) && scope.validationErrors) {
-                            scope.validationErrors[field] = undefined;
-                        }
-                    }
-                }, true);
-
-                scope.createEntity = function (successCallback) {
-                    return rest.createEntity(scope.entityCrudId, scope.entity).then(function () {
-                        scope.validationErrors = undefined;
-                        successCallback && successCallback();
-                    }, handleValidationErrorsCallback(scope))
-                };
-
-                scope.updateEntity = function (successCallback) {
-                    return rest.updateEntity(scope.entityCrudId, scope.entityForUpdate()).then(function () { //TODO send only difference with original entity
-                        scope.validationErrors = undefined;
-                        if (successCallback) successCallback();
-                    }, handleValidationErrorsCallback(scope))
-                };
-
-                scope.entityForUpdate = function () {
-                    var forUpdate = {id: scope.entity.id};
-                    for (var field in scope.entity) {
-                        if (scope.entity.hasOwnProperty(field) && scope.isFieldChanged(field)) {
-                            forUpdate[field] = scope.entity[field] ? scope.entity[field] : null;
-                        }
-                    }
-                    return forUpdate;
-                };
-
-                scope.isFieldChanged = function (field) {
-                    return scope.entity && scope.originalEntity && !angular.equals(scope.entity[field], scope.originalEntity[field])
-                };
-
-                if (attrs.publishMethods) {
-                    var publishMethodsTo = $parse(attrs.publishMethods);
-                    publishMethodsTo.assign(scope.$parent, {
-                        createEntity: scope.createEntity,
-                        updateEntity: scope.updateEntity,
-                        reloadEntity: scope.reloadEntity
-                    })
-                }
-
-                rest.getFieldDescriptions(scope.entityCrudId, false, function (descriptions) { //TODO doubling
-                    scope.fieldDescriptions = descriptions;
-                    scope.fieldRenderer = {};
-                    scope.fieldToDesc = {};
-                    $(descriptions).each(function (index, desc) {
-                        scope.fieldRenderer[desc.field] = fieldRenderingService.readOnlyFieldRenderer(desc);
-                        scope.fieldToDesc[desc.field] = desc;
-                    })
-                });
-
-                scope.showLabel = function (field) {
-                    return scope.fieldToDesc && scope.fieldToDesc[field] && !scope.fieldToDesc[field].fieldType.removeFormLabel;
-                };
-
-                scope.reloadEntity();
-            });
-
-            attrs.isEditor && scope.$parent.$watch(attrs.isEditor, function (isEditor) {
-                scope.isEditor = isEditor;
-            });
-
-            if (attrs.entityId)
-                scope.$parent.$watch(attrs.entityId, function (newEntityId) {
-                    if (scope.reloadEntity) scope.reloadEntity();
-                });
-        }
-    }
-}]);
-
 allcountModule.directive("lcFormDefault", [function () {
     return {
         restrict: 'C',
@@ -1125,50 +570,9 @@ allcountModule.directive("lcFormCreate", [function () {
     }
 }]);
 
-function messageDirective(directiveName) {
-    return ["messages", function (messages) {
-        return {
-            restrict: 'A',
-            scope: false,
-            link: function (scope, element, attrs) {
-                attrs.$observe(directiveName, function (messageValue) {
-                    $(element).text(messages(messageValue));
-                });
-            }
-        }
-    }];
-}
 allcountModule.directive("aMessage", messageDirective("aMessage")); //TODO deprecated
-allcountModule.directive("lcMessage", messageDirective("lcMessage"));
 
-function menuDirective() {
-    return ["rest", function (rest) {
-        return {
-            restrict: 'C',
-            scope: true,
-            link: function (scope, element, attrs) {
-                rest.menus().then(function (menuItems) {
-                    scope.menuItems = menuItems;
-                });
-
-                scope.onlyFirstLevel = function () {
-                    if (scope.menuItems) {
-                        var onlyFirstLevel = true;
-                        $(scope.menuItems).each(function (index, item) {
-                            if (item.children && item.children.length > 0) {
-                                onlyFirstLevel = false;
-                            }
-                        });
-                        return onlyFirstLevel;
-                    }
-                    return false;
-                }
-            }
-        }
-    }];
-}
 allcountModule.directive("aMenu", menuDirective()); //TODO deprecated
-allcountModule.directive("lcMenu", menuDirective());
 
 allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse", "$modal", function (rest, $location, messages, $parse, $modal) {
     return {
@@ -1358,9 +762,11 @@ allcountModule.directive("lcTooltip", ["$parse", "messages", function ($parse, m
                 return true == ("ontouchstart" in window || window.DocumentTouch && document instanceof DocumentTouch);
             }
             if (!isTouchDevice()) {
-                $(element).tooltip({
-                    placement: 'bottom',
-                    title: messages(attrs.lcTooltip)
+                messages.messagePromise(attrs.lcTooltip).then(function (msg) {
+                    $(element).tooltip({
+                        placement: 'bottom',
+                        title: msg
+                    });
                 });
             }
         }
