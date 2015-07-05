@@ -6,11 +6,12 @@ module.exports = function (menuService, messagesService, securityService, themeS
     service.vars = function (req, obj) {
         var result = obj || {};
         var acceptLanguageHeader = req.header('Accept-Language');
+        var languageSetting = req.languageSetting;
         _.extend(result, {
             menuService: menuService,
             entityTypeId: req.params.entityTypeId,
-            messages: messagesService.messages(acceptLanguageHeader),
-            locale: messagesService.extractLocale(acceptLanguageHeader),
+            messages: messagesService.messages(acceptLanguageHeader, languageSetting),
+            locale: messagesService.extractLocale(acceptLanguageHeader, languageSetting),
             user: req.user,
             securityService: securityService,
             entityTitle: req.params.entityTypeId && entityDescriptionService.entityDescription(entityDescriptionService.entityTypeIdCrudId(req.params.entityTypeId)).title || undefined,
@@ -20,8 +21,8 @@ module.exports = function (menuService, messagesService, securityService, themeS
             services: {
                 menuService: menuService,
                 entityTypeId: req.params.entityTypeId,
-                messages: messagesService.messages(acceptLanguageHeader),
-                locale: messagesService.extractLocale(acceptLanguageHeader),
+                messages: messagesService.messages(acceptLanguageHeader, languageSetting),
+                locale: messagesService.extractLocale(acceptLanguageHeader, languageSetting),
                 user: req.user,
                 securityService: securityService,
                 themeService: themeService

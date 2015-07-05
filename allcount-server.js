@@ -78,6 +78,7 @@ function configure() {
         'requestParserSetup',
         'assetsSetup',
         'sessionSetup',
+        'languageSettingSetup',
         'securitySetup',
         'viewPathsSetup',
         'routesSetup',

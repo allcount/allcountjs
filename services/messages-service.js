@@ -31,8 +31,8 @@ module.exports = function () {
         })
     };
 
-    service.messagesByLocale = function (acceptLanguageHeader) {
-        var locale = service.extractLocale(acceptLanguageHeader);
+    service.messagesByLocale = function (acceptLanguageHeader, languageSetting) {
+        var locale = service.extractLocale(acceptLanguageHeader, languageSetting);
         var fileSuffix = locale ? '_' + locale.locale : '';
         var localeKey = locale ? locale.locale : 'default';
 
@@ -51,15 +51,15 @@ module.exports = function () {
         return messages[localeKey];
     };
 
-    service.messages = function (acceptLanguageHeader) {
-        var messagesByLocale = service.messagesByLocale(acceptLanguageHeader);
+    service.messages = function (acceptLanguageHeader, languageSetting) {
+        var messagesByLocale = service.messagesByLocale(acceptLanguageHeader, languageSetting);
         return function (msg) {
             return messagesByLocale && messagesByLocale[msg] || msg;
         }
     };
 
-    service.extractLocale = function (acceptLanguageHeader) {
-        var languages = forceLocale && [forceLocale] || parseAcceptLanguageHeader(acceptLanguageHeader);
+    service.extractLocale = function (acceptLanguageHeader, languageSetting) {
+        var languages = forceLocale && [forceLocale] || languageSetting && [languageSetting] || parseAcceptLanguageHeader(acceptLanguageHeader);
         var locale = _.find(languages, function (lang) {
             if (appMessages[lang]) {
                 return true;
