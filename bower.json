@@ -16,7 +16,7 @@
     "angular-ui-sortable": "0.13.4",
     "angular-bootstrap": "0.13.0",
     "blueimp-gallery": "~2.15.2",
-    "allcountjs-angular-base": "allcount/allcountjs-angular-base"
+    "allcountjs-angular-base": "1.0.0"
   },
   "install": {
     "path": {
