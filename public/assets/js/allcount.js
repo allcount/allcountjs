@@ -139,7 +139,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             integer: [function (value) {
                 return value;
             }, function (fieldDescription, controller, updateValue, clone, scope) {
-                scope.integerValue = controller.$viewValue + "";
+                scope.integerValue = controller.$viewValue;
                 scope.pattern = /\d+/;
                 scope.$watch('integerValue', function (integerValue) {
                     controller.$setViewValue(integerValue && parseInt(integerValue, 10) || undefined);
