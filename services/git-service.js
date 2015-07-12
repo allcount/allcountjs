@@ -16,8 +16,8 @@ module.exports = function () {
     };
 
     function getRepositoryHeadSha(repositoryDir) {
-        return Q.nfcall(childProcess.exec, 'git log HEAD^..HEAD', {cwd: repositoryDir, timeout: 30000}).then(function (commitInfo) {
-            return commitInfo.toString().split('\n')[0];
+        return Q.nfcall(childProcess.exec, 'git rev-parse HEAD', {cwd: repositoryDir, timeout: 30000}).then(function (commitInfo) {
+            return commitInfo[0].trim();
         });
     }
 
