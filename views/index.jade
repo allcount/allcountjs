@@ -12,7 +12,7 @@ block content
             .row(ng-repeat='menuItem in menuItems', ng-class='{"col-lg-4": onlyFirstLevel(), "col-sm-6": onlyFirstLevel()}', ng-cloak)
                 h2
                     i(class="fa fa-{{menuItem.icon || 'circle-thin'}} fa-fw")
-                    a(ng-if='menuItem.entityTypeId', href='/entity/{{menuItem.entityTypeId}}') {{menuItem.name}}
+                    a(ng-if='menuItem.entityTypeId', href='/entity/{{menuItem.entityTypeId}}', lc-message="{{menuItem.name}}")
                     span(ng-if='!menuItem.entityTypeId') {{menuItem.name}}
                 .col-lg-4.col-sm-6(ng-repeat='childItem in menuItem.children')
                     h3
