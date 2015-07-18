@@ -8,6 +8,7 @@
     "bootstrap-datepicker": "1.3.0",
     "components-font-awesome": "4.2.0",
     "jquery.visible": "*",
+    "angular": "1.3.6",
     "angular-animate": "1.3.6",
     "blueimp-file-upload": "9.8.1",
     "jquery.inputmask": "3.1.27",
