@@ -1,14 +1,14 @@
 var Q = require('q');
 
-module.exports = function (templateVarService, keygrip, securityService, securityConfigService, loginMethods) {
+module.exports = function (templateVarService, keygrip, securityService, securityConfigService, loginMethods, homePageService) {
     var routes = {};
 
     routes.login = function (req, res) {
         if (req.user && (!req.user.isGuest || req.query.redirect_url)) {
             successLoginRedirect(req.user, req, res);
         } else if (req.query.user_id && keygrip.verify(req.query.user_id, req.query.sign)) {
-            securityService.loginUserWithIdIfExists(req, req.query.user_id).then(function () {
-                res.redirect('/');
+            securityService.loginUserWithIdIfExists(req, req.query.user_id).then(function (user) {
+                res.redirect(securityService.withUserScope(user, function () { return homePageService.homePage() }));
             }, function () {
                 res.redirect('/login');
             }).done();
@@ -36,7 +36,7 @@ module.exports = function (templateVarService, keygrip, securityService, securit
                 return s.join('=')
             }).join('&'));
         } else {
-            res.redirect('/');
+            res.redirect(securityService.withUserScope(user, function () { return homePageService.homePage() }));
         }
     }
 

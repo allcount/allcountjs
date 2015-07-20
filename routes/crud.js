@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil, cloudinaryService) {
+module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil, cloudinaryService, securityService) {
     var route = {};
 
     var extractEntityCrudId = routeUtil.extractEntityCrudId;
@@ -157,7 +157,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     route.withUserScope = function (req, res, next) {
-        return injection.inScope({User: req.user || null}, next);
+        return securityService.withUserScope(req.user, next);
     };
 
     return route;

@@ -53,6 +53,9 @@ mixin defaultNavBar()
                                       if user.hasRole('admin')
                                           a(href='/entity/User')= messages('Users')
                                       a(href='/logout')= messages('Logout')
+                  else
+                      .nav.navbar-nav.navbar-right: li
+                          a(href='/login')= messages('Sign in')
 mixin defaultHead()
     +defaultMeta()
     +defaultFavicon()

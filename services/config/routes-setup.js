@@ -96,7 +96,7 @@ module.exports = function (
                     callback(err, user)
                 })(req, res);
             })));
-            app.get('/login', securityRoute.login);
+            app.get('/login', crudRoute.withUserScope, securityRoute.login);
             app.post('/api/sign-up', securityRoute.signUp);
             app.post('/api/sign-in', securityRoute.apiSignIn);
             app.get('/logout', securityRoute.logout);

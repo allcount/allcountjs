@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (entityDescriptionService, viewService) {
+module.exports = function (entityDescriptionService, viewService, linkBuilder) {
     var menuItems;
 
     var menuService = {};
@@ -41,7 +41,7 @@ module.exports = function (entityDescriptionService, viewService) {
             } else if (item.entityTypeId && !entityDescriptionService.hasEntityDescription(item.entityTypeId)) {
                 errors.error("Entity type '%s' referenced in item '%s' is not defined", item.entityTypeId, item.name);
             } else {
-                item.url = item.view ? item.view : '/entity/' + item.entityTypeId;
+                item.url = linkBuilder.buildLinkTo(item);
             }
         }
     };

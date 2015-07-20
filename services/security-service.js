@@ -28,7 +28,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
                 return false;
             }
             return storageDriver.checkUserPassword(table, user.id, 'passwordHash', password);
-        }).nodeify(done);
+        }).then(prepareUserForReq).nodeify(done);
     };
 
     service.authenticateAndGenerateToken = function (username, password) {
@@ -148,6 +148,10 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
 
     service.deserializeUser = function(userId, done) {
         readAndPrepareUser(userId).nodeify(done);
+    };
+
+    service.withUserScope = function (user, fn) {
+        return injection.inScope({User: user || null}, fn);
     };
 
     return service;
