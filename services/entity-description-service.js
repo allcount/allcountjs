@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityConfigService, appUtil, injection) {
+module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries) {
     var service = {};
 
     function CompiledField(field) {
@@ -89,7 +89,7 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 referenceNameExpression: description.propertyValue('referenceName'),
                 filteringExpression: function () {
                     var filteringValue = description.evaluatedValue('filtering');
-                    return _.isString(filteringValue) && queryParseService.prepareQuery(filteringValue) || filteringValue && {query: filteringValue};
+                    return _.isString(filteringValue) && queryParseService.prepareQuery(filteringValue) || filteringValue && filteringValue.filtering && {filtering: filteringValue.filtering} || filteringValue && {query: filteringValue};
                 },
                 permissions: permissions && permissions.evaluateProperties(),
                 showInGrid: description.arrayPropertyValue('showInGrid'),
