@@ -47,7 +47,7 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
                         if (migration.operation.id === "insert") {
                             promise = Q.all(migration.operation.entities.map(function (entity) {
                                 var crudId = entityDescriptionService.entityTypeIdCrudId(migration.operation.entityTypeId);
-                                return referenceService.resolveReferenceValues(crudId, entity).then(function () {
+                                return referenceService.resolveReferenceValues(crudId, entity).then(function () { //TODO could remove because already done in beforeSave ?
                                     return storageDriver.createEntity(entityDescriptionService.tableDescription(crudId), entity);
                                 });
                             }))

@@ -23,6 +23,7 @@ function configure() {
         'crudService',
         'actionService',
         'crudHookService',
+        'defaultReferenceResolverHookFix ',
         'computedFieldService',
         'layoutService',
         'viewService',
@@ -97,6 +98,7 @@ function configure() {
         return require('less-middleware');
     });
     injection.bindFactory('routeUtil', require('./routes/route-util'));
+    injection.bindFactory('referenceResolvers', ['defaultReferenceResolver']);
 }
 
 configure();

@@ -6,7 +6,7 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
 
     service.strategyForCrudId = function (crudId) {
         return _.map(crudStrategies, function (strategy) {
-            return resolveReferencesWrapper(crudId, securityWrapper(crudId, strategy.crudHandlerFor(crudId)));
+            return securityWrapper(crudId, strategy.crudHandlerFor(crudId));
         })[0];
     };
 
@@ -44,18 +44,6 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
             return undefined;
         }));
     };
-
-    function resolveReferencesWrapper(crudId, crudStrategy) {
-        var result = {};
-        _.extend(result, crudStrategy);
-        wrap(function (entity) {
-            var next = this;
-            return service.resolveReferenceValues(crudId, entity).then(function () {
-                return next();
-            })
-        }, ['createEntity', 'updateEntity'], result, crudStrategy);
-        return result;
-    }
 
     function securityWrapper(crudId, crudStrategy) {
         var result = {};
