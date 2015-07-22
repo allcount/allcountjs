@@ -23,7 +23,7 @@ function configure() {
         'crudService',
         'actionService',
         'crudHookService',
-        'defaultReferenceResolverHookFix ',
+        'defaultReferenceResolverHook',
         'computedFieldService',
         'layoutService',
         'viewService',
