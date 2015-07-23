@@ -213,4 +213,20 @@ exports.initializeScopedThen = function (Q) {
     Q.makePromise.prototype.scopedThenInitialized = true;
 };
 
+exports.installModule = function (module) {
+    if (module.installModule) {
+        module.installModule(this);
+    }
+};
+
+exports.installModulesFromPackageJson = function (packageJsonFilePath) {
+    var packageJson = JSON.parse(fs.readFileSync(packageJsonFilePath));
+    packageJson.dependencies = packageJson.dependencies || {};
+    _.forEach(packageJson.dependencies, function (version, name) {
+        if (name.indexOf("allcountjs-") === 0) {
+            exports.installModule(require(name));
+        }
+    })
+};
+
 exports.resetInjection();

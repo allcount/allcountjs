@@ -21,6 +21,8 @@ if (dbUrl.indexOf('postgres') !== -1) {
 }
 injection.bindFactory('gitRepoUrl', gitUrl);
 
+injection.installModulesFromPackageJson("package.json");
+
 var server = injection.inject('allcountServerStartup');
 server.startup(function (errors) {
     if (errors) {
