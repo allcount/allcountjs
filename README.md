@@ -55,7 +55,7 @@ A.app({
   menuItems: [
     {
       name: "Hello world",
-      entityTypeId: "HelloWorld",
+      entityTypeId: "HelloWorld"
     }
   ],
   entities: function(Fields) {
