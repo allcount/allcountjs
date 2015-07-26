@@ -400,9 +400,7 @@ module.exports = function (dbUrl, injection) {
     }
 
     function fromBsonValue(value, field, entity) {
-        if (field.fieldType.id == 'date' && value) {
-            return moment(value).format('YYYY-MM-DD'); //TODO move to REST layer?
-        } else if (field.fieldType.id == 'money' && value) {
+        if (field.fieldType.id == 'money' && value) {
             return value.toString(10);
         } else if (field.fieldType.id == 'checkbox' && field.fieldType.storeAsArrayField) {
             return entity[field.fieldType.storeAsArrayField] &&

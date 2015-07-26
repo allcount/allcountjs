@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var Q = require('q');
+var moment = require('moment');
 
 module.exports = function (crudService, referenceService, entityDescriptionService, storageDriver, injection, routeUtil, cloudinaryService, securityService) {
     var route = {};
@@ -58,7 +59,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .strategyForCrudId(extractEntityCrudId(req))
             .findRange(filteringAndSorting(req), req.query.start, req.query.count)
             .then(function (result) {
-                res.json(result);
+                res.json(result.map(route.formatJsonObj));
             })
             .done();
     };
@@ -86,7 +87,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .strategyForCrudId(entityCrudId)
             .readEntity(req.params.entityId)
             .then(function (result) {
-                res.json(result);
+                res.json(route.formatJsonObj(result));
             })
             .done();
     };
@@ -95,7 +96,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
         var entityCrudId = extractEntityCrudId(req);
         var entity = removeReadOnlyFieldValues(entityCrudId, req.body);
         crudService.strategyForCrudId(entityCrudId).updateEntity(entity).then(function (result) {
-            res.json(result);
+            res.json(route.formatJsonObj(result));
         }).done();
     };
 
@@ -108,6 +109,15 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
                 res.json(result);
             })
             .done();
+    };
+
+    route.formatJsonObj = function (entity) {
+        _.forEach(entity, function (value, property) {
+            if (_.isDate(value)) {
+                entity[property] = moment(value).format('YYYY-MM-DD');
+            }
+        });
+        return entity;
     };
 
     route.referenceValues = function (req, res) { //TODO support reference TOP values
