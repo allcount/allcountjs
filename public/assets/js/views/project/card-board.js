@@ -4,6 +4,7 @@ cardBoardModule.controller('BoardController', ['$scope', 'rest', '$q', function 
     $scope.boardItems = {};
     $scope.statusField = $scope.statusField || 'status';
     $scope.summaryField = $scope.summaryField || 'summary';
+    var controller = this;
 
     function statusFieldValue(fieldValue) {
         return (_.isObject(fieldValue) ? fieldValue.id : fieldValue) || '';
@@ -54,6 +55,11 @@ cardBoardModule.controller('BoardController', ['$scope', 'rest', '$q', function 
             return rest.referenceValues(statusFieldDescription.fieldType.referenceEntityTypeId);
         }).then(function (statusReferenceValues) {
             $scope.boardColumns = statusReferenceValues;
+            if (controller.hideNotSetColumn) {
+                $scope.boardColumns = _.filter($scope.boardColumns, function (obj) {
+                    return !!obj.id;
+                })
+            }
             initializeBoardItemArrays();
         });
     });
