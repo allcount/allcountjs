@@ -107,7 +107,7 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
             var hookNames = ['Save', 'Create', 'Update', 'Delete'];
             var hooks = prefixes.map(function (prefix) {
                 var methods = hookNames.map(function (method) {
-                    if (description.hasPropertyValue(prefix + method)) {
+                    if (description.hasOwnPropertyValue(prefix + method)) {
                         return [method.toLowerCase(), function (scope) {
                             return injection.inScope(scope, function () {
                                 return description.evaluatedValue(prefix + method);

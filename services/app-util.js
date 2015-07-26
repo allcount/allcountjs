@@ -56,6 +56,10 @@ module.exports = function (injection) {
             return !!this.obj[name];
         },
 
+        hasOwnPropertyValue: function (name) {
+            return this.obj.hasOwnProperty(name);
+        },
+
         propertyValues: function () {
             var self = this;
             var results = {};
