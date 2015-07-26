@@ -278,7 +278,13 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             var container = $('<div/>');
             var tabContainer = $('<ul class="nav nav-tabs"/>');
             $(childrenObjs).each(function (index, item) {
-                var elem = $('<li class="' + (index == 0 ? 'active' : '') +'"><a href="#tab-' + index +  '" data-toggle="tab">' + item.params.title + '</a></li>'); //TODO javascript injection? //TODO id generation
+                var elem = $('<li class="' + (index == 0 ? 'active' : '') +'"><a href="#">' + item.params.title + '</a></li>'); //TODO javascript injection? //TODO id generation
+                elem.click(function () {
+                    $('.tab-pane', container).removeClass('active');
+                    $('li', container).removeClass('active');
+                    elem.addClass('active');
+                    $('#tab-' + index, container).addClass('active');
+                });
                 tabContainer.append(elem);
             });
             container.append(tabContainer);
@@ -404,7 +410,8 @@ function layoutDirective(directiveName) {
                                 return renderChild(item, allocateScope(layoutElem.params, parentScope));
                             }
                         }),
-                        layoutElem.children
+                        layoutElem.children,
+                        parentScope
                     );
                 }
 
