@@ -114,6 +114,8 @@ module.exports = function (injection) {
                 result = object.map(function (i) {
                     return self.evaluateObject(i)
                 });
+            } else if (_.isDate(object)) {
+                return object;
             } else if (Q.isPromise(object) || object && object.then) {
                 result = Q(object); //TODO .then(evaluateObject) ?
             } else if (_.isObject(object)) {
