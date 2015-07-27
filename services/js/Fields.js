@@ -145,6 +145,11 @@ Field.prototype.readOnly = function (isReadOnly) {
     return this;
 };
 
+Field.prototype.readOnlyExpression = function (isReadOnlyExpression) {
+    this.isReadOnlyExpression = _.isUndefined(isReadOnlyExpression) ? "function (Entity) {return false}" : isReadOnlyExpression.toString();
+    return this;
+};
+
 Field.prototype.unique = function (isUnique) {
     this.isUnique = _.isUndefined(isUnique) ? true : isUnique;
     return this;

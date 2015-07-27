@@ -24,6 +24,10 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
         return !!(this.isReadOnly || this.computeExpression);
     };
 
+    CompiledField.prototype.readOnlyExpression = function () {
+        return this.isReadOnlyExpression && this.isReadOnlyExpression.toString();
+    };
+
     CompiledField.prototype.referenceEntityTypeId = function () {
         if (this.fieldType.id === 'reference') {
             return this.fieldType.referenceEntityTypeId
@@ -162,7 +166,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 hideInGrid: field.hideInGrid || showInGrid && showInGrid.indexOf(fieldName) === -1,
                 fieldTypeId: field.fieldType.id, //TODO remove?
                 fieldType: field.fieldType,
-                isReadOnly: field.readOnly()
+                isReadOnly: field.readOnly(),
+                isReadOnlyExpression: field.readOnlyExpression()
             }
         }
     };
