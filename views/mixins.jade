@@ -25,6 +25,8 @@ mixin defaultToolbar(withoutHeader)
                 i.glyphicon.glyphicon-pencil
             button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                 i.glyphicon.glyphicon-ok
+            button.btn.btn-danger.ng-cloak(ng-click='deleteEntity()', lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='gridMethods.permissions().delete')
+                i.glyphicon.glyphicon-trash
             +actions('single-item')
 
 mixin actions(actionTarget)

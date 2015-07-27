@@ -47,6 +47,18 @@ var EntityViewController = ['$scope', 'track', '$window', function ($scope, trac
         });
     };
 
+    $scope.deleteEntity = function () {
+        track('allcount-entity-delete', {
+            location: $window.location.href
+        });
+        $scope.editForm.deleteEntity(function () {
+            $scope.viewState.mode = 'list';
+            $scope.viewState.isFormEditing = false;
+            $scope.pagingMethods.refresh();
+            $scope.gridMethods.updateGrid();
+        });
+    };
+
     $scope.startGridEditing = function() {
         track('allcount-entity-start-grid-editing', {
             location: $window.location.href
