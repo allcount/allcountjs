@@ -4,6 +4,7 @@ var _ = require('underscore');
 var crypto = require('crypto');
 var fsExtra = require('fs.extra');
 var childProcess = require('child_process');
+var url = require('url');
 
 module.exports = function (gitRepoUrl, gitService, halt) {
     var service = {};
@@ -14,10 +15,13 @@ module.exports = function (gitRepoUrl, gitService, halt) {
         return Q.nfcall(childProcess.exec, 'git clone ' + repoUrl + ' ' + repoDir, {cwd: process.cwd, timeout: 30000})
     };
 
+    function convertToPath(fileUrl) {
+        return url.parse(fileUrl).path;
+    }
 
     function existsPromise(path) {
         var deferred = Q.defer();
-        fs.exists(path, function (exists) {
+        fs.exists(convertToPath(path), function (exists) {
             deferred.resolve(exists);
         });
         return deferred.promise;
@@ -47,7 +51,7 @@ module.exports = function (gitRepoUrl, gitService, halt) {
             return existsPromise(gitRepoUrl).then(function (exists) {
                 if (exists) {
                     console.log('Failed to fetch "' + gitRepoUrl + '". Trying to use as regular directory.');
-                    repositoryDir = gitRepoUrl;
+                    repositoryDir = convertToPath(gitRepoUrl);
                     return repositoryDir;
                 } else {
                     throw err;
