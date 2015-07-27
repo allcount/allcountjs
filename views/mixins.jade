@@ -16,7 +16,7 @@ mixin defaultToolbar(withoutHeader)
         .container(ng-show="viewState.mode === 'create'"): .btn-toolbar
             button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
                 i.glyphicon.glyphicon-chevron-left
-            button.btn.btn-default.ng-cloak(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.create")
+            button.btn.btn-default.ng-cloak(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.done")
                 i.glyphicon.glyphicon-ok
         .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
             button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")
