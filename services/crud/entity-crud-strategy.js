@@ -34,12 +34,7 @@ module.exports = function (entityDescriptionService, storageDriver, injection, q
         }
 
         function setupRelationFieldFiltering(filteringAndSorting) {
-            if (!filteringAndSorting) {
-                filteringAndSorting = {};
-            }
-            if (!filteringAndSorting.filtering) {
-                filteringAndSorting.filtering = {};
-            }
+            addDefaultFiltering(filteringAndSorting);
             filteringAndSorting.filtering[backReferenceField()] = crudId.parentEntityId;
             return filteringAndSorting;
         }
