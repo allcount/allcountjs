@@ -27,10 +27,10 @@ injection.installModulesFromPackageJson("package.json");
 var server = injection.inject('allcountServerStartup');
 server.startup(function (errors) {
     if (errors) {
-        if (_.isObject(errors)) {
-            throw new Error(errors);
-        } else {
+        if (_.isArray(errors)) {
             throw new Error(errors.join('\n'));
+        } else {
+            throw errors;
         }
     }
 });
