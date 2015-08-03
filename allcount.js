@@ -2,6 +2,7 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var injection = require('./services/injection');
+var _ = require('lodash');
 
 var port = argv.port || process.env.PORT || 9080;
 var gitUrl = argv.git || process.env.GIT_URL;
@@ -26,6 +27,10 @@ injection.installModulesFromPackageJson("package.json");
 var server = injection.inject('allcountServerStartup');
 server.startup(function (errors) {
     if (errors) {
-        throw new Error(errors.join('\n'));
+        if (_.isObject(errors)) {
+            throw new Error(errors);
+        } else {
+            throw new Error(errors.join('\n'));
+        }
     }
 });
