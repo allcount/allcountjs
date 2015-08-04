@@ -49,14 +49,22 @@ function configure() {
     injection.bindFactory('defaultViewPathProvider', function () {
         return [path.join(__dirname, 'views')];
     });
-    injection.bindFactory('express', function () { return require('express') });
-    injection.bindFactory('app', function (express) { return express() });
-    injection.bindFactory('passport', function () { return require('passport') });
+    injection.bindFactory('express', function () {
+        return require('express')
+    });
+    injection.bindFactory('app', function (express) {
+        return express()
+    });
+    injection.bindFactory('passport', function () {
+        return require('passport')
+    });
 
     injection.bindFactory('keygrip', function () {
         return Keygrip([crypto.randomBytes(30).toString('hex')]); //TODO load rotating keys from somewhere
     });
-    injection.bindFactory('sessionMiddleware', function (keygrip) { return require('cookie-session')({keys: keygrip}) });
+    injection.bindFactory('sessionMiddleware', function (keygrip) {
+        return require('cookie-session')({keys: keygrip})
+    });
     injection.bindFactory('httpServer', function (port) {
         return function (handler, onReady) {
             var server = http.createServer(handler);
@@ -64,7 +72,11 @@ function configure() {
             return server;
         }
     });
-    injection.bindFactory('proxyHandler', function () { return function (req, res, next) { next() } });
+    injection.bindFactory('proxyHandler', function () {
+        return function (req, res, next) {
+            next()
+        }
+    });
     injection.bindMultiple('appConfigurators', []);
     injection.bindFactory('halt', function (gitRepoUrl) {
         return function (cause) {
@@ -99,6 +111,9 @@ function configure() {
     });
     injection.bindFactory('routeUtil', require('./routes/route-util'));
     injection.bindFactory('referenceResolvers', ['defaultReferenceResolver']);
+    injection.bindFactory('Console', function () {
+        return console;
+    });
 }
 
 configure();
