@@ -1,4 +1,5 @@
 var domain = require('domain');
+var _ = require('lodash');
 
 module.exports = function (app, templateVarService, appUtil) {
     return {
@@ -15,7 +16,11 @@ module.exports = function (app, templateVarService, appUtil) {
                     console.error(err.stack);
                     res.locals.error = err;
                     if (req.url.indexOf('/api/') === 0) {
-                        res.status(500).send(err.stack.toString());
+                        if (_.isError(err)) {
+                            res.status(500).send(err.stack.toString());
+                        } else {
+                            res.status(500).send(err);
+                        }
                     } else {
                         res.status(500).render('error');
                     }
