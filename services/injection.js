@@ -4,7 +4,7 @@ var path = require('path');
 
 exports.lookup = function (serviceName) {
     if (!serviceName.match(/^[A-Z]\w*$/)) {
-        throw new Error("Can't resolve '" + serviceName + "'. Only AllcountJS API services could be resolved in app configuration JS.");
+        throw new Error("Can't resolve '" + serviceName + "'. Only AllcountJS API services could be resolved in app configuration JS. API services names should start with uppercase letter.");
     }
     return exports.inject(serviceName);
 };
