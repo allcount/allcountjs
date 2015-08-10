@@ -32,7 +32,8 @@ function configure() {
         'themeService',
         'migrationService',
         'cloudinaryService',
-        'homePageService'
+        'homePageService',
+        "webhookService"
     ]);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));
@@ -77,7 +78,7 @@ function configure() {
             next()
         }
     });
-    injection.bindMultiple('appConfigurators', []);
+    injection.bindMultiple('appConfigurators', ['webhooksRoute']);
     injection.bindFactory('halt', function (gitRepoUrl) {
         return function (cause) {
             console.log(util.format('Exiting app "%s"%s...'), gitRepoUrl, cause ? " (" + cause + ")" : "");

@@ -25,6 +25,9 @@ module.exports = function (crudService, entityDescriptionService, injection) {
         actionContextCrud: function () {
             return CrudFor(injection.inject('actionContext').entityCrudId);
         },
+        crudFor: function (entityTypeId) {
+            return this.crudForEntityType(entityTypeId);
+        },
         crudForEntityType: function (entityTypeId) {
             return CrudFor(entityDescriptionService.entityTypeIdCrudId(entityTypeId));
         }
