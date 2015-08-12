@@ -31,5 +31,6 @@ module.exports = {
     "Not set": "Не задано",
     "Sign Up": "Зарегистрироваться",
     "Repeat Password": "Повторите пароль",
-    "User with provided user name already exists": "Пользователь с таким именем уже существует"
+    "User with provided user name already exists": "Пользователь с таким именем уже существует",
+    "Are you sure you want to delete it?": "Вы уверены, что хотите удалить эту запись?"
 };

@@ -25,7 +25,7 @@ mixin defaultToolbar(withoutHeader)
                 i.glyphicon.glyphicon-pencil
             button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
                 i.glyphicon.glyphicon-ok
-            button.btn.btn-danger.ng-cloak(ng-click='deleteEntity()', lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='gridMethods.permissions().delete')
+            button.btn.btn-danger.ng-cloak(lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='gridMethods.permissions().delete', popover-title=messages('Are you sure you want to delete it?'), popover-template="viewState.mode == 'form' ? '/assets/template/delete-confirm.html' : null", popover-placement="bottom")
                 i.glyphicon.glyphicon-trash
             +actions('single-item')
 
