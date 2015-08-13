@@ -6,11 +6,11 @@ var _ = require('lodash');
 var fs = require('fs');
 
 var port = argv.port || process.env.PORT || 9080;
-var gitUrl = argv.git || process.env.GIT_URL;
+var gitUrl = argv.app || process.env.APP || argv.git || process.env.GIT_URL;
 var dbUrl = argv.db || process.env.DB_URL;
 
 if (!gitUrl || !dbUrl) {
-    console.log('Usage: allcountjs --git <Application Git URL> --db <Application MongoDB URL> -port [Application HTTP port]');
+    console.log('Usage: allcountjs --app <Path to application\'s dir or Git URL> --db <Application MongoDB URL> -port [Application HTTP port]');
     process.exit(0);
 }
 

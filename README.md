@@ -81,8 +81,10 @@ git commit -m "Initial commit"
 Then run it with
 
 ```
-allcountjs --git file://<path to allcountjs-helloworld> --db mongodb://localhost:27017/allcountjs-helloworld
+allcountjs --app <path or URL> --db mongodb://localhost:27017/allcountjs-helloworld
 ```
+
+`<path or URL>` can be regular path to the directory where application located (e.g. `./` or `/home/user/allcountjs-helloworld`) or URL (e.g. `file:///home/user/allcountjs-helloworld` or `https://github.com/user/my-app.git`). It doesn't matter whether `<path or URL>` points to regular directory or Git repository.
 
 Please note that MongoDB should be running in order to run this example.
 
