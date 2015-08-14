@@ -420,7 +420,7 @@ module.exports = function (dbUrl, injection) {
             return moment(value, 'YYYY-MM-DD').toDate(); //TODO move to REST layer?
         } else if (field.fieldType.id == 'reference' && value) {
             if (!value.id) {
-                throw new Error("Reference value without id was passed for field '" + fieldName + "'");
+                throw new Error("Reference value without id was passed for field '" + fieldName + "'"); //TODO mongoose returns empty objects for reference if it's undefined, Maybe return null here?
             }
             return {
                 id: toMongoId(value.id),
