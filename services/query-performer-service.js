@@ -22,7 +22,7 @@ module.exports = function (entityDescriptionService, storageDriver) {
                             { $match: storageDriver.queryFor(tableDescription, {filtering: filter}) },
                             { $group: grouping }
                         ]).then(function (row) {
-                            return row[0][path[1].fieldName];
+                            return row[0] && row[0][path[1].fieldName];
                         });
                     } else {
                         throw new Error('Only back reference queries are supported')
