@@ -17,74 +17,36 @@ The main idea is to make application development fully declarative and reduce ap
 
 # Install
 Before we start you should install [Node.js](http://nodejs.org/), [MongoDB](http://www.mongodb.org/) and [Git](http://git-scm.com/).
-After that in order to install AllcountJS server you should run from CLI:
+After that in order to install AllcountJS CLI you should run:
 
 > *NOTE:* Preferred way to install and run allcountjs on Windows is to use Git-Bash.
 
 ```
-npm install -g allcountjs
+npm install -g allcountjs-cli
 ```
 
-You could also install it locally in current dir using
-
-```
-npm install allcountjs
-```
-
-In this way you should run `node_modules/.bin/allcountjs` instead `allcountjs`.
-
-> *NOTE:* There could be an EACCES issue with bower install on Mac OS X.
-As workaround please remove bower cache with `bower cache clean` and run `npm install allcountjs` to pre load it.
+> *NOTE:* Users who prior installed allcountjs globally could continue use it but this way should be considered as deprecated.
 
 # Running Hello World
-AllcountJS server uses Git repositories to load app configurations from it and MongoDB to store application data.
-To run AllcountJS Git should be installed and available in path.
-Create empty repository directory with
+AllcountJS server uses Git repositories and regular directories to load app configurations from it and MongoDB to store application data.
+To use AllcountJS Git capabilities Git should be installed and available in path.
+To init new AllcountJS project just run
 
 ```
-mkdir allcountjs-helloworld
-cd allcountjs-helloworld
-git init
+allcountjs init
 ```
 
-Create `helloworld-app.js` with following content in created dir
+You'll be prompted to enter project name, description and other info saved to package.json.
+You could also pass `--template <template_name>` option that could be used to init your project with existing demo at [Demo Gallery](https://allcountjs.com/entity/DemoGallery).
+`template_name` can be found at [Demo Gallery](https://allcountjs.com/entity/DemoGallery).
+After project is initialized you could see created from template `app-config/` and `package.json` in newly created project directory.
+In order to install AllcountJS dependencies please run:
 
-```js
-A.app({
-  appName: "Hello World",
-  menuItems: [
-    {
-      name: "Hello world",
-      entityTypeId: "HelloWorld"
-    }
-  ],
-  entities: function(Fields) {
-    return {
-      HelloWorld: {
-        fields: {
-          foo: Fields.text("Foo"),
-          bar: Fields.date("Bar")
-        }
-      }
-    }
-  }
-});
-```
+`cd <project_name> && npm install`
 
-Commit it with
+To run your project and to connect to local MongoDB instance please run from project dir:
 
-```
-git add .
-git commit -m "Initial commit"
-```
-
-Then run it with
-
-```
-allcountjs --app <path or URL> --db mongodb://localhost:27017/allcountjs-helloworld
-```
-
-`<path or URL>` can be regular path to the directory where application located (e.g. `./` or `/home/user/allcountjs-helloworld`) or URL (e.g. `file:///home/user/allcountjs-helloworld` or `https://github.com/user/my-app.git`). It doesn't matter whether `<path or URL>` points to regular directory or Git repository.
+`allcountjs run`
 
 Please note that MongoDB should be running in order to run this example.
 
