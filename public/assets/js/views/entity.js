@@ -99,7 +99,7 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
     };
 
     $scope.updateStateFromLocation = function () {
-        var splitPath = _.filter($location.path().split('/'), _.identity);
+        var splitPath = _.filter(($location.path() || '').split('/'), _.identity);
         if (splitPath.length === 1 && splitPath[0]) {
             if (splitPath[0] === 'new') {
                 $scope.viewState.mode = 'create';
