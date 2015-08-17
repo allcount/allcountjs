@@ -408,6 +408,8 @@ module.exports = function (dbUrl, injection) {
                 entity[field.fieldType.storeAsArrayField].indexOf(field.name) != -1
         } else if (field.fieldType.id == 'password') {
             return '';
+        } else if (field.fieldType.id == 'reference') {
+            return value && value.id ? {id: value.id.toString(), name: value.name} : undefined;
         }
         return value;
     }
