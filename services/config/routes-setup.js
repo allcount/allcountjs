@@ -49,6 +49,8 @@ module.exports = function (
                 })
                 .use(crudRoute.withUserScope)
                 .get('/entity/:entityTypeId', entityRoute.entity)
+                .get('/entity/:entityTypeId/:entityId', entityRoute.entity)
+                .get('/entity/:entityTypeId/:entityId/:state', entityRoute.entity)
                 .get('/api/entity/:entityTypeId/permissions', fieldDescriptionsRoute.permissions);
 
 

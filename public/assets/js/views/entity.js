@@ -1,4 +1,4 @@
-var EntityViewController = ['$scope', 'track', '$window', function ($scope, track, $window) {
+var EntityViewController = ['$scope', 'track', '$window', '$location', function ($scope, track, $window, $location) {
     $scope.viewState = {
         mode: 'list',
         filtering: {}
@@ -96,7 +96,44 @@ var EntityViewController = ['$scope', 'track', '$window', function ($scope, trac
 
     $scope.showList = function () {
         return $scope.viewState.mode === "list" && $scope.viewState.paging && $scope.viewState.paging.count > 0 || $scope.viewState.editState;
-    }
+    };
+
+    $scope.updateStateFromLocation = function () {
+        var splitPath = _.filter($location.path().split('/'), _.identity);
+        if (splitPath.length === 1 && splitPath[0]) {
+            if (splitPath[0] === 'new') {
+                $scope.viewState.mode = 'create';
+            } else {
+                $scope.viewState.formEntityId = splitPath[0];
+                $scope.viewState.mode = 'form';
+            }
+            $scope.viewState.isFormEditing = false;
+        } else if (splitPath.length === 2) {
+            $scope.viewState.formEntityId = splitPath[0];
+            $scope.viewState.mode = 'form';
+            $scope.viewState.isFormEditing = true;
+        } else {
+            $scope.viewState.mode = 'list';
+            $scope.viewState.isFormEditing = false;
+        }
+    };
+
+    $scope.updateLocationFromState = function () {
+        if ($scope.viewState.mode === 'form') {
+            $location.path($scope.viewState.formEntityId + ($scope.viewState.isFormEditing ? '/edit' : ''));
+        } else if ($scope.viewState.mode === 'create') {
+            $location.path('new')
+        } else {
+            $location.path(null);
+        }
+    };
+
+    $scope.$on('$locationChangeStart', $scope.updateStateFromLocation);
+    $scope.$watch('viewState.mode', $scope.updateLocationFromState);
+    $scope.$watch('viewState.formEntityId', $scope.updateLocationFromState);
+    $scope.$watch('viewState.isFormEditing', $scope.updateLocationFromState);
+
+    $scope.updateStateFromLocation();
 }];
 
 allcountModule.controller('EntityViewController', EntityViewController);

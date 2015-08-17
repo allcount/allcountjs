@@ -56,10 +56,15 @@ mixin defaultNavBar()
                   else
                       .nav.navbar-nav.navbar-right: li
                           a(href='/login')= messages('Sign in')
+mixin defaultBase()
+    if entityTypeId
+        base(href="/entity/#{entityTypeId}/")
+
 mixin defaultHead()
     +defaultMeta()
     +defaultFavicon()
     +pageTitle()
     +lessTheme()
+    +defaultBase()
     include head-scripts
     include tracking

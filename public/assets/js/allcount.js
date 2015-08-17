@@ -25,6 +25,10 @@ allcountModule.config(["$httpProvider", function ($httpProvider) {
     }]);
 }]);
 
+allcountModule.config(["$locationProvider", function ($locationProvider) {
+    $locationProvider.html5Mode({enabled: true, requireBase: true});
+}]);
+
 /**
  * Deprecated
  */
@@ -169,8 +173,14 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 });
                 return $compile('<div class="checkbox"><label><input type="checkbox" ng-model="checkboxValue"></label></div>')(scope);
             }],
-            reference: [function (value) {
-                return value ? value.name : undefined;
+            reference: [function (value, fieldDescription) {
+                if (value) {
+                    var link = $('<a></a>');
+                    link.attr('href', '/entity/' + fieldDescription.fieldType.referenceEntityTypeId + '/' + value.id); //TODO base href
+                    link.text(value.name);
+                    return link;
+                }
+                return undefined;
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 if (fieldDescription.fieldType.render === 'fixed') {
                     rest.referenceValues(fieldDescription.fieldType.referenceEntityTypeId, function (referenceValues) {
