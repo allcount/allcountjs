@@ -34,6 +34,8 @@ module.exports = function (entityDescriptionService, viewService, linkBuilder) {
                     errors.error("Item '%s' has children and defines reference simultaneously", item.name);
                 }
                 item.children.forEach(compileCheckRecursive);
+            } else if ((item.entityTypeId || item.view) && !(_.isString(item.entityTypeId) || _.isString(item.view))) {
+                errors.error('Entity type or view references either should be string type');
             } else if (item.view && item.entityTypeId) { //TODO compile check
                 errors.error("Item '%s' defines multiple references simultaneously", item.name);
             } else if (item.view && !viewService.views[item.view]) {
