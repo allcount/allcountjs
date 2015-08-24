@@ -1,25 +1,41 @@
 var injection = require('../services/injection.js');
 var Q = require('q');
+var mongoose = require('mongoose');
 
 module.exports = function (test, fixtureName, testFn) {
-    var allcountServer = require('../allcount-server.js');
+    var dbUrl = 'mongodb://localhost:27017/' + fixtureName;
 
-    injection.resetInjection();
-    injection.bindFactory('port', 9080);
-    injection.bindFactory('dbUrl', 'mongodb://localhost:27017/' + fixtureName);
-    injection.bindFactory('gitRepoUrl', 'test-fixtures/' + fixtureName);
-
-    allcountServer.reconfigureAllcount();
-    var server = allcountServer.inject('allcountServerStartup');
-    server.startup(function (errors) {
-        if (errors) {
-            throw new Error(errors.join('\n'));
-        }
-        Q(testFn()).then(function () {
-            return server.stop().then(function () {
-                injection.resetInjection();
-                test.done();
+    var cleanUp = function () {
+        return Q.nbind(mongoose.connect, mongoose)(dbUrl).then(function () {
+            var db = mongoose.connection.db;
+            return Q.nbind(db.dropDatabase, db)().then(function () {
+                db.close();
             });
-        }).done();
+        });
+    };
+
+    cleanUp().then(function () {
+        var allcountServer = require('../allcount-server.js');
+
+        injection.resetInjection();
+        injection.bindFactory('port', 9080);
+        injection.bindFactory('dbUrl', dbUrl);
+        injection.bindFactory('gitRepoUrl', 'test-fixtures/' + fixtureName);
+
+        allcountServer.reconfigureAllcount();
+        return allcountServer.inject('allcountServerStartup');
+    }).then(function (server) {
+        return Q.nbind(server.startup, server)().then(function (errors) {
+            if (errors) {
+                throw new Error(errors.join('\n'));
+            }
+            return Q(testFn()).then(function () {
+                return server.stop().then(function () {
+                    injection.resetInjection();
+                });
+            });
+        }).then(cleanUp);
+    }).done(function () {
+        test.done();
     });
 };
