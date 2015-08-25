@@ -17,6 +17,9 @@ module.exports = function (crudService, entityDescriptionService, injection) {
             },
             find: function (query) {
                 return crudStrategy.findAll(query);
+            },
+            findCount: function (query) {
+                return crudStrategy.findCount(query);
             }
         }
     }
