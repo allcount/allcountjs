@@ -34,8 +34,8 @@ module.exports = function (test, fixtureName, testFn) {
                     injection.resetInjection();
                 });
             });
-        }).then(cleanUp);
-    }).done(function () {
+        });
+    }).finally(cleanUp).done(function () {
         test.done();
     });
 };
