@@ -20,6 +20,7 @@ function configure() {
         'messagesService',
         'securityConfigService',
         'entityDescriptionService',
+        'referentialIntegrity',
         'crudService',
         'actionService',
         'crudHookService',

@@ -98,7 +98,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 title: description.propertyValue('title'),
                 customView: description.stringPropertyValue('customView'),
                 layout: description.evaluatedValue('layout'),
-                crudHooks: prepareCrudHooks(description)
+                crudHooks: prepareCrudHooks(description),
+                disableReferentialIntegrity: description.propertyValue('disableReferentialIntegrity')
             });
         }
 
@@ -144,7 +145,8 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 title: evaluated.title,
                 customView: evaluated.customView,
                 layout: evaluated.layout,
-                crudHooks: evaluated.crudHooks
+                crudHooks: evaluated.crudHooks,
+                disableReferentialIntegrity: evaluated.disableReferentialIntegrity
             };
             var persistedFields = {};
             _.each(evaluated.evaluatedFields, function (field, fieldName) {
