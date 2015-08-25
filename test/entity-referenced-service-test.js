@@ -40,7 +40,7 @@ exports.isEntityReferencedFalseWhenNoOtherEntities = function (test) {
 
 exports.isEntityReferencedByOneOfOne = function (test) {
     var crud = {
-        crudForEntityType: function () {
+        strategyForCrudId: function () {
             return {
                 findCount: function () {
                     return Q(1)
@@ -49,6 +49,9 @@ exports.isEntityReferencedByOneOfOne = function (test) {
         }
     };
     var entityDescriptionService = {
+        entityTypeIdCrudId: function (entityTypeId) {
+            return entityTypeId;
+        },
         entityDescriptions: {
             Foo: {
                 allFields: {
@@ -77,7 +80,7 @@ exports.isEntityReferencedByOneOfOne = function (test) {
 
 exports.isEntityReferencedByOneOfTwo = function (test) {
     var crud = {
-        crudForEntityType: function (entityTypeId) {
+        strategyForCrudId: function (entityTypeId) {
             return {
                 findCount: function () {
                     if (entityTypeId === 'Bar1') return Q(1);
@@ -87,6 +90,9 @@ exports.isEntityReferencedByOneOfTwo = function (test) {
         }
     };
     var entityDescriptionService = {
+        entityTypeIdCrudId: function (entityTypeId) {
+            return entityTypeId;
+        },
         entityDescriptions: {
             Foo: {
                 allFields: {}
@@ -119,7 +125,7 @@ exports.isEntityReferencedByOneOfTwo = function (test) {
 
 exports.isEntityReferencedByZeroOfTwo = function (test) {
     var crud = {
-        crudForEntityType: function (entityTypeId) {
+        strategyForCrudId: function (entityTypeId) {
             return {
                 findCount: function () {
                     if (entityTypeId === 'Bar1') return Q(0);
@@ -129,6 +135,9 @@ exports.isEntityReferencedByZeroOfTwo = function (test) {
         }
     };
     var entityDescriptionService = {
+        entityTypeIdCrudId: function (entityTypeId) {
+            return entityTypeId;
+        },
         entityDescriptions: {
             Foo: {
                 allFields: {}
@@ -161,7 +170,7 @@ exports.isEntityReferencedByZeroOfTwo = function (test) {
 
 exports.isEntityReferencedButActuallyNoReferenceFields = function (test) {
     var crud = {
-        crudForEntityType: function () {
+        strategyForCrudId: function () {
             throw Error('should not be called')
         }
     };

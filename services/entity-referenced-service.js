@@ -2,7 +2,7 @@
 var _ = require('lodash');
 var Q = require('q');
 
-module.exports = function (entityDescriptionService, Crud) {
+module.exports = function (entityDescriptionService, crudService) {
     var service = {};
 
     service.isEntityReferenced = function (entityId, crudId) {
@@ -36,7 +36,7 @@ module.exports = function (entityDescriptionService, Crud) {
                 return count > 0;
             };
 
-            return Crud.crudForEntityType(entityType).
+            return crudService.strategyForCrudId(entityDescriptionService.entityTypeIdCrudId(entityType)).
                 findCount({query: queryForReferencingFields(fields)}).
                 then(countMoreThanZero);
         };

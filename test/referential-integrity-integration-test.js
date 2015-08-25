@@ -48,7 +48,7 @@ exports.referentialIntegrityEnabledAndAllowDeleteWhenNotReferencedTest = functio
         }).then(function () {
             return fooCrud.readEntity('1');
         }, function (err) {
-            assert.fail('delete fails', 'delete should be successful', err, '!=');
+            assert.fail('delete fails', 'delete should be successful', err.stack.toString(), '!=');
         }).then(function (entity) {
             if (entity) {
                 assert.fail('delete fails', 'delete should be successful', 'should not fail because no references to this entity', '!=');
