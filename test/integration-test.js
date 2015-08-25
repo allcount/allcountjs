@@ -35,7 +35,7 @@ module.exports = function (test, fixtureName, testFn) {
                 });
             });
         });
-    }).finally(cleanUp).done(function () {
+    }).finally(cleanUp).finally(function () {
         test.done();
-    });
+    }).done();
 };
