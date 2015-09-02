@@ -36,6 +36,12 @@ exports.referentialIntegrityEnabledTest = function (test) {
             assert.fail('entity deleted successfully', 'error should be thrown', 'should fail due to referential integrity is enabled', '!=');
         }, function (err) {
             assert.ok(err);
+        }).then(function () {
+            return fooCrud.readEntity('1');
+        }).then(function (entity) {
+            if (!entity) {
+                assert.fail('entity deleted successfully', 'error should be thrown', 'should fail due to referential integrity is enabled', '!=');
+            }
         });
     });
 };

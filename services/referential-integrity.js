@@ -7,7 +7,7 @@ module.exports = function (entityDescriptionService, storageDriver, entityRefere
                 return !rootEntityTypeIdAndDescription[1].disableReferentialIntegrity
             }).forEach(function (rootEntityTypeIdAndDescription) {
                 var crudId = entityDescriptionService.entityTypeIdCrudId(rootEntityTypeIdAndDescription[0]);
-                storageDriver.addEntityListener(
+                storageDriver.addBeforeCrudListener(
                     entityDescriptionService.
                         tableDescription(crudId),
                     function (oldEntity, newEntity) {
