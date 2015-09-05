@@ -1,0 +1,19 @@
+# appveyor file
+# http://www.appveyor.com/docs/appveyor-yml
+
+# what combinations to test
+environment:
+  matrix:
+    # node.js
+    - nodejs_version: "0.10"
+    - nodejs_version: "0.11"
+    # io.js
+    - nodejs_version: "1.0"
+
+test_script:
+  - node --version
+  - npm --version
+  - cmd: npm test
+
+services:
+  - mongodb
