@@ -139,10 +139,14 @@ A.app({
 Entity type description has following structure:
 ```js
 {
-  fields: { ... },
   referenceName: "...",
+  fields: { ... },
+  filtering: { ... },
+  sorting: [ ... ],
   views: { ... },
-  permissions: { ... }
+  CRUDhooks: { ... },
+  actions: { ... },
+  permissions: { ... },
 }
 ```
 `fields` and `views` configuration are described below.
