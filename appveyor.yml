@@ -27,3 +27,8 @@ services:
 
 # Don't actually build.
 build: off
+
+notifications:
+  - provider: Webhook
+    url: https://webhooks.gitter.im/e/d221b3f58fc1db241ced
+
