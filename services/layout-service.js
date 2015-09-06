@@ -6,7 +6,7 @@ module.exports = function (entityDescriptionService, appUtil) {
         compile: function () {
             var self = this;
             _.forEach(entityDescriptionService.entityDescriptions, function (description, entityTypeId) {
-                entityTypeIdToLayout[entityTypeId] = description.layout ? self.compileLayout(description.layout) : self.prepareDefaultLayout(description, entityTypeId);
+                entityTypeIdToLayout[entityTypeId] = description.layout && self.compileLayout(description.layout);
             })
         },
         compileLayout: function (layout) {
@@ -74,7 +74,7 @@ module.exports = function (entityDescriptionService, appUtil) {
             }
         },
         layoutFor: function (entityTypeId) {
-            return entityTypeIdToLayout[entityTypeId];
+            return entityTypeIdToLayout[entityTypeId] || this.prepareDefaultLayout(entityDescriptionService.entityDescription(entityDescriptionService.entityTypeIdCrudId(entityTypeId)), entityTypeId);
         }
     }
 

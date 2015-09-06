@@ -154,5 +154,13 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         return injection.inScope({User: user || null}, fn);
     };
 
+    service.withUserScopeByName = function (username, fn) {
+        return findUser(username).then(function (user) {
+            return prepareUserForReq(user);
+        }).then(function (user) {
+            return service.withUserScope(user, fn);
+        })
+    };
+
     return service;
 };

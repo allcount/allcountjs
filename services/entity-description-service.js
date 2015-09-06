@@ -188,7 +188,16 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
     };
 
     service.fieldDescriptions = function (entityCrudId) {
-        return service.entityDescription(entityCrudId).fields;
+        var user = injection.inject('User', true);
+        var readPermissionFilteredFields = service.readPermissionFilteredFields(entityCrudId, user);
+        var writePermissionFilteredFields = service.writePermissionFilteredFields(entityCrudId, user);
+        return service.entityDescription(entityCrudId).fields.filter(function (field) {
+            return readPermissionFilteredFields[field.field];
+        }).map(function (field) {
+            field = _.clone(field);
+            field.isReadOnly = field.isReadOnly || !writePermissionFilteredFields[field.field];
+            return field;
+        });
     };
 
     service.tableDescription = function (entityCrudId) {
@@ -205,9 +214,29 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
 
     service.userHasDeleteAccess = userHasAccessTo('delete', service.userHasWriteAccess.bind(service));
 
-    function userHasAccessTo(permission, parentPermissionFn) {
+    service.permissionFilteredFields = function (permission, parentPermissionFn) {
         return function (entityCrudId, user) {
-            var permissions = service.entityDescription(entityCrudId).permissions;
+            return _.chain(service.entityDescription(entityCrudId).allFields).map(function (field, fieldName) {
+                var hasAccess = userHasAccessTo(permission, parentPermissionFn && parentPermissionFn(field.permissions), function () {
+                    return field.permissions;
+                })(entityCrudId, user);
+                if (hasAccess) {
+                    return [fieldName, field];
+                } else {
+                    return undefined;
+                }
+            }).filter(_.identity).object().value();
+        }
+    };
+
+    service.readPermissionFilteredFields = service.permissionFilteredFields('read');
+    service.writePermissionFilteredFields = service.permissionFilteredFields('write', function (permissions) {
+        return userHasAccessTo('read', undefined, function () { return permissions });
+    });
+
+    function userHasAccessTo(permission, parentPermissionFn, permissionsGetFn) {
+        return function (entityCrudId, user) {
+            var permissions = permissionsGetFn && permissionsGetFn() || service.entityDescription(entityCrudId).permissions;
             return (permissions && !_.isUndefined(permissions[permission])) ? !permissions[permission] || user && _.any(permissions[permission], function (role) {
                 return user.hasRole(role);
             }) : (!parentPermissionFn || parentPermissionFn(entityCrudId, user));

@@ -6,8 +6,14 @@ module.exports = function (test, fixtureName, testFn) {
     var dbUrl = 'mongodb://localhost:27017/' + fixtureName;
 
     var cleanUp = function () {
-        return Q.nbind(mongoose.connect, mongoose)(dbUrl).then(function () {
-            var db = mongoose.connection.db;
+        var deferred = Q.defer();
+        var connection = mongoose.createConnection(dbUrl);
+
+        connection.on('connected', function () {
+            deferred.resolve(connection.db);
+        });
+
+        return deferred.promise.then(function (db) {
             return Q.nbind(db.dropDatabase, db)().then(function () {
                 db.close();
             });

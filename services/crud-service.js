@@ -68,7 +68,46 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
             return next();
         }, ['deleteEntity'], result, crudStrategy);
 
+        wrap(function () {
+            var next = this;
+            var filteredFields = entityDescriptionService.readPermissionFilteredFields(crudId, injection.inject('User', true));
+            return next().then(function (items) {
+                return filterItems(items, filteredFields);
+            });
+        }, ['findAll', 'findRange'], result);
+
+        wrap(function () {
+            var next = this;
+            var filteredFields = entityDescriptionService.readPermissionFilteredFields(crudId, injection.inject('User', true));
+            return next().then(function (item) {
+                return item && filterFields(item, filteredFields);
+            });
+        }, ['getTotalRow', 'readEntity'], result);
+
+        wrap(function (item) {
+            var next = this;
+            var filteredFields = entityDescriptionService.writePermissionFilteredFields(crudId, injection.inject('User', true));
+            filterFields(item, filteredFields);
+            return next();
+        }, ['createEntity', 'updateEntity'], result);
+
         return result;
+
+        function filterItems(items, filteredFields) {
+            _.forEach(items, function (item) {
+                filterFields(item, filteredFields);
+            });
+            return items;
+        }
+
+        function filterFields(item, filteredFields) {
+            _.forEach(item, function (value, fieldName) {
+                if (!filteredFields[fieldName] && fieldName !== 'id') { //TODO is id really special here?
+                    delete item[fieldName];
+                }
+            });
+            return item;
+        }
 
         function checkPermission(permissionName, permissionCheckMethod) {
             var user = injection.inject('User', true);
@@ -88,11 +127,13 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
     }
 
     function wrap(proxyFn, methodsToWrap, obj, target) {
+        target = target || obj;
         _.forEach(methodsToWrap, function (methodName) {
+            var targetFn = target[methodName];
             obj[methodName] = function () {
                 var args = arguments;
                 return proxyFn.apply(function () {
-                    return target[methodName].apply(target, args);
+                    return targetFn.apply(target, args);
                 }, args);
             }
         });

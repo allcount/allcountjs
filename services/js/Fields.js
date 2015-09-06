@@ -154,3 +154,8 @@ Field.prototype.masked = function (mask) {
     this.fieldType.mask = mask;
     return this;
 };
+
+Field.prototype.permissions = function (permissions) {
+    this.permissions = permissions;
+    return this;
+};
