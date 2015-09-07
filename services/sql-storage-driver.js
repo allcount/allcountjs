@@ -44,7 +44,7 @@ module.exports = function (dbUrl, injection, dbClient) {
 
     service.findCount = function (table, filteringAndSorting) {
         var where = queryFor(table, filteringAndSorting);
-        return Q(where(knex(table.tableName)).count('id as count')).then(function (result) {
+        return Q(where(knex(table.tableName)).count('id')).then(function (result) {
             return result[0].count;
         });
     };
@@ -65,7 +65,7 @@ module.exports = function (dbUrl, injection, dbClient) {
 
     service.findRange = function (table, filteringAndSorting, start, count) {
         var query = this.findQuery(table, filteringAndSorting);
-        return Q(query(knex(table.tableName)).limit(parseInt(count)).offset(parseInt(start)))
+        return Q(query(knex(table.tableName)).limit(count).offset(start))
             .then(function (result) {
                 return result.map(fromBson(table.fields))
             });
