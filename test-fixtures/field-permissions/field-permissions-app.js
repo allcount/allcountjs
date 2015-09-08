@@ -19,6 +19,16 @@ A.app({
                         read: ['owner']
                     })
                 }
+            },
+            CreateOnly: {
+                fields: {
+                    foo: Fields.text("Foo"),
+                    bar: Fields.text("Bar")
+                },
+                permissions: {
+                    read: ['manager'],
+                    create: null
+                }
             }
         }
     }

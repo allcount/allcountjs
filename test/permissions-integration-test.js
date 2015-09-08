@@ -51,3 +51,24 @@ exports.permissionsTest = function (test) {
         });
     })
 };
+
+exports.createOnlyTest = function (test) {
+    integrationTests(test, 'field-permissions', function () {
+        var securityService = injection.inject('securityService');
+        var entityDescriptionService = injection.inject('entityDescriptionService');
+        var userCrud = injection.inject('crudService').systemStrategyForCrudId({entityTypeId: 'User'});
+        return Q.all([
+            userCrud.createEntity({username: 'manager', role_manager: true})
+        ]).then(function () {
+            var crud = injection.inject('Crud').crudForEntityType('CreateOnly');
+            return crud.createEntity({foo: "1", bar: '2'}).then(function (id) {
+                return securityService.withUserScopeByName('manager', function () {
+                    return crud.readEntity(id).then(function (entity) {
+                        assert.equal(entity.foo, "1");
+                        assert.equal(entity.bar, "2");
+                    });
+                });
+            })
+        });
+    })
+};
