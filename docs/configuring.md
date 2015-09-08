@@ -144,7 +144,7 @@ Entity type description has following structure:
   filtering: { ... },
   sorting: [ ... ],
   views: { ... },
-  CRUDhooks: { ... },
+  <CRUD_hook_name>: { ... },
   actions: { ... },
   permissions: { ... },
 }
