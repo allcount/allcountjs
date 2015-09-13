@@ -64,9 +64,16 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .done();
     };
 
+    function evalReadOnlyExpression(field, entity) {
+        var readOnlyExpr = field.readOnlyExpression();
+        var entityCopy = JSON.parse(JSON.stringify(entity));
+        var evalResult = readOnlyExpr && eval("("+readOnlyExpr + ")(entityCopy)");
+        return readOnlyExpr && evalResult;
+    }
+
     function removeReadOnlyFieldValues (entityCrudId, entity) {
         _.forEach(entityDescriptionService.entityDescription(entityCrudId).allFields, function (field, fieldName) {
-            if (field.readOnly()) {
+            if (field.readOnly() || evalReadOnlyExpression(field, entity)) {
                 delete entity[fieldName];
             }
         });
