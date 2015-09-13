@@ -1,7 +1,7 @@
 # Introduction
 
 AllcountJS is an application framework aimed for rapid development of business applications.
-The main idea is to make application development fully declarative and reduce application configuration to minimum possible amount.
+The main idea is to make application development fully declarative and reduce application code base size to minimum possible amount.
 AllcountJS could be used as standalone server or as a npm dependency.
 Typical AllcountJS application consists of app configuration and extensions code.
 You could build applications by developing only configuration code though.

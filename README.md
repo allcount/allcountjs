@@ -5,7 +5,7 @@
 # What is AllcountJS
 
 AllcountJS is an application framework aimed for rapid development of business applications.
-The main idea is to make application development fully declarative and reduce application configuration to minimum possible amount.
+The main idea is to make application development fully declarative and reduce application code base size to minimum possible amount.
 
 # Try it
 
@@ -44,11 +44,15 @@ You could also pass `--template <template_name>` option that could be used to in
 After project is initialized you could see created from template `app-config/` and `package.json` in newly created project directory.
 In order to install AllcountJS dependencies please run:
 
-`cd <project_name> && npm install`
+```
+cd <project_name> && npm install
+```
 
 To run your project and to connect to local MongoDB instance please run from project dir:
 
-`allcountjs run`
+```
+allcountjs run
+```
 
 Please note that MongoDB should be running in order to run this example.
 
