@@ -140,6 +140,7 @@ Entity type description has following structure:
 ```js
 {
   referenceName: "...",
+  customView: { ... },
   fields: { ... },
   filtering: { ... },
   sorting: [ ... ],
@@ -149,7 +150,6 @@ Entity type description has following structure:
   permissions: { ... },
 }
 ```
-`fields` and `views` configuration are described below.
 `referenceName` defines entity field name used to show items in reference fields (`Fields.reference()`, `Fields.fixedReference()`).
 `permissions` property defines roles that could access entity type.
 In order to define `foo` and `bar` as read roles and `foobar` as write role you could do:
@@ -159,6 +159,17 @@ In order to define `foo` and `bar` as read roles and `foobar` as write role you 
     write: ['foobar']
   }
 ```
+Other properties of entity are described below.
+
+### CustomView
+`customView` is used to specify custom layout of UI. If property is undefined, then default auto-generated layout will be used for entity web view.
+Property value refers to template, which needs to be defined in `.jade` file. AllcountJS uses [jade template engine](http://jade-lang.com/) to produce resulting HTML. 
+
+For example, this definition:
+```js
+customView: "board"
+```
+requires `board.jade` file with jade template source code inside.
 
 ### Sorting
 
