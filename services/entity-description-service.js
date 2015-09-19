@@ -51,6 +51,21 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 fields.isGuest = Fields.checkbox('Guest');
                 return fields;
             }
+        }),
+        Integration: new appUtil.ConfigObject({
+            referenceName: 'name',
+            permissions: {
+                read: ['admin']
+            },
+            customView: 'integrations',
+            title: 'Integrations',
+            fields: function (Fields) {
+                return {
+                    name: Fields.text('Name').unique().required(),
+                    appId: Fields.text('Application ID').required(),
+                    accessToken: Fields.text('Access Token').readOnly()
+                }
+            }
         })
     };
 

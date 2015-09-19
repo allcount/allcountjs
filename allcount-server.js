@@ -34,7 +34,8 @@ function configure() {
         'migrationService',
         'cloudinaryService',
         'homePageService',
-        "webhookService"
+        "webhookService",
+        'baseUrlService'
     ]);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));
@@ -79,7 +80,7 @@ function configure() {
             next()
         }
     });
-    injection.bindMultiple('appConfigurators', ['webhooksRoute']);
+    injection.bindMultiple('appConfigurators', ['webhooksRoute', 'integrationsRoute']);
     injection.bindFactory('halt', function (gitRepoUrl) {
         return function (cause) {
             console.log(util.format('Exiting app "%s"%s...'), gitRepoUrl, cause ? " (" + cause + ")" : "");
@@ -116,6 +117,7 @@ function configure() {
     injection.bindFactory('Console', function () {
         return console;
     });
+    injection.bindMultiple('integrationProviders', []);
 }
 
 configure();

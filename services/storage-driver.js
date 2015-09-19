@@ -9,7 +9,7 @@ var Schema = mongoose.Schema;
 var ObjectId = mongoose.Types.ObjectId;
 require('mongoose-long')(mongoose);
 
-module.exports = function (dbUrl, injection) {
+module.exports = function (dbUrl, injection, appUtil) {
     var service = {};
     var db;
     var onConnectListeners = [];
@@ -253,7 +253,18 @@ module.exports = function (dbUrl, injection) {
             toInsert.createTime = new Date();
             toInsert.modifyTime = new Date();
             setAuxiliaryFields(table.fields, toInsert, toInsert);
-            return Q(modelFor(table).create(toInsert))
+            return Q(modelFor(table).create(toInsert)).catch(function (err) {
+                if (err.message.indexOf('duplicate key error index') !== -1) {
+                    var fieldToMessage = {};
+                    _.forEach(toInsert, function (v, name) {
+                        if (err.message.indexOf(name) !== -1) {
+                            fieldToMessage[name] = 'Should be unique';
+                        }
+                    });
+                    throw new appUtil.ValidationError(fieldToMessage);
+                }
+                throw err;
+            })
                 .then(callAfterCrudListeners(table, null, fromBson(table.fields)(toInsert)))
                 .then(function (result) {
                     return result._id;

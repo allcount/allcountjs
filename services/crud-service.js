@@ -5,6 +5,9 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
     var service = {};
 
     service.strategyForCrudId = function (crudId) {
+        if (_.isString(crudId)) {
+            crudId = entityDescriptionService.entityTypeIdCrudId(crudId);
+        }
         return _.map(crudStrategies, function (strategy) {
             return securityWrapper(crudId, strategy.crudHandlerFor(crudId));
         })[0];
@@ -112,7 +115,7 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
         function checkPermission(permissionName, permissionCheckMethod) {
             var user = injection.inject('User', true);
             if (!entityDescriptionService[permissionCheckMethod](crudId, user)) {
-                throw new appUtil.ForbiddenError(permissionName + ' permission to ' + JSON.stringify(crudId) + ' denied for ' + user.username);
+                throw new appUtil.ForbiddenError(permissionName + ' permission to ' + JSON.stringify(crudId) + ' denied for ' + (user ? '"' + user.username + '"' : 'unauthorized user'));
             }
         }
     }
