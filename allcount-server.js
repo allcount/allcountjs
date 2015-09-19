@@ -118,6 +118,9 @@ function configure() {
         return console;
     });
     injection.bindMultiple('integrationProviders', []);
+    injection.bindFactory('Q', function () {
+        return Q;
+    });
 }
 
 configure();
