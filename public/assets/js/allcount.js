@@ -680,33 +680,45 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                     return;
                 }
                 scope.entityTypeId = entityTypeId;
-                var bloodhound = new Bloodhound({
-                    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-                    queryTokenizer: Bloodhound.tokenizers.whitespace,
-                    prefetch: "/api/entity/" + entityTypeId + '/reference-values',
-                    remote: "/api/entity/" + entityTypeId + '/reference-values?query=%QUERY'
+
+                var elem = $('.reference-input', element);
+
+                elem.select2({
+                    ajax: {
+                        url: "/api/entity/" + entityTypeId + '/reference-values',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (term) {
+                            return {
+                                query: term
+                            };
+                        },
+                        results: function (data, page) {
+                            // parse the results into the format expected by Select2.
+                            // since we are using custom formatting functions we do not need to
+                            // alter the remote JSON data
+                            return {results: data };
+                        },
+                        cache: true
+                    },
+                    text: function (item) {
+                        return item && item.name;
+                    },
+                    initSelection: function (element, callback) {
+                        if (element.val() === (controller.$viewValue && controller.$viewValue.id)) {
+                            callback(controller.$viewValue);
+                        }
+                    }
+
                 });
 
-                bloodhound.initialize();
-
-                var elem = $('.typeahead', element);
-
-                elem.typeahead(null, {
-                    name: 'reference',
-                    displayKey: 'name',
-                    source: bloodhound.ttAdapter()
-                });
-
-                function onChange(event, referenceValue) {
-                    scope.$apply(function () {
-                        controller.$setViewValue(referenceValue);
-                    })
+                function onChange() {
+                    controller.$setViewValue(elem.val() && (controller.$viewValue && controller.$viewValue.id === elem.val() ? controller.$viewValue : {id: elem.val()}) || null);
                 }
-                elem.on('typeahead:selected', onChange);
-                elem.on('typeahead:autocompleted', onChange);
+                elem.on('change', onChange);
 
                 controller.$render = function () {
-                    elem.typeahead('val', controller.$viewValue && controller.$viewValue.name || '');
+                    elem.select2('val', controller.$viewValue && controller.$viewValue.id || null, true);
                 };
 
                 controller.$render();
@@ -717,7 +729,7 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                 }
 
                 scope.clear = function () {
-                    setValue(undefined);
+                    setValue(null);
                 };
 
                 scope.referenceViewState.onCreate = function () {
@@ -725,12 +737,12 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                         rest.referenceValueByEntityId(entityTypeId, entityId).then(function (referenceValue) {
                             setValue(referenceValue);
                         });
-                        scope.isCreateModalShowing = false;
+                        scope.referenceViewState.isCreateModalShowing = false;
                     })
                 };
 
                 scope.createNewReferenceItem = function () {
-                    scope.isCreateModalShowing = true;
+                    scope.referenceViewState.isCreateModalShowing = true;
                 }
             });
         }
@@ -758,11 +770,18 @@ allcountModule.directive("lcModal", ["$parse", function ($parse) {
                             modal.modal('hide');
                         }
                     }
-                });
+                }, true);
 
                 function fireIsShowing(isShowing) {
                     scope.show = isShowing;
-                    assignIsShowing(scope.$parent, isShowing);
+                    var assign = function () {
+                        assignIsShowing(scope.$parent, isShowing);
+                    };
+                    if(!scope.$$phase) {
+                        scope.$apply(assign);
+                    } else {
+                        assign();
+                    }
                 }
                 modal.on('show.bs.modal', function () { fireIsShowing(true) });
                 modal.on('hide.bs.modal', function () { fireIsShowing(false) });

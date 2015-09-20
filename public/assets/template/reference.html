@@ -1,11 +1,11 @@
-<div class="input-group">
-    <input class="typeahead form-control" type="text">
+<div class="input-group select2-bootstrap-append">
+    <span class="form-control reference-input"></span>
     <span class="input-group-btn">
         <button class="btn btn-danger" ng-click="clear()"><i class="glyphicon glyphicon-remove-circle"></i></button>
         <button class="btn btn-success" ng-click="createNewReferenceItem()"><i class="glyphicon glyphicon-plus"></i></button>
     </span>
 </div>
-<div class="modal fade" lc-modal="isCreateModalShowing">
+<div class="modal fade" lc-modal="referenceViewState.isCreateModalShowing">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
