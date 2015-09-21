@@ -1,24 +1,52 @@
 mixin defaultToolbar(withoutHeader)
+    +defaultToolbarContainer(withoutHeader)
+        +listActions()
+        +createActions()
+        +formActions()
+
+mixin defaultToolbarContainer(withoutHeader)
     div(class=!withoutHeader ? 'toolbar-header' : '')
-        +listActionsContainer()
-            .pull-left: .btn-toolbar
-                +navigateToCreateButton()
-                +startGridEditingButton()
-                +doneGridEditingButton()
-                +actions('all-items')
-                +entityTitle()
-            .pull-right.form-inline
-                +searchInput()
-                +pagingControl()
-        +createActionsContainer(): .btn-toolbar
-            +returnToGridButton()
-            +createEntityButton()
-        +formActionsContainer(): .btn-toolbar
-            +returnToGridButton()
-            +startFormEditingButton()
-            +doneFormEditingButton()
-            +deleteEntityButton()
-            +actions('single-item')
+        block
+
+mixin listActions()
+    +listActionsContainer()&attributes(attributes)
+        +listActionsToolbarContainer()
+            +navigateToCreateButton()
+            +startGridEditingButton()
+            +doneGridEditingButton()
+            +actions('all-items')
+            block
+            +entityTitle()
+        +searchAndPagingContainer()
+            +searchInput()
+            +pagingControl()
+
+mixin createActions()
+    +createActionsContainer()&attributes(attributes): +toolbarContainer()
+        +returnToGridButton()
+        +createEntityButton()
+        block
+
+mixin formActions()
+    +formActionsContainer()&attributes(attributes): +toolbarContainer()
+        +returnToGridButton()
+        +startFormEditingButton()
+        +doneFormEditingButton()
+        +deleteEntityButton()
+        block
+        +actions('single-item')
+
+mixin toolbarContainer()
+    .btn-toolbar
+        block
+
+mixin listActionsToolbarContainer()
+    .pull-left: +toolbarContainer()
+        block
+
+mixin searchAndPagingContainer()
+    .pull-right.form-inline
+        block
 
 mixin listActionsContainer()
     .container.form-inline(ng-show='viewState.mode == "list"')&attributes(attributes)
