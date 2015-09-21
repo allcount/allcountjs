@@ -4,7 +4,7 @@ include mixins
 block vars
     - var hasToolbar = true
 block content
-    .a-refresh-form-controller(ng-app='allcount', ng-controller='EntityViewController')
+    div(ng-app='allcount', ng-controller='EntityViewController')
         +defaultToolbar()
         .container.screen-container(ng-cloak)
             +defaultGrid()
