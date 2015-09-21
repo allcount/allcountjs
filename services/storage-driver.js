@@ -69,6 +69,8 @@ module.exports = function (dbUrl, injection, appUtil) {
                 fieldType = Date;
             } else if (field.fieldType.id === 'reference') {
                 fieldType = {id: Schema.ObjectId, name: String};
+            } else if (field.fieldType.id === 'multiReference') {
+                fieldType = [{id: Schema.ObjectId, name: String}];
             } else if (field.fieldType.id === 'attachment') {
                 fieldType = {}; // allow to save attachments in different storage providers
             } else if (field.fieldType.id === 'integer') {
@@ -359,6 +361,8 @@ module.exports = function (dbUrl, injection, appUtil) {
         var strings = convertEntity(fields, function (value, field) {
             if (field.fieldType.id == 'reference' && value) {
                 return value.name && value.name.toString() || undefined;
+            } else if (field.fieldType.id == 'multiReference' && value) {
+                return value.map(_.property('name')).join(' ');
             }
             return value && value.toString() || undefined;
         }, entity);
@@ -421,17 +425,14 @@ module.exports = function (dbUrl, injection, appUtil) {
             return '';
         } else if (field.fieldType.id == 'reference') {
             return value && value.id ? {id: value.id.toString(), name: value.name} : undefined;
+        } else if (field.fieldType.id === 'multiReference') {
+            return value && value.map(function (v) { return {id: v.id.toString(), name: v.name}}) || undefined;
         }
         return value;
     }
 
     function toBsonValue(value, field, entity, fieldName) {
-        if (field.fieldType.id == 'date' && value) {
-            if (_.isDate(value)) {
-                return value;
-            }
-            return moment(value, 'YYYY-MM-DD').toDate(); //TODO move to REST layer?
-        } else if (field.fieldType.id == 'reference' && value) {
+        var toDbReference = function (value) {
             if (!value.id) {
                 throw new Error("Reference value without id was passed for field '" + fieldName + "'"); //TODO mongoose returns empty objects for reference if it's undefined, Maybe return null here?
             }
@@ -439,6 +440,16 @@ module.exports = function (dbUrl, injection, appUtil) {
                 id: toMongoId(value.id),
                 name: value.name
             }
+        };
+        if (field.fieldType.id == 'date' && value) {
+            if (_.isDate(value)) {
+                return value;
+            }
+            return moment(value, 'YYYY-MM-DD').toDate(); //TODO move to REST layer?
+        } else if (field.fieldType.id == 'reference' && value) {
+            return toDbReference(value);
+        } else if (field.fieldType.id == 'multiReference' && value) {
+            return value.map(toDbReference);
         } else if (field.fieldType.id == 'money' && value) {
             return mongo.Long.fromString(value.toString());
         } else if (field.fieldType.id == 'checkbox' && field.fieldType.storeAsArrayField && !_.isUndefined(value)) {

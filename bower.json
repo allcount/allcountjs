@@ -17,7 +17,7 @@
     "angular-ui-sortable": "0.13.4",
     "angular-bootstrap": "0.13.0",
     "blueimp-gallery": "~2.15.2",
-    "allcountjs-angular-base": "1.0.0",
+    "allcountjs-angular-base": "1.1.0",
     "select2": "~3.4.0",
     "select2-bootstrap-css": "~1.4.6"
   },

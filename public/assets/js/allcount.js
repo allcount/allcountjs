@@ -108,6 +108,15 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             return viewValue && $.inputmask.format(viewValue.slice(0, viewValue.length - 2) + currencyConfig.radixPoint + viewValue.slice(viewValue.length - 2), currencyConfig) || undefined;
         }
 
+        var referenceRenderer = function (value, fieldDescription) {
+            if (value) {
+                var link = $('<a></a>');
+                link.attr('href', '/entity/' + fieldDescription.fieldType.referenceEntityTypeId + '/' + value.id); //TODO base href
+                link.text(value.name);
+                return link;
+            }
+            return undefined;
+        };
         return {
             text: [function (value, fieldDescription) {
                 return fieldDescription.fieldType.isMultiline ? textareaRenderer(value) : value;
@@ -173,15 +182,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 });
                 return $compile('<div class="checkbox"><label><input type="checkbox" ng-model="checkboxValue"></label></div>')(scope);
             }],
-            reference: [function (value, fieldDescription) {
-                if (value) {
-                    var link = $('<a></a>');
-                    link.attr('href', '/entity/' + fieldDescription.fieldType.referenceEntityTypeId + '/' + value.id); //TODO base href
-                    link.text(value.name);
-                    return link;
-                }
-                return undefined;
-            }, function (fieldDescription, controller, updateValue, clone, scope) {
+            reference: [referenceRenderer, function (fieldDescription, controller, updateValue, clone, scope) {
                 if (fieldDescription.fieldType.render === 'fixed') {
                     rest.referenceValues(fieldDescription.fieldType.referenceEntityTypeId, function (referenceValues) {
                         scope.referenceValues = referenceValues;
@@ -206,6 +207,27 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     return $compile('<div ng-model="selectedReference.value" lc-reference="referenceEntityTypeId"></div>')(scope);
 
                 }
+            }],
+            multiReference: [function (value, fieldDescription) {
+                if (value) {
+                    var container = $('<div></div>');
+                    value.forEach(function (i) {
+                        var wrapper = $('<div></div>');
+                        wrapper.append(referenceRenderer(i, fieldDescription));
+                        container.append(wrapper);
+                    });
+                    return container;
+                }
+                return undefined;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.referenceEntityTypeId = fieldDescription.fieldType.referenceEntityTypeId;
+
+                scope.$watch('selectedReference.value', function (referenceValue) {
+                    controller.$setViewValue(referenceValue);
+                });
+                scope.selectedReference = {value: controller.$viewValue};
+
+                return $compile('<div ng-model="selectedReference.value" lc-reference="referenceEntityTypeId" is-multiple="true"></div>')(scope);
             }],
             password: [function (value) {
                 return '';
@@ -683,6 +705,13 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
 
                 var elem = $('.reference-input', element);
 
+                var isMultiple = attrs.isMultiple && scope.$eval(attrs.isMultiple);
+                var viewValueAndValEquals = function (element) {
+                    if (!element.val()) {
+                        return !controller.$viewValue;
+                    }
+                    return angular.equals(element.val().split(','), controller.$viewValue && _.map(controller.$viewValue, _.property('id')));
+                };
                 elem.select2({
                     ajax: {
                         url: "/api/entity/" + entityTypeId + '/reference-values',
@@ -701,24 +730,51 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                         },
                         cache: true
                     },
+                    tags: isMultiple,
                     text: function (item) {
                         return item && item.name;
                     },
                     initSelection: function (element, callback) {
-                        if (element.val() === (controller.$viewValue && controller.$viewValue.id)) {
-                            callback(controller.$viewValue);
+                        if (isMultiple) {
+                            if (element.val() && viewValueAndValEquals(element)) {
+                                callback(controller.$viewValue);
+                            }
+                        } else {
+                            if (element.val() === (controller.$viewValue && controller.$viewValue.id)) {
+                                callback(controller.$viewValue);
+                            }
                         }
                     }
 
                 });
 
                 function onChange() {
-                    controller.$setViewValue(elem.val() && (controller.$viewValue && controller.$viewValue.id === elem.val() ? controller.$viewValue : {id: elem.val()}) || null);
+                    if (isMultiple) {
+                        if (!viewValueAndValEquals(elem)) {
+                            controller.$setViewValue(elem.val() && _.map(elem.select2('val'), function (i) { return {id: i}}) || null);
+                        }
+                    } else {
+                        controller.$setViewValue(elem.val() && (controller.$viewValue && controller.$viewValue.id === elem.val() ? controller.$viewValue : {id: elem.val()}) || null);
+                    }
                 }
-                elem.on('change', onChange);
+
+                function phaseWrapper(func) {
+                    return function () {
+                        if(!scope.$$phase) {
+                            scope.$apply(func);
+                        } else {
+                            func();
+                        }
+                    }
+                }
+                elem.on('change', phaseWrapper(onChange));
 
                 controller.$render = function () {
-                    elem.select2('val', controller.$viewValue && controller.$viewValue.id || null, true);
+                    if (isMultiple) {
+                        elem.select2('val', controller.$viewValue && _.map(controller.$viewValue, _.property('id')) || null, true);
+                    } else {
+                        elem.select2('val', controller.$viewValue && controller.$viewValue.id || null, true);
+                    }
                 };
 
                 controller.$render();
@@ -735,7 +791,13 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                 scope.referenceViewState.onCreate = function () {
                     scope.referenceViewState.editForm.createEntity(function (entityId) { //TODO
                         rest.referenceValueByEntityId(entityTypeId, entityId).then(function (referenceValue) {
-                            setValue(referenceValue);
+                            if (isMultiple) {
+                                var v = _.clone(controller.$viewValue);
+                                v.push(referenceValue);
+                                setValue(v);
+                            } else {
+                                setValue(referenceValue);
+                            }
                         });
                         scope.referenceViewState.isCreateModalShowing = false;
                     })

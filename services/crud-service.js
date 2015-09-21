@@ -43,6 +43,15 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
                 ).then(function (referenceValue) {
                         entity[field.field] = referenceValue;
                     });
+            } else if (field.fieldType.id === 'multiReference' && entity[field.field]) {
+                return Q.all(entity[field.field].map(function (entry) {
+                    return service.referenceValueByEntityId(
+                        entityDescriptionService.entityTypeIdCrudId(field.fieldType.referenceEntityTypeId),
+                        entry.id
+                    )
+                })).then(function (referenceValue) {
+                    entity[field.field] = referenceValue;
+                });
             }
             return undefined;
         }));

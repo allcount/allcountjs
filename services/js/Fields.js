@@ -77,6 +77,16 @@ exports.reference = function (name, referenceEntityTypeId) {
     });
 };
 
+exports.multiReference = function (name, referenceEntityTypeId) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'multiReference',
+            referenceEntityTypeId: referenceEntityTypeId
+        }
+    });
+};
+
 exports.relation = function (name, relationEntityTypeId, backReferenceField) {
     return new Field({
         name: name,
