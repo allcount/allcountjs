@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (entityDescriptionService, storageDriver) {
+module.exports = function (entityDescriptionService, storageDriver, Q) {
     var AggregateFunToMongoFun = {
         sum: "$sum"
     };
@@ -29,6 +29,22 @@ module.exports = function (entityDescriptionService, storageDriver) {
                     }
                 } else {
                     throw new Error('Only sum queries are supported')
+                }
+            } else {
+                throw new Error('Only function queries are supported');
+            }
+        },
+        getChangedIds: function (query, rootEntityTypeId, oldEntity, newEntity) {
+            if (query.fun) {
+                var path = query.value.path;
+                if (path.length !== 2) {
+                    throw new Error('Only two path elements are supported for queries');
+                }
+                if (path[0].forward === false) {
+                    var backReferenceFieldValue = newEntity ? newEntity[path[0].backReferenceField] : oldEntity[path[0].backReferenceField];
+                    return Q(backReferenceFieldValue ? [backReferenceFieldValue.id] : []);
+                } else {
+                    throw new Error('Only back reference queries are supported')
                 }
             } else {
                 throw new Error('Only function queries are supported');

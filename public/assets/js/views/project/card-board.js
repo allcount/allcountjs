@@ -34,7 +34,7 @@ cardBoardModule.controller('BoardController', ['$scope', 'rest', '$q', function 
             })
         }).flatten().filter(_.identity).value()).then(function (results) {
             if (results.length > 0) {
-                $scope.gridMethods.updateGrid();
+                $scope.viewState.gridMethods.updateGrid();
             }
         }, function () {
             updateBoardItems($scope.items);

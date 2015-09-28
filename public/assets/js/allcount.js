@@ -242,7 +242,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             }],
             relation: [false, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.$parent.$watch('entity', function (entity) {
-                    scope.entityCrudId = entity.id ? {
+                    scope.entityCrudId = entity && entity.id ? {
                         entityTypeId: scope.entityTypeId,
                         relationField: fieldDescription.field,
                         parentEntityId: entity.id

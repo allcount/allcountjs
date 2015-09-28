@@ -64,11 +64,11 @@ mixin entityTitle()
     span.entity-title.hidden-xs.hidden-sm= messages(entityTitle) || ' '
 
 mixin navigateToCreateButton()
-    button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='gridMethods.permissions().create')&attributes(attributes)
+    button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().create')&attributes(attributes)
         i.glyphicon.glyphicon-plus
 
 mixin startGridEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='gridMethods.permissions().update || gridMethods.permissions().delete')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().update || viewState.gridMethods.permissions().delete')&attributes(attributes)
         i.glyphicon.glyphicon-pencil
 
 mixin doneGridEditingButton()
@@ -76,7 +76,7 @@ mixin doneGridEditingButton()
         i.glyphicon.glyphicon-ok
 
 mixin startFormEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='gridMethods.permissions().update')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='viewState.gridMethods.permissions().update')&attributes(attributes)
         i.glyphicon.glyphicon-pencil
 
 mixin doneFormEditingButton()
@@ -88,18 +88,18 @@ mixin returnToGridButton()
         i.glyphicon.glyphicon-chevron-left
 
 mixin createEntityButton()
-    button.btn.btn-default.ng-cloak(ng-click='createForm.createEntity(returnToGrid)', lc-tooltip="entity.done")&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='viewState.createForm.createEntity(returnToGrid)', lc-tooltip="entity.done")&attributes(attributes)
         i.glyphicon.glyphicon-ok
 
 mixin deleteEntityButton()
-    button.btn.btn-danger.ng-cloak(lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='gridMethods.permissions().delete', popover-title=messages('Are you sure you want to delete it?'), popover-template="viewState.mode == 'form' ? '/assets/template/delete-confirm.html' : null", popover-placement="bottom")&attributes(attributes)
+    button.btn.btn-danger.ng-cloak(lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='viewState.gridMethods.permissions().delete', popover-title=messages('Are you sure you want to delete it?'), popover-template="viewState.mode == 'form' ? '/assets/template/delete-confirm.html' : null", popover-placement="bottom")&attributes(attributes)
         i.glyphicon.glyphicon-trash
 
 mixin searchInput()
     input.form-control.hidden-xs(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))&attributes(attributes)
 
 mixin pagingControl()
-    span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')&attributes(attributes)
+    span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='viewState.pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')&attributes(attributes)
 
 mixin actions(actionTarget)
     button.btn.btn-default.ng-cloak(
@@ -110,7 +110,7 @@ mixin actions(actionTarget)
     on-refresh="refreshOnAction()",
     selected-items="[viewState.formEntityId]",
     ng-disabled="!action.isEnabled || action.isPerforming",
-    publish-methods="actionMethods",
+    publish-methods="viewState.actionMethods",
     class!=attributes.class
     )
         i.fa.fa-fw.fa-spin.fa-spinner(ng-if="action.isPerforming")
@@ -127,11 +127,11 @@ mixin defaultEditAndCreateForms()
         +defaultFormTemplate()
 
 mixin defaultCreateForm()
-    .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='createForm', is-editor="true")&attributes(attributes)
+    .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='viewState.createForm', is-editor="true")&attributes(attributes)
         block
 
 mixin defaultEditForm()
-    .right-animation-screen.form-horizontal(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='editForm', is-editor='viewState.isFormEditing')&attributes(attributes)
+    .right-animation-screen.form-horizontal(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='viewState.editForm', is-editor='viewState.isFormEditing')&attributes(attributes)
         block
 
 mixin defaultFormTemplate()
@@ -172,7 +172,7 @@ mixin defaultGrid()
     navigate='navigateTo($entityId)',
     paging='viewState.paging',
     total-row='viewState.totalRow',
-    publish-methods='gridMethods'
+    publish-methods='viewState.gridMethods'
     )&attributes(attributes)
         +gridTemplate()
 
@@ -244,7 +244,7 @@ mixin defaultList()
     navigate='navigateTo($entityId)',
     paging='viewState.paging',
     total-row='viewState.totalRow',
-    publish-methods='gridMethods'
+    publish-methods='viewState.gridMethods'
     )&attributes(attributes)
         block
 

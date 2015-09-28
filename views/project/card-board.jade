@@ -7,20 +7,7 @@ block content
     .a-refresh-form-controller(ng-app='allcount-card-board', ng-controller='EntityViewController')
         +defaultToolbar()
         .container.screen-container
-            .left-animation-screen(
-            lc-list='"' + entityTypeId + '"',
-            filtering='viewState.filtering',
-            ng-show='viewState.mode == "list" && viewState.paging.count > 0',
-            edit-mode='viewState.editState',
-            navigate='navigateTo($entityId)',
-            paging='viewState.paging',
-            total-row='viewState.totalRow',
-            publish-methods='gridMethods',
-            ng-controller='BoardController as boardController',
-            ng-cloak,
-            ng-init="entityTypeId = '" + entityTypeId + "'",
-            style="overflow-y: scroll"
-            )
+            +defaultList()(style="overflow-y: scroll", ng-cloak, ng-init="entityTypeId = '" + entityTypeId + "'", ng-controller='BoardController as boardController')
                 block boardInit
                 table.table
                     thead: tr

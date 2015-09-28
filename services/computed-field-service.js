@@ -29,19 +29,18 @@ module.exports = function (entityDescriptionService, storageDriver, queryCompile
                         if (!pathElement.entityTypeId) {
                             return;
                         }
-                        storageDriver.addEntityListener(
+                        storageDriver.addAfterCrudListener(
                             entityDescriptionService.tableDescription(entityDescriptionService.entityTypeIdCrudId(pathElement.entityTypeId)),
                             function (oldEntity, newEntity) {
-                                //TODO get changed ids
-                                return storageDriver.findAll(description.tableDescription, {}).then(function (rootEntities) {
-                                    return Q.all(rootEntities.map(function (rootEntity) {
-                                        return queryPerformerService.performSingleValueSelect(query, rootEntityTypeId, rootEntity.id).then(function (value) {
-                                            var toUpdate = {id: rootEntity.id};
+                                return queryPerformerService.getChangedIds(query, rootEntityTypeId, oldEntity, newEntity).then(function (changedIds) {
+                                    return Q.all(changedIds.map(function (changedId) {
+                                        return queryPerformerService.performSingleValueSelect(query, rootEntityTypeId, changedId).then(function (value) {
+                                            var toUpdate = {id: changedId};
                                             toUpdate[fieldName] = value;
                                             return storageDriver.updateEntity(description.tableDescription, toUpdate);
                                         })
                                     }));
-                                });
+                                })
                             }
                         )
                     });

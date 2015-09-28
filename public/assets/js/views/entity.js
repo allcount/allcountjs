@@ -14,8 +14,8 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
         });
         $scope.viewState.mode = 'list';
         $scope.viewState.isFormEditing = false;
-        $scope.pagingMethods.refresh();
-        $scope.gridMethods.updateGrid();
+        $scope.viewState.pagingMethods && $scope.viewState.pagingMethods.refresh();
+        $scope.viewState.gridMethods && $scope.viewState.gridMethods.updateGrid();
     };
 
     $scope.navigateTo = function (entityId) {
@@ -31,7 +31,7 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
         track('allcount-entity-start-editing', {
             location: $window.location.href
         });
-        $scope.editForm.reloadEntity(function () {
+        $scope.viewState.editForm.reloadEntity(function () {
             $scope.viewState.isFormEditing = true;
         });
     };
@@ -40,10 +40,10 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
         track('allcount-entity-done-editing', {
             location: $window.location.href
         });
-        $scope.editForm.updateEntity(function () {
+        $scope.viewState.editForm.updateEntity(function () {
             $scope.viewState.isFormEditing = false;
-            $scope.editForm.reloadEntity();
-            $scope.actionMethods.refresh();
+            $scope.viewState.editForm.reloadEntity();
+            $scope.viewState.actionMethods && $scope.viewState.actionMethods.refresh();
         });
     };
 
@@ -51,11 +51,12 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
         track('allcount-entity-delete', {
             location: $window.location.href
         });
-        $scope.editForm.deleteEntity(function () {
+        $scope.viewState.editForm.deleteEntity(function () {
             $scope.viewState.mode = 'list';
             $scope.viewState.isFormEditing = false;
-            $scope.pagingMethods.refresh();
-            $scope.gridMethods.updateGrid();
+            delete $scope.viewState['formEntityId'];
+            $scope.viewState.pagingMethods && $scope.viewState.pagingMethods.refresh();
+            $scope.viewState.gridMethods && $scope.viewState.gridMethods.updateGrid();
         });
     };
 
@@ -73,9 +74,9 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
         $scope.viewState.editState = false;
         setTimeout(function () {
             $scope.$evalAsync(function () {
-                $scope.pagingMethods.refresh();
-                $scope.gridMethods.updateGrid();
-                $scope.actionMethods.refresh();
+                $scope.viewState.pagingMethods && $scope.viewState.pagingMethods.refresh();
+                $scope.viewState.gridMethods && $scope.viewState.gridMethods.updateGrid();
+                $scope.viewState.actionMethods && $scope.viewState.actionMethods.refresh();
             });
         }, 400); //TODO delay for animation hack
     };
@@ -85,13 +86,13 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
             location: $window.location.href
         });
         $scope.viewState.mode = 'create';
-        $scope.createForm.reloadEntity();
+        $scope.viewState.createForm.reloadEntity();
     };
 
     $scope.refreshOnAction = function () {
-        $scope.pagingMethods.refresh();
-        $scope.gridMethods.updateGrid();
-        $scope.editForm.reloadEntity();
+        $scope.viewState.pagingMethods && $scope.viewState.pagingMethods.refresh();
+        $scope.viewState.gridMethods && $scope.viewState.gridMethods.updateGrid();
+        $scope.viewState.editForm && $scope.viewState.editForm.reloadEntity();
     };
 
     $scope.showList = function () {
@@ -132,6 +133,23 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
     $scope.$watch('viewState.mode', $scope.updateLocationFromState);
     $scope.$watch('viewState.formEntityId', $scope.updateLocationFromState);
     $scope.$watch('viewState.isFormEditing', $scope.updateLocationFromState);
+
+    // backward compatibility
+    $scope.$watch('viewState.editForm', function (editForm) {
+        $scope.editForm = editForm;
+    });
+    $scope.$watch('viewState.createForm', function (createForm) {
+        $scope.createForm = createForm;
+    });
+    $scope.$watch('viewState.gridMethods', function (gridMethods) {
+        $scope.gridMethods = gridMethods;
+    });
+    $scope.$watch('viewState.pagingMethods', function (pagingMethods) {
+        $scope.pagingMethods = pagingMethods;
+    });
+    $scope.$watch('viewState.actionMethods', function (actionMethods) {
+        $scope.actionMethods = actionMethods;
+    });
 
     $scope.updateStateFromLocation();
 }];
