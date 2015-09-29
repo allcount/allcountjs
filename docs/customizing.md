@@ -306,8 +306,8 @@ injection.bindFactory('myFooService', function () {
 AllcountJS provides JSON REST API to perform all operations available to users including entity query, create, update, delete as well as utility operations to load entity descriptions.
 There is a brief cheat sheet for these APIs:
 
-* `POST` `/api/sign-up` - Sign up user if available. Expects `{ username: "...", password: "..."}` body.
-* `POST` `/api/sign-in` - Sign in user. Expects `{ username: "...", password: "..."}` body. Returns access token in format `{token: "..."}`. This token should be passed in `X-Access-Token` header for all requests requiring authentication.
+* `POST` `/api/sign-up` - Sign up user if available. Expects `{ "username": "...", "password": "..."}` body.
+* `POST` `/api/sign-in` - Sign in user. Expects `{ "username": "...", "password": "..."}` body. Returns access token in format `{token: "..."}`. This token should be passed in `X-Access-Token` header for all requests requiring authentication.
 * `GET` `/api/entity/:entityTypeId/count` - Get entity count for `entityTypeId`. You could pass filtering param described below. Returns `{ count: ...}` object.
 * `GET` `/api/entity/:entityTypeId` - Load entities `entityTypeId`. You could pass filtering param described below. Returns array of entities.
 * `POST` `/api/entity/:entityTypeId` - Create entity for `entityTypeId`. Expects entity object body.
