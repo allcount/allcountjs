@@ -212,7 +212,7 @@ module.exports = function (dbUrl, injection, appUtil) {
                     }
                     var filterValue = filteringAndSorting.filtering[fieldName];
                     if (field.fieldType.id == 'reference') {
-                        query[fieldName + '.id'] = toMongoId(filteringAndSorting.filtering[fieldName])
+                        query[fieldName + '.id'] = toMongoId(filteringAndSorting.filtering[fieldName].id || filteringAndSorting.filtering[fieldName])
                     } else if (field.fieldType.id == 'checkbox') {
                         query[fieldName] = filteringAndSorting.filtering[fieldName] ? filteringAndSorting.filtering[fieldName] : {$in: [false, null]};
                     } else if (field.fieldType.id == 'date') {
