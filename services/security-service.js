@@ -134,9 +134,11 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
     };
 
     function prepareUserForReq(user) {
-        user.hasRole = function (role) {
-            return this['role_' + role] === true || this.role_admin === true;
-        };
+        if (user) {
+            user.hasRole = function (role) {
+                return this['role_' + role] === true || this.role_admin === true;
+            };
+        }
         return user;
     }
 
