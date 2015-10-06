@@ -3,7 +3,20 @@
 @import "../lib/less/components-font-awesome/font-awesome";
 @import (inline) "../lib/css/blueimp-file-upload/jquery.fileupload.css";
 @import (inline) "../lib/css/blueimp-gallery/blueimp-gallery.css";
+
 @import (inline) "../lib/css/select2/select2.css";
+
+@media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-resolution: 2dppx)  {
+  .select2-search input,
+  .select2-search-choice-close,
+  .select2-container .select2-choice abbr,
+  .select2-container .select2-choice .select2-arrow b {
+    background-image: url('/assets/lib/png/select2/select2x2.png') !important;
+    background-repeat: no-repeat !important;
+    background-size: 60px 40px !important;
+  }
+}
+
 @import "../../../bower_components/select2-bootstrap-css/lib/select2-bootstrap.less";
 
 @fa-font-path:   "/assets/lib/fonts/components-font-awesome";
@@ -425,10 +438,26 @@ a.select2-search-choice-close {
   .glyphicon-remove;
   font-size: 10px;
   color: @btn-default-color;
-  background: none;
+  background: none !important;
   position: absolute;
   top: 12px;
   &:hover {
     text-decoration: none;
   }
+}
+
+.select2-search input.select2-active {
+  background: #fff url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%;
+  background: url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%, -webkit-gradient(linear, left bottom, left top, color-stop(0.85, #fff), color-stop(0.99, #eee));
+  background: url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%, -webkit-linear-gradient(center bottom, #fff 85%, #eee 99%);
+  background: url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%, -moz-linear-gradient(center bottom, #fff 85%, #eee 99%);
+  background: url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%, linear-gradient(to bottom, #fff 85%, #eee 99%) 0 0;
+}
+
+.select2-more-results.select2-active {
+  background: #f4f4f4 url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100%;
+}
+
+.select2-container-multi .select2-choices .select2-search-field input.select2-active {
+  background: #fff url('/assets/lib/gif/select2/select2-spinner.gif') no-repeat 100% !important;
 }
