@@ -121,6 +121,7 @@ function configure() {
     injection.bindFactory('Q', function () {
         return Q;
     });
+    injection.bindFactory('ValidationError', require('./services/validation-error'));
 }
 
 configure();

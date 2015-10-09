@@ -2,7 +2,7 @@ var util = require('util');
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (injection) {
+module.exports = function (injection, ValidationError) {
     function CompileError () {
         this.message = util.format.apply(util.format, arguments);
         this.name = "CompileError";
@@ -10,15 +10,6 @@ module.exports = function (injection) {
     }
 
     util.inherits(CompileError, Error);
-
-    function ValidationError (fieldNameToMessage) {
-        this.fieldNameToMessage = fieldNameToMessage;
-        this.message = JSON.stringify(fieldNameToMessage);
-        this.name = "ValidationError";
-        Error.captureStackTrace(this, arguments.callee);
-    }
-
-    util.inherits(ValidationError, Error);
 
     function ForbiddenError (message) {
         this.message = message;
