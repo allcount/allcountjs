@@ -110,9 +110,8 @@ mixin actions(actionTarget)
     on-refresh="refreshOnAction()",
     selected-items="[viewState.formEntityId]",
     ng-disabled="!action.isEnabled || action.isPerforming",
-    publish-methods="viewState.actionMethods",
-    class!=attributes.class
-    )
+    publish-methods="viewState.actionMethods"
+    )&attributes(attributes)
         i.fa.fa-fw.fa-spin.fa-spinner(ng-if="action.isPerforming")
         | {{action.name}}
 
@@ -136,32 +135,50 @@ mixin defaultEditForm()
 
 mixin defaultFormTemplate()
     +defaultFormLayout()
-        +defaultFormLabel()
-        +defaultFormFieldContainer()
-            +defaultFormField()
-            +defaultFormValidationMessage()
+        +defaultLabelAndFieldVar()
 
+mixin fieldGroup(field)
+    - field = field ? "'" + field + "'" : field
+    +defaultFormGroup(field)
+        +defaultLabelAndFieldVar(field)
+
+mixin defaultLabelAndFieldVar(field)
+    +defaultFormLabel(field)
+    +defaultFormFieldContainer(field)
+        +defaultFormField(field)
+        +defaultFormValidationMessage(field)
 
 mixin defaultFormLayout()
-    .form-group(a-layout='entityTypeId', field='field', ng-class="{'has-warning': isFieldChanged(field), 'has-error': validationErrors[field]}")&attributes(attributes)
+    +defaultFormGroup()(a-layout='entityTypeId', field='field')&attributes(attributes)
         block
 
-mixin defaultFormLabel()
-    label.control-label(ng-class='labelWidthClass(labelWidth)', ng-if='showLabel(field)', lc-message='{{fieldToDesc[field].name}}')&attributes(attributes)
+mixin defaultFormGroup(field)
+    - field = field || 'field';
+    .form-group(ng-class="{'has-warning': isFieldChanged(#{field}), 'has-error': validationErrors[#{field}]}")&attributes(attributes)
         block
 
-mixin defaultFormFieldContainer()
-    div(ng-class="!showLabel(field) && 'col-sm-12' || fieldWidthClass(labelWidth)")&attributes(attributes)
+//TODO: get rid off width classes?
+mixin defaultFormLabel(field)
+    - field = field || 'field';
+    label.control-label(ng-class="labelWidthClass && labelWidthClass(labelWidth) || 'col-md-3'", ng-if="showLabel(#{field})", lc-message="{{fieldToDesc[#{field}].name}}")&attributes(attributes)
         block
 
-mixin defaultFormField()
-    +defaultField('fieldToDesc[field]', 'entity[field]', 'isEditor')&attributes(attributes)
+//TODO: get rid off width classes?
+mixin defaultFormFieldContainer(field)
+    - field = field || 'field';
+    div(ng-class="!showLabel(#{field}) && 'col-sm-12' || fieldWidthClass && fieldWidthClass(labelWidth) || 'col-md-9'")&attributes(attributes)
+        block
+
+mixin defaultFormField(field)
+    - field = field || 'field';
+    +defaultField("fieldToDesc[" + field + "]", "entity[" + field+ "]", 'isEditor')&attributes(attributes)
 
 mixin defaultField(field, model, isEditor)
     div(lc-field=field, ng-model=model, is-editor=isEditor)&attributes(attributes)
 
-mixin defaultFormValidationMessage()
-    .text-danger(ng-if='validationErrors[field]', lc-message='{{validationErrors[field]}}')&attributes(attributes)
+mixin defaultFormValidationMessage(field)
+    - field = field || 'field';
+    .text-danger(ng-if="validationErrors[#{field}]", lc-message="{{validationErrors[#{field}]}}")&attributes(attributes)
 
 mixin defaultGrid()
     .left-animation-screen(
