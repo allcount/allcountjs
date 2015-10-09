@@ -8,6 +8,7 @@ function setupConfigFiles(content) {
             {fileName: 'root.js', content: content}
         ]);
     }});
+    injection.bindFactory('ValidationError', require('../services/validation-error'));
 }
 
 function ensureObjects(ensureFunc) {

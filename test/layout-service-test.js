@@ -3,6 +3,7 @@ var injection = require('../services/injection.js');
 
 exports.gutter = function (test) {
     injection.resetInjection();
+    injection.bindFactory('ValidationError', require('../services/validation-error'));
     var layoutService = injection.inject('layoutService');
     var compiled = layoutService.compileLayout({
         H: [
