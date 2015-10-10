@@ -5,3 +5,4 @@ public/assets/less/*.css
 tmp/
 bower_components/
 public/assets/lib/
+build/

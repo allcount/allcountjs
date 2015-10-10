@@ -1,22 +1,6 @@
-script(src='/assets/js/jquery.visible.js')
-script(src='/assets/lib/js/bootstrap/js/bootstrap.js')
-script(src='/assets/lib/js/angular-animate/angular-animate.js')
-script(src='/assets/lib/js/blueimp-file-upload/jquery.ui.widget.js')
-script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload.js')
-script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload-process.js')
-script(src='/assets/lib/js/blueimp-file-upload/jquery.iframe-transport.js')
-script(src='/assets/lib/js/blueimp-file-upload/jquery.fileupload-angular.js')
-script(src='/assets/lib/js/select2/select2.js')
-script(src='/assets/lib/js/jquery.inputmask/jquery.inputmask.js')
-script(src='/assets/lib/js/jquery.inputmask/jquery.inputmask.numeric.extensions.js')
-script(src="/assets/lib/js/angular-bootstrap/ui-bootstrap.js")
-script(src="/assets/lib/js/angular-bootstrap/ui-bootstrap-tpls.js")
-script(src="/assets/lib/js/blueimp-gallery/blueimp-gallery.js")
+include script-mixins
+
++concatScripts('/assets/js/allcount-core-scripts.js')
 
 if locale
    script(src="/assets/lib/js/angular-i18n/angular-locale_" + locale.locale + ".js")
-script(src="/assets/lib/js/allcountjs-angular-base/allcount-base.js")
-script(src="/assets/js/allcount.js")
-script(src="/assets/lib/js/moment/moment-with-locales.js")
-script(src="/assets/lib/js/eonasdan-bootstrap-datetimepicker/bootstrap-datetimepicker.js")
-script(src="/js/messages.js")

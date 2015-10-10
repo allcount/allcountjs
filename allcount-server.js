@@ -101,6 +101,9 @@ function configure() {
         'routesSetup',
         'errorHandlingSetup'
     ]);
+    injection.bindFactory('defaultAssets', require('./services/config/default-assets'));
+    injection.bindFactory('assetsMinifier', require('./services/config/assets-minifier'));
+    injection.bindMultiple('scriptConfigs', ['defaultAssets']);
     injection.bindFactory('renderEngine', function () {
         return require('jade').renderFile;
     });

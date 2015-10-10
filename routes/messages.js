@@ -2,7 +2,7 @@ module.exports = function (messagesService) {
     var route = {};
 
     route.messagesNgModule = function (req, res) {
-        res.send('allcountModule.factory("messagesObj", function () { return ' + JSON.stringify(messagesService.messagesByLocale(req.header('Accept-Language'), req.languageSetting) || {}) + '});');
+        res.send('angular.module("allcount").factory("messagesObj", function () { return ' + JSON.stringify(messagesService.messagesByLocale(req.header('Accept-Language'), req.languageSetting) || {}) + '});');
     };
 
     route.messagesObj = function (req, res) {

@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (menuService, messagesService, securityService, themeService, entityDescriptionService, trackingService, jadeParserService, securityConfigService, integrationService) {
+module.exports = function (menuService, messagesService, securityService, themeService, entityDescriptionService, trackingService, jadeParserService, securityConfigService, integrationService, assetsService) {
     var service = {};
 
     service.vars = function (req, obj) {
@@ -19,6 +19,7 @@ module.exports = function (menuService, messagesService, securityService, themeS
             parser: jadeParserService,
             securityConfigService: securityConfigService,
             integrationService: integrationService,
+            assetsService: assetsService,
             services: {
                 menuService: menuService,
                 entityTypeId: req.params.entityTypeId,
