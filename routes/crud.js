@@ -55,11 +55,13 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
     };
 
     route.findRange = function (req, res) {
+        var entityCrudId = extractEntityCrudId(req);
+        var allFields = entityDescriptionService.entityDescription(entityCrudId).allFields;
         crudService
-            .strategyForCrudId(extractEntityCrudId(req))
+            .strategyForCrudId(entityCrudId)
             .findRange(filteringAndSorting(req), req.query.start, req.query.count)
             .then(function (result) {
-                res.json(result.map(route.formatJsonObj));
+                res.json(result.map(function (i) { return route.formatJsonObj(i, allFields) }));
             })
             .done();
     };
@@ -87,7 +89,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .strategyForCrudId(entityCrudId)
             .readEntity(req.params.entityId)
             .then(function (result) {
-                res.json(route.formatJsonObj(result));
+                res.json(route.formatJsonObj(result, entityDescriptionService.entityDescription(entityCrudId).allFields));
             })
             .done();
     };
@@ -96,7 +98,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
         var entityCrudId = extractEntityCrudId(req);
         var entity = removeReadOnlyFieldValues(entityCrudId, req.body);
         crudService.strategyForCrudId(entityCrudId).updateEntity(entity).then(function (result) {
-            res.json(route.formatJsonObj(result));
+            res.json(route.formatJsonObj(result, entityDescriptionService.entityDescription(entityCrudId).allFields));
         }).done();
     };
 
@@ -106,15 +108,15 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .strategyForCrudId(entityCrudId)
             .deleteEntity(req.params.entityId)
             .then(function (result) {
-                res.json(result);
+                res.json(result, entityDescriptionService.entityDescription(entityCrudId).allFields);
             })
             .done();
     };
 
-    route.formatJsonObj = function (entity) {
+    route.formatJsonObj = function (entity, fields) {
         _.forEach(entity, function (value, property) {
             if (_.isDate(value)) {
-                entity[property] = moment(value).format('YYYY-MM-DD');
+                entity[property] = moment(value).format(fields[property].fieldType.hasTime ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
             }
         });
         return entity;

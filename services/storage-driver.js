@@ -447,7 +447,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             if (_.isDate(value)) {
                 return value;
             }
-            return moment(value, 'YYYY-MM-DD').toDate(); //TODO move to REST layer?
+            return moment(value, 'YYYY-MM-DD HH:mm:ss').toDate(); //TODO move to REST layer?
         } else if (field.fieldType.id == 'reference' && value) {
             return toDbReference(value);
         } else if (field.fieldType.id == 'multiReference' && value) {

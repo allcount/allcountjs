@@ -51,14 +51,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
         }
 
         function parseDate(s) {
-            if (!s) return undefined;
-            var match;
-            if (match = s.match(dateRegex)) {
-                var date = new Date(0);
-                date.setFullYear(parseInt(match[1], 10), parseInt(match[2], 10) - 1, parseInt(match[3], 10));
-                return date;
-            }
-            return undefined;
+            return s && moment(s, 'YYYY-MM-DD HH:mm:ss').toDate();
         }
 
         function wireTextInputWithController(input, controller, updateValue) {
@@ -117,6 +110,17 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             }
             return undefined;
         };
+
+        var dateFormat = function (fieldDescription) {
+            return fieldDescription.fieldType.hasTime ? $locale.DATETIME_FORMATS.short : $locale.DATETIME_FORMATS.shortDate;
+        };
+
+        var toMomentDateFormat = function (angularDateFormat) {
+            return angularDateFormat.replace("yyyy", "YYYY").replace("yy", "YY").replace("y", "YYYY").replace("dd","DD")
+                .replace('EEE', 'ddd').replace('EEEE', 'dddd')
+                .replace('w', 'W').replace('ww', 'WW');
+        };
+
         return {
             text: [function (value, fieldDescription) {
                 return fieldDescription.fieldType.isMultiline ? textareaRenderer(value) : value;
@@ -129,23 +133,20 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     return textInput(controller, updateValue)
                 }
             }],
-            date: [function (value) {
-                return $filter('date')(value);
+            date: [function (value, fieldDescription) {
+                return $filter('date')(parseDate(value), dateFormat(fieldDescription));
             }, function (fieldDescription, controller, updateValue, clone, scope) { //TODO
                 var input = $('<div class="input-group date"><input type="text" class="form-control"><span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span></div>');
-                input.datepicker({
-                    autoclose: true,
-                    language: $locale.id.split("-")[0],
-                    format: $locale.DATETIME_FORMATS.shortDate
-                        .replace("MMMM", "^^").replace("MMM", "^").replace("MM","mm").replace("M", "m").replace("^^", "MM").replace("^", "M")
-                        .replace("EEE", "D").replace("EEEE", "DD")
+                input.datetimepicker({
+                    locale: $locale.id.split("-")[0],
+                    format: toMomentDateFormat(dateFormat(fieldDescription))
                 });
-                input.datepicker('update', parseDate(controller.$viewValue));
-                input.datepicker().on('changeDate', function (e) {
-                    updateValue(e.date ? $filter('date')(e.date, 'yyyy-MM-dd') : undefined);
+                input.data("DateTimePicker").date(parseDate(controller.$viewValue) || null);
+                input.on('dp.change', function (e) {
+                    updateValue(e.date ? e.date.format('YYYY-MM-DD HH:mm:ss') : undefined);
                 });
-                input.datepicker().on('clearDate', function (e) {
-                    updateValue(undefined);
+                $('input', input).focus(function () {
+                    input.data("DateTimePicker").show();
                 });
                 return input;
             }],

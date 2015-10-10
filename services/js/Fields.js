@@ -28,6 +28,16 @@ exports.date = function (name) {
     });
 };
 
+exports.datetime = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'date',
+            hasTime: true
+        }
+    });
+};
+
 exports.integer = function (name) {
     return new Field({
         name: name,
