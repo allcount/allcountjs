@@ -210,7 +210,7 @@ mixin gridTemplate()
 
 
 mixin gridItemRow()
-    tr.animated-grid-row(ng-repeat='item in items')&attributes(attributes)
+    tr.animated-grid-row(ng-repeat='item in items track by item.id')&attributes(attributes)
         block
 
 mixin gridHeaderActionCell()
