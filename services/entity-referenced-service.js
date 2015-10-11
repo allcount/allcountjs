@@ -5,16 +5,65 @@ var Q = require('q');
 module.exports = function (entityDescriptionService, crudService) {
     var service = {};
 
-    service.isEntityReferenced = function (entityId, crudId) {
+    /**
+     * @param entityId
+     * @param crudId
+     * @return Array of tuples mapping entity type id to referencing field names: [[String, [String]]]. For example: [['EntityTypeId1', ['fooField1', 'barField2']], ['EntityTypeId2', ['fooField2']], ...]. Or [] if no such entity types.
+     */
+    service.referencingEntitiesWithFieldNames = function (entityId, crudId) {
+        var filterNotReferencingFields = function (entityTypeAndFields) {
+            var entityType = entityTypeAndFields[0];
+            var fields = entityTypeAndFields[1];
+            var crud = strategyForEntityType(entityType);
 
-        var referenceFieldNamesFromDescription = function (description) {
+            return Q.all(fields.map(function (field) {
+                return crud.findCount({query: queryForReferencingFields(entityId)([field])}).
+                    then(function (result) {
+                        if (result) return field;
+                    });
+            })).then(function (fields) {
+                return [entityType, fields.filter(function (field) {
+                    return !_.isUndefined(field)
+                })];
+            });
+        };
+
+        var entityTypesToActualReferencingFields = allReferencingEntityTypesAndFields(crudId).
+            map(filterNotReferencingFields);
+
+        var filterTypesWithoutActuallyReferencingFields = function (referencingEntityTypesAndFields) {
+            return referencingEntityTypesAndFields.filter(function (entityTypeAndFields) {
+                return entityTypeAndFields[1].length > 0;
+            });
+        };
+
+        return Q.all(entityTypesToActualReferencingFields).then(filterTypesWithoutActuallyReferencingFields);
+    };
+
+    var strategyForEntityType = function (entityType) {
+        return crudService.strategyForCrudId(entityDescriptionService.entityTypeIdCrudId(entityType));
+    };
+
+    var referenceFieldNamesFromDescription = function (crudId) {
+        return function (description) {
             var fieldIsNotReferenceToThisEntityType = function (field) {
                 return (field.fieldType.id !== 'reference' || field.fieldType.referenceEntityTypeId !== crudId.entityTypeId)
             };
             return _.keysIn(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType));
         };
+    };
 
-        var queryForReferencingFields = function (fields) {
+    var entityTypesWithoutReferencingFields = function (entityTypeAndFields) {
+        return entityTypeAndFields[1].length > 0;
+    };
+
+    var allReferencingEntityTypesAndFields = function (crudId) {
+        return _.pairs(_.mapValues(entityDescriptionService.entityDescriptions, referenceFieldNamesFromDescription(crudId))).
+            filter(entityTypesWithoutReferencingFields);
+    };
+
+    var queryForReferencingFields = function (entityId) {
+        return function (fields) {
             var query = {};
             if (fields.length === 1) {
                 query[fields[0] + '.id'] = entityId;
@@ -27,6 +76,9 @@ module.exports = function (entityDescriptionService, crudService) {
             }
             return query;
         };
+    };
+
+    service.isEntityReferenced = function (entityId, crudId) {
 
         var entityTypesAndFieldsToCountOfReferencingObjects = function (entityTypeAndFields) {
             var entityType = entityTypeAndFields[0];
@@ -36,19 +88,13 @@ module.exports = function (entityDescriptionService, crudService) {
                 return count > 0;
             };
 
-            return crudService.strategyForCrudId(entityDescriptionService.entityTypeIdCrudId(entityType)).
-                findCount({query: queryForReferencingFields(fields)}).
+            return strategyForEntityType(entityType).
+                findCount({query: queryForReferencingFields(entityId)(fields)}).
                 then(countMoreThanZero);
         };
 
-        var entityTypesWithoutReferencingFields = function (entityTypeAndFields) {
-            return entityTypeAndFields[1].length > 0;
-        };
 
-        var countsOfReferencingObjects =
-            _.pairs(_.mapValues(entityDescriptionService.entityDescriptions, referenceFieldNamesFromDescription)).
-                filter(entityTypesWithoutReferencingFields).
-                map(entityTypesAndFieldsToCountOfReferencingObjects);
+        var countsOfReferencingObjects = allReferencingEntityTypesAndFields(crudId).map(entityTypesAndFieldsToCountOfReferencingObjects);
 
         var checkPresenceOfTrue = function (results) {
             return results.indexOf(true) >= 0;
@@ -58,4 +104,5 @@ module.exports = function (entityDescriptionService, crudService) {
     };
 
     return service;
-};
+}
+;
