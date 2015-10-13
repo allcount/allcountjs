@@ -108,7 +108,7 @@ module.exports = function (crudService, referenceService, entityDescriptionServi
             .strategyForCrudId(entityCrudId)
             .deleteEntity(req.params.entityId)
             .then(function (result) {
-                res.json(result, entityDescriptionService.entityDescription(entityCrudId).allFields);
+                res.json(route.formatJsonObj(result, entityDescriptionService.entityDescription(entityCrudId).allFields));
             })
             .done();
     };

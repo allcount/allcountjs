@@ -326,6 +326,8 @@ module.exports = function (dbUrl, injection, appUtil) {
         return service.readEntity(table, entityId).then(function (oldEntity) {
             return callBeforeCrudListeners(table, oldEntity, null).then(function () {
                 return Q(modelFor(table).findOneAndRemove({_id: toMongoId(entityId)}).exec()).then(callAfterCrudListeners(table, oldEntity, null));
+            }).then(function (result) {
+                return fromBson(table.fields)(result);
             });
         })
     };
