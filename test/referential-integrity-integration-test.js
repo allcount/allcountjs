@@ -1,6 +1,8 @@
 var integrationTests = require('./integration-test');
 var injection = require('../services/injection.js');
 var assert = require('assert');
+var chai = require('chai');
+chai.should();
 
 exports.referentialIntegrityDisabledTest = function (test) {
     integrationTests(test, 'referential-integrity-disabled', function () {
@@ -36,6 +38,7 @@ exports.referentialIntegrityEnabledTest = function (test) {
             assert.fail('entity deleted successfully', 'error should be thrown', 'should fail due to referential integrity is enabled', '!=');
         }, function (err) {
             assert.ok(err);
+            err.message.should.contain('Bar').and.contain('barField');
         }).then(function () {
             return fooCrud.readEntity('1');
         }).then(function (entity) {

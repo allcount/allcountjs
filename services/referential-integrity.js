@@ -1,6 +1,17 @@
 var _ = require('lodash');
 
 module.exports = function (entityDescriptionService, storageDriver, entityReferencedService) {
+    var makeStringOfReferencing = function (entitiesAndFields) {
+        if (entitiesAndFields.length > 0) {
+            return entitiesAndFields.map(function (entityTypeAndFields) {
+                return 'one or more of entities "' + entityTypeAndFields[0] + '" are referencing by field(s): ' +
+                    entityTypeAndFields[1].join(', ');
+            }).join(';');
+        } else {
+            return '';
+        }
+    };
+
     return {
         compile: function (objects, errors) {
             _.pairs(entityDescriptionService.entityDescriptions).filter(function (rootEntityTypeIdAndDescription) {
@@ -12,9 +23,9 @@ module.exports = function (entityDescriptionService, storageDriver, entityRefere
                         tableDescription(crudId),
                     function (oldEntity, newEntity) {
                         if (newEntity) return;
-                        return entityReferencedService.isEntityReferenced(oldEntity.id, crudId).then(function(result) {
-                            if (result) {
-                                throw new Error('Can\'t delete entity: referential integrity violation');
+                        return entityReferencedService.referencingEntitiesWithFieldNames(oldEntity.id, crudId).then(function(entitiesAndFields) {
+                            if (entitiesAndFields.length > 0) {
+                                throw new Error('Can\'t delete entity: referential integrity violation (' + makeStringOfReferencing(entitiesAndFields) + ')');
                             }
                         });
                     }
