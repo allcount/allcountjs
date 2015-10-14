@@ -104,5 +104,4 @@ module.exports = function (entityDescriptionService, crudService) {
     };
 
     return service;
-}
-;
+};

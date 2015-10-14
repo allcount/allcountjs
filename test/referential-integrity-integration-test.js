@@ -38,7 +38,8 @@ exports.referentialIntegrityEnabledTest = function (test) {
             assert.fail('entity deleted successfully', 'error should be thrown', 'should fail due to referential integrity is enabled', '!=');
         }, function (err) {
             assert.ok(err);
-            err.message.should.contain('Bar').and.contain('barField');
+            err.message.should.contain('Bar', 'Error message should contain referencing entity type id').
+                and.contain('bar', 'Error message should contain referencing field name');
         }).then(function () {
             return fooCrud.readEntity('1');
         }).then(function (entity) {
