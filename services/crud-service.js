@@ -36,14 +36,14 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
 
     service.resolveReferenceValues = function (crudId, entity) {
         return Q.all(entityDescriptionService.entityDescription(crudId).fields.map(function (field) {
-            if (field.fieldType.id === 'reference' && entity[field.field] && entity[field.field].id) {
+            if (field.fieldType.id === 'reference' && entity.hasOwnProperty(field.field) && entity[field.field].id) {
                 return service.referenceValueByEntityId(
                     entityDescriptionService.entityTypeIdCrudId(field.fieldType.referenceEntityTypeId),
                     entity[field.field].id
                 ).then(function (referenceValue) {
                         entity[field.field] = referenceValue;
                     });
-            } else if (field.fieldType.id === 'multiReference' && entity[field.field]) {
+            } else if (field.fieldType.id === 'multiReference' && entity.hasOwnProperty(field.field)) {
                 return Q.all(entity[field.field].map(function (entry) {
                     return service.referenceValueByEntityId(
                         entityDescriptionService.entityTypeIdCrudId(field.fieldType.referenceEntityTypeId),
