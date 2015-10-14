@@ -12,6 +12,8 @@ module.exports = function (app, templateVarService, appUtil) {
                 templateVarService.setupLocals(req, res);
                 if (err instanceof appUtil.ValidationError) {
                     res.status(403).json(err.fieldNameToMessage);
+                } else if (err instanceof appUtil.ConflictError) {
+                    res.status(409).send(err.message);
                 } else if (err) {
                     console.error(err.stack);
                     res.locals.error = err;

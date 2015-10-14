@@ -18,6 +18,13 @@ module.exports = function (injection, ValidationError) {
 
     util.inherits(ForbiddenError, Error);
 
+    function ConflictError (message) {
+        this.message = message;
+        Error.captureStackTrace(this, arguments.callee);
+    }
+
+    util.inherits(ConflictError, Error);
+
     function ConfigObject(obj) {
         this.obj = obj;
     }
@@ -100,6 +107,7 @@ module.exports = function (injection, ValidationError) {
         ValidationError: ValidationError,
         ConfigObject: ConfigObject,
         ForbiddenError: ForbiddenError,
+        ConflictError: ConflictError,
         evaluateObject: function (object) {
             var self = this;
             var result;

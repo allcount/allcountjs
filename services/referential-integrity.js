@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-module.exports = function (entityDescriptionService, storageDriver, entityReferencedService) {
+module.exports = function (entityDescriptionService, storageDriver, entityReferencedService, appUtil) {
     var makeStringOfReferencing = function (entitiesAndFields) {
         if (entitiesAndFields.length > 0) {
             return entitiesAndFields.map(function (entityTypeAndFields) {
@@ -25,7 +25,7 @@ module.exports = function (entityDescriptionService, storageDriver, entityRefere
                         if (newEntity) return;
                         return entityReferencedService.referencingEntitiesWithFieldNames(oldEntity.id, crudId).then(function(entitiesAndFields) {
                             if (entitiesAndFields.length > 0) {
-                                throw new Error('Can\'t delete entity: referential integrity violation (' + makeStringOfReferencing(entitiesAndFields) + ')');
+                                throw new appUtil.ConflictError('Can\'t delete entity: referential integrity violation (' + makeStringOfReferencing(entitiesAndFields) + ')');
                             }
                         });
                     }
