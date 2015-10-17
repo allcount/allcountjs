@@ -116,9 +116,10 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
         };
 
         var toMomentDateFormat = function (angularDateFormat) {
-            return angularDateFormat.replace("yyyy", "YYYY").replace("yy", "YY").replace("y", "YYYY").replace("dd","DD")
-                .replace('EEE', 'ddd').replace('EEEE', 'dddd')
-                .replace('w', 'W').replace('ww', 'WW');
+            return angularDateFormat.replace("yyyy", "YYYY").replace("yy", "YY").replace("y", "YYYY").replace("dd","DD").replace("d", "D")
+                .replace('EEEE', 'dddd').replace('EEE', 'ddd')
+                .replace('ww', 'WW').replace('w', 'W')
+                .replace('sss', 'SSS');
         };
 
         return {
