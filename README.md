@@ -7,6 +7,37 @@
 AllcountJS is an application framework aimed for rapid development of business applications.
 The main idea is to make application development fully declarative and reduce application code base size to minimum possible amount.
 
+Write this:
+
+```
+A.app({
+  appName: "Hello World",
+  appIcon: "heart",
+  menuItems: [
+    {
+      name: "Gifts",
+      icon: "gift",
+      entityTypeId: "Gift"
+    }
+  ],
+  entities: function(Fields) {
+    return {
+      Gift: {
+        title: 'Gifts',
+        fields: {
+          item: Fields.text("Item"),
+          date: Fields.date("Giving Date")
+        }
+      }
+    }
+  }
+});
+```
+
+Get this:
+
+![AllcountJS Hello World App](https://allcountjs.com/assets/images/allcountjs-splash.png)
+
 # Try it
 
 - [Run application demo](http://allcountjs.com/#demo)
