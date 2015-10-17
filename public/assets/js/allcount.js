@@ -252,7 +252,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
 
                 return $compile('<div ng-show="entityCrudId" lc-grid="entityCrudId" paging="{start: 0, count: 50}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
             }],
-            attachment: [function (value) {
+            attachment: [function (value, fieldDescription) {
                 if (!value) {
                     return undefined;
                 }
