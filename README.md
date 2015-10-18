@@ -4,8 +4,7 @@
 
 # What is AllcountJS
 
-AllcountJS is an application framework aimed for rapid development of business applications.
-The main idea is to make application development fully declarative and reduce application code base size to minimum possible amount.
+The fastest way to deliver web & mobile applications with business value using Node.js.
 
 Write this:
 
