@@ -461,3 +461,46 @@ exports.referencingEntitiesWithFieldNames1of2HaveNoActuallyReferencingFields = f
         referencingEntitiesWithFieldNames('fooEntityId', {entityTypeId: 'Foo'}).should.eventually.
         eql([['Bar2', ['barField2']]]).notify(test.done);
 };
+
+exports.referencingEntitiesWithFieldNamesShouldOutputFieldNameNotId = function (test) {
+    var crud = {
+        strategyForCrudId: function () {
+            return {
+                findCount: function () {
+                    return Q(1)
+                }
+            }
+        }
+    };
+    var entityDescriptionService = {
+        entityTypeIdCrudId: function (entityTypeId) {
+            return entityTypeId;
+        },
+        entityDescriptions: {
+            Foo: {
+                allFields: {
+                    fooField: {
+                        fieldType: {
+                            id: 'string'
+                        }
+                    }
+                }
+            },
+            Bar: {
+                allFields: {
+                    barFieldId: {
+                        name: 'barFieldName',
+                        fieldType: {
+                            id: 'reference',
+                            name: 'Ref2Foo',
+                            referenceEntityTypeId: 'Foo'
+                        }
+                    }
+                }
+            }
+        }
+    };
+    injection(entityDescriptionService, crud).
+        referencingEntitiesWithFieldNames('fooEntityId', {entityTypeId: 'Foo'}).should.eventually.
+        eql([['Bar', ['barFieldName']]]).notify(test.done);
+};

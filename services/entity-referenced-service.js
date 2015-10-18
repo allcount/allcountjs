@@ -49,7 +49,9 @@ module.exports = function (entityDescriptionService, crudService) {
             var fieldIsNotReferenceToThisEntityType = function (field) {
                 return (field.fieldType.id !== 'reference' || field.fieldType.referenceEntityTypeId !== crudId.entityTypeId)
             };
-            return _.keysIn(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType));
+            return _.valuesIn(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType)).map(function (field) {
+                return field.name;
+            });
         };
     };
 
