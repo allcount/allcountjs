@@ -8,9 +8,9 @@ block content
         block formAndHeader
             .toolbar-header
                 .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
-                    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing')
+                    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="Edit", ng-hide='viewState.isFormEditing')
                         i.glyphicon.glyphicon-pencil
-                    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')
+                    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="Done", ng-show='viewState.isFormEditing')
                         i.glyphicon.glyphicon-ok
                     +actions('single-item')
             .container.screen-container(ng-cloak)

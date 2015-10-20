@@ -38,7 +38,8 @@ module.exports = function () {
 
         if (!messages[localeKey]) {
             if (_.isUndefined(messages[localeKey])) {
-                messages[localeKey] = require('../config/locale/messages' + fileSuffix + '.js');
+                var p = '../config/locale/messages' + fileSuffix + '.js';
+                messages[localeKey] = fs.existsSync(path.join(__dirname, p)) && require(p);
             }
             if (appMessages[localeKey]) {
                 if (!messages[localeKey]) {

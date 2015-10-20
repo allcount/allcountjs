@@ -64,31 +64,31 @@ mixin entityTitle()
     span.entity-title.hidden-xs.hidden-sm= messages(entityTitle) || ' '
 
 mixin navigateToCreateButton()
-    button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="entity.create", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().create')&attributes(attributes)
+    button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="Create", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().create')&attributes(attributes)
         i.glyphicon.glyphicon-plus
 
 mixin startGridEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="entity.edit", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().update || viewState.gridMethods.permissions().delete')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="Edit", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().update || viewState.gridMethods.permissions().delete')&attributes(attributes)
         i.glyphicon.glyphicon-pencil
 
 mixin doneGridEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="entity.done", ng-show='viewState.editState')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="Done", ng-show='viewState.editState')&attributes(attributes)
         i.glyphicon.glyphicon-ok
 
 mixin startFormEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="entity.edit", ng-hide='viewState.isFormEditing', ng-if='viewState.gridMethods.permissions().update')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="Edit", ng-hide='viewState.isFormEditing', ng-if='viewState.gridMethods.permissions().update')&attributes(attributes)
         i.glyphicon.glyphicon-pencil
 
 mixin doneFormEditingButton()
-    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="entity.done", ng-show='viewState.isFormEditing')&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="Done", ng-show='viewState.isFormEditing')&attributes(attributes)
         i.glyphicon.glyphicon-ok
 
 mixin returnToGridButton()
-    button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="entity.backToList")&attributes(attributes)&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="Back to list")&attributes(attributes)&attributes(attributes)
         i.glyphicon.glyphicon-chevron-left
 
 mixin createEntityButton()
-    button.btn.btn-default.ng-cloak(ng-click='viewState.createForm.createEntity(returnToGrid)', lc-tooltip="entity.done")&attributes(attributes)
+    button.btn.btn-default.ng-cloak(ng-click='viewState.createForm.createEntity(returnToGrid)', lc-tooltip="Done")&attributes(attributes)
         i.glyphicon.glyphicon-ok
 
 mixin deleteEntityButton()
@@ -96,7 +96,7 @@ mixin deleteEntityButton()
         i.glyphicon.glyphicon-trash
 
 mixin searchInput()
-    input.form-control.hidden-xs(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("entity.search"))&attributes(attributes)
+    input.form-control.hidden-xs(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("Search"))&attributes(attributes)
 
 mixin pagingControl()
     span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='viewState.pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')&attributes(attributes)
@@ -117,7 +117,7 @@ mixin actions(actionTarget)
 
 mixin noEntries()
     div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")
-        b= messages("entity.noRecords")
+        b= messages("No records")
 
 mixin defaultEditAndCreateForms()
     +defaultCreateForm()
