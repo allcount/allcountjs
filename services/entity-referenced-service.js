@@ -25,7 +25,7 @@ module.exports = function (entityDescriptionService, crudService) {
                 return [entityType, fields.filter(function (field) {
                     return !_.isUndefined(field)
                 }).map(function (field) {
-                    return field[1];
+                    return field.name;
                 })];
             });
         };
@@ -51,8 +51,11 @@ module.exports = function (entityDescriptionService, crudService) {
             var fieldIsNotReferenceToThisEntityType = function (field) {
                 return (field.fieldType.id !== 'reference' || field.fieldType.referenceEntityTypeId !== crudId.entityTypeId)
             };
-            return _.pairs(_.mapValues(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType), function (field, id) {
-                return field.name || id;
+            return _.valuesIn(_.mapValues(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType), function (field, id) {
+                return {
+                    name: field.name || id,
+                    id: id
+                };
             }));
         };
     };
@@ -69,7 +72,7 @@ module.exports = function (entityDescriptionService, crudService) {
     var queryForReferencingFields = function (entityId) {
         return function (fields) {
             var fieldIds = fields.map(function (field) {
-                return field[0];
+                return field.id;
             });
             var query = {};
             if (fieldIds.length === 1) {
