@@ -330,6 +330,7 @@ Every entity could be referenced by any another entity using reference fields.
 Reference fields are defined using
 
 * `Fields.reference(name, referenceEntityTypeId)` - reference with create ability.
+* `Fields.multiReference(name, referenceEntityTypeId)` - many-to-many relation reference with create ability.
 * `Fields.fixedReference(name, referenceEntityTypeId)` - fixed combo box.
 
 To define reference field in `Student` labeled 'Tutor' to `Teacher` entity type you could do:
