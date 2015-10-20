@@ -24,6 +24,8 @@ module.exports = function (entityDescriptionService, crudService) {
             })).then(function (fields) {
                 return [entityType, fields.filter(function (field) {
                     return !_.isUndefined(field)
+                }).map(function (field) {
+                    return field[1];
                 })];
             });
         };
@@ -44,14 +46,14 @@ module.exports = function (entityDescriptionService, crudService) {
         return crudService.strategyForCrudId(entityDescriptionService.entityTypeIdCrudId(entityType));
     };
 
-    var referenceFieldNamesFromDescription = function (crudId) {
+    var referenceFieldsFromDescription = function (crudId) {
         return function (description) {
             var fieldIsNotReferenceToThisEntityType = function (field) {
                 return (field.fieldType.id !== 'reference' || field.fieldType.referenceEntityTypeId !== crudId.entityTypeId)
             };
-            return _.valuesIn(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType)).map(function (field) {
-                return field.name;
-            });
+            return _.pairs(_.mapValues(_.omit(description.allFields, fieldIsNotReferenceToThisEntityType), function (field, id) {
+                return field.name || id;
+            }));
         };
     };
 
@@ -60,17 +62,20 @@ module.exports = function (entityDescriptionService, crudService) {
     };
 
     var allReferencingEntityTypesAndFields = function (crudId) {
-        return _.pairs(_.mapValues(entityDescriptionService.entityDescriptions, referenceFieldNamesFromDescription(crudId))).
+        return _.pairs(_.mapValues(entityDescriptionService.entityDescriptions, referenceFieldsFromDescription(crudId))).
             filter(entityTypesWithoutReferencingFields);
     };
 
     var queryForReferencingFields = function (entityId) {
         return function (fields) {
+            var fieldIds = fields.map(function (field) {
+                return field[0];
+            });
             var query = {};
-            if (fields.length === 1) {
-                query[fields[0] + '.id'] = entityId;
+            if (fieldIds.length === 1) {
+                query[fieldIds[0] + '.id'] = entityId;
             } else {
-                query['$or'] = fields.map(function (field) {
+                query['$or'] = fieldIds.map(function (field) {
                     var expression = {};
                     expression[field + '.id'] = entityId;
                     return expression;

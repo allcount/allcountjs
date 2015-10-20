@@ -286,7 +286,6 @@ exports.referencingEntitiesWithFieldNamesOneReference = function (test) {
                     barField: {
                         fieldType: {
                             id: 'reference',
-                            name: 'Ref2Foo',
                             referenceEntityTypeId: 'Foo'
                         }
                     }
@@ -492,7 +491,6 @@ exports.referencingEntitiesWithFieldNamesShouldOutputFieldNameNotId = function (
                         name: 'barFieldName',
                         fieldType: {
                             id: 'reference',
-                            name: 'Ref2Foo',
                             referenceEntityTypeId: 'Foo'
                         }
                     }
