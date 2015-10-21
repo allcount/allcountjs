@@ -15,7 +15,9 @@ module.exports = function (test, fixtureName, testFn) {
 
         return deferred.promise.then(function (db) {
             return Q.nbind(db.dropDatabase, db)().then(function () {
-                db.close();
+                return Q.nbind(mongoose.disconnect, mongoose)().then(function () {
+                    mongoose.connections = [];
+                })
             });
         });
     };
@@ -41,7 +43,9 @@ module.exports = function (test, fixtureName, testFn) {
                 });
             });
         });
-    }).finally(cleanUp).finally(function () {
+    }).finally(cleanUp).then(function () {
         test.done();
-    }).done();
+    }, function (err) {
+        test.done(err);
+    })
 };
