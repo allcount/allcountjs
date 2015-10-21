@@ -57,6 +57,9 @@ var EntityViewController = ['$scope', 'track', '$window', '$location', function 
             delete $scope.viewState['formEntityId'];
             $scope.viewState.pagingMethods && $scope.viewState.pagingMethods.refresh();
             $scope.viewState.gridMethods && $scope.viewState.gridMethods.updateGrid();
+            delete $scope.errorMessage;
+        }).catch(function (err) {
+            $scope.errorMessage = err.data;
         });
     };
 
