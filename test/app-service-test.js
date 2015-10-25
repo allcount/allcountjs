@@ -74,17 +74,18 @@ exports.evaluateProperties = function (test) {
 
 exports.withParentTest = function (test) {
     injection.resetInjection();
-    setupConfigFiles('A.app(function (Fields) { return {foo: Fields, view: {bar: "Hello"} } });');
+    setupConfigFiles('A.app(function (Fields) { return {foo: Fields, view: {bar: "Hello", foo: function ($parentProperty) { $parentProperty.some = "hello"; return $parentProperty } } } });');
     var oldLookup = replaceLookup();
 
     ensureObjects(function (objects) {
         var wParent = objects[0].propertyValue('view').withParent(objects[0]);
         assert.equal(wParent.propertyValue('bar'), 'Hello');
         assert.equal(wParent.propertyValue('foo').propertyValue('service'), 'Fields');
+        assert.equal(wParent.propertyValue('foo').propertyValue('some'), 'hello');
     });
 
-    injection.inject('appService').compile(function () {
+    injection.inject('appService').compile(function (err) {
         revertLookup(oldLookup);
-        test.done();
+        test.done(err.length && new Error(err.join(',')));
     })
 };

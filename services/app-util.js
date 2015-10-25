@@ -47,7 +47,7 @@ module.exports = function (injection, ValidationError) {
 
     ConfigObject.prototype = {
         propertyValue: function (name) {
-            return appUtil.evaluateObject(this.obj[name]);
+            return appUtil.evaluateObject(this.obj[name], this.obj.__proto__, name);
         },
 
         hasPropertyValue: function (name) {
@@ -108,11 +108,17 @@ module.exports = function (injection, ValidationError) {
         ConfigObject: ConfigObject,
         ForbiddenError: ForbiddenError,
         ConflictError: ConflictError,
-        evaluateObject: function (object) {
+        evaluateObject: function (object, parent, name) {
             var self = this;
             var result;
             if (_.isFunction(object)) {
-                result = self.evaluateObject(injection.resolveFuncArgs(object, injection.lookup));
+                result = self.evaluateObject(injection.resolveFuncArgs(object, function (dependency) {
+                    if (dependency === '$parentProperty') {
+                        return parent && name && self.evaluateObject(parent[name], parent.__proto__, name).obj;
+                    } else {
+                        return injection.lookup(dependency);
+                    }
+                }));
             } else if (_.isArray(object)) {
                 result = object.map(function (i) {
                     return self.evaluateObject(i)
