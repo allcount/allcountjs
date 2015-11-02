@@ -497,13 +497,14 @@ function pagingDirective(directiveName) {
                     })
                 }
 
+                scope.filtering = {};
+
                 scope.$parent.$watch(attrs.filtering, function (filtering) {
                     scope.filtering = filtering;
                     if (scope.reload) scope.reload();
                 }, true);
 
                 scope.$parent.$watch(attrs[directiveName], function (entityTypeId) {
-                    scope.filtering = {};
                     scope.pageSize = 50;
                     scope.numPages = 10;
                     var pagingAssign;
