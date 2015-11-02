@@ -201,7 +201,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             if (filteringAndSorting.textSearch) {
                 var split = splitText(filteringAndSorting.textSearch);
                 if (split.length > 0) {
-                    query.$and = split.map(function (value) { return {__textIndex: { $regex: value + ".*" }}});
+                    query.$and = split.map(function (value) { return {__textIndex: { $regex: "^" + value + ".*" }}});
                 }
             }
             if (filteringAndSorting.filtering) {
@@ -227,7 +227,7 @@ module.exports = function (dbUrl, injection, appUtil) {
                         }
                     } else if (field.fieldType.id == 'text') {
                         if (filterValue.op === 'startsWith') {
-                            query[fieldName] = { $regex: filterValue.value + ".*" };
+                            query[fieldName] = { $regex: "^" + filterValue.value + ".*" };
                         } else if (filterValue.op === 'in') {
                             query[fieldName] = { $in: filterValue.value };
                         } else {
