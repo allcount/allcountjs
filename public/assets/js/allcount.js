@@ -243,6 +243,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 return input;
             }],
             relation: [false, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.entityCrudId = null;
                 scope.$parent.$watch('entity', function (entity) {
                     scope.entityCrudId = entity && entity.id ? {
                         entityTypeId: scope.entityTypeId,
@@ -251,7 +252,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     } : undefined;
                 });
 
-                return $compile('<div ng-show="entityCrudId" lc-grid="entityCrudId" paging="{start: 0, count: 50}" edit-mode="isEditor"></div><div ng-show="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope); //TODO paging
+                return $compile('<div ng-if="entityCrudId" lc-grid="entityCrudId" paging="{}" edit-mode="isEditor"></div><div ng-if="!entityCrudId">' + messages('Relation editing available after object creation') + '</div>')(scope);
             }],
             attachment: [function (value, fieldDescription) {
                 if (!value) {
@@ -699,6 +700,7 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
         require: 'ngModel',
         link: function (scope, element, attrs, controller) {
             scope.referenceViewState = {};
+            scope.entityTypeId = null;
 
             scope.$parent.$watch(attrs.lcReference, function (entityTypeId) {
                 if (!entityTypeId) {
@@ -754,10 +756,10 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                 function onChange() {
                     if (isMultiple) {
                         if (!viewValueAndValEquals(elem)) {
-                            controller.$setViewValue(elem.val() && _.map(elem.select2('val'), function (i) { return {id: i}}) || null);
+                            controller.$setViewValue(elem.val() && elem.select2('data') || null);
                         }
                     } else {
-                        controller.$setViewValue(elem.val() && (controller.$viewValue && controller.$viewValue.id === elem.val() ? controller.$viewValue : {id: elem.val()}) || null);
+                        controller.$setViewValue(elem.val() && (controller.$viewValue && controller.$viewValue.id === elem.val() ? controller.$viewValue : elem.select2('data')) || null);
                     }
                 }
 
@@ -773,11 +775,7 @@ allcountModule.directive("lcReference", ["rest", "$location", "messages", functi
                 elem.on('change', phaseWrapper(onChange));
 
                 controller.$render = function () {
-                    if (isMultiple) {
-                        elem.select2('val', controller.$viewValue && _.map(controller.$viewValue, _.property('id')) || null, true);
-                    } else {
-                        elem.select2('val', controller.$viewValue && controller.$viewValue.id || null, true);
-                    }
+                    elem.select2('data', controller.$viewValue);
                 };
 
                 controller.$render();
