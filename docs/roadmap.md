@@ -25,3 +25,6 @@
 
 1. Offline sync support.
 2. Real time messaging.
+3. Mobile push notifications.
+4. Geo location support.
+5. Analytics and reporting tools.
