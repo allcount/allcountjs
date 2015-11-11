@@ -7,11 +7,12 @@ module.exports = function (Q, crudService) {
             var batchSize = options.batchSize || 1000;
             var keyFn = options.keyFn || function (item) {return item.id};
             var eqFn = options.equals || _.isEqual;
+            var strategyForCrudId = crudService.strategyForCrudId(entityCrudId);
+            var writeCrud = options.writeCrud || strategyForCrudId;
             return Q(source).then(function (sourceItems) {
                 var keyToSourceItem = _.chain(sourceItems).map(function (item) {
                     return [keyFn(item), item];
                 }).object().value();
-                var strategyForCrudId = crudService.strategyForCrudId(entityCrudId);
                 return strategyForCrudId.findCount(destinationQuery).then(function (count) {
                     var batchCount = Math.ceil(count / batchSize);
                     var seenKeys = {};
@@ -25,17 +26,17 @@ module.exports = function (Q, crudService) {
                                     delete itemWithoutId['id'];
                                     if (!eqFn(keyToSourceItem[itemKey], itemWithoutId)) {
                                         keyToSourceItem[itemKey].id = item.id;
-                                        return strategyForCrudId.updateEntity(keyToSourceItem[itemKey]);
+                                        return writeCrud.updateEntity(keyToSourceItem[itemKey]);
                                     }
                                 } else {
-                                    return strategyForCrudId.deleteEntity(item.id);
+                                    return writeCrud.deleteEntity(item.id);
                                 }
                             }))
                         })
                     })).then(function () {
                         return Q.all(sourceItems.map(function (sourceItem) {
                             if (!seenKeys[keyFn(sourceItem)]) {
-                                return strategyForCrudId.createEntity(sourceItem);
+                                return writeCrud.createEntity(sourceItem);
                             }
                         }))
                     })
