@@ -5,7 +5,7 @@
 1. Mail services (Mailgun, Mailchimp).
 2. File storage (Google Disk).
 3. Social networks (Facebook, LinkedIn, Twitter). Both auth and sync.
-4. SIP, SMS. (Twillio).
+4. SIP, SMS. (Twillio, Plivo).
 5. Payments. (Stripe, PayPal).
 
 ## SQL RDBMS Support
