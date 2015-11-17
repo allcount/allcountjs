@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries) {
+module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries, entityDescriptionCompilers) {
     var service = {};
 
     function CompiledField(field) {
@@ -116,6 +116,9 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 crudHooks: prepareCrudHooks(description),
                 disableReferentialIntegrity: description.propertyValue('disableReferentialIntegrity')
             });
+            entityDescriptionCompilers.forEach(function (compiler) {
+                description.invokePropertiesOn(compiler.entity(entityTypeId, persistenceEntityTypeId));
+            })
         }
 
         function prepareCrudHooks(description) {

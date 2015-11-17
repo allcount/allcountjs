@@ -20,7 +20,6 @@ function configure() {
         'messagesService',
         'securityConfigService',
         'entityDescriptionService',
-        'crudService',
         'actionService',
         'crudHookService',
         'referentialIntegrity',
@@ -36,6 +35,9 @@ function configure() {
         'homePageService',
         "webhookService",
         'baseUrlService'
+    ]);
+    injection.bindMultiple('entityDescriptionCompilers', [
+        'mongooseModelCompileService'
     ]);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));

@@ -99,6 +99,13 @@ module.exports = function (injection, ValidationError) {
                 throw new appUtil.CompileError(errorMsg, name);
             }
             return propertyValue;
+        },
+
+        invokePropertiesOn: function (invokeOn) {
+            var self = this;
+            _.forEach(invokeOn, function (method, name) {
+                self.hasPropertyValue(name) && invokeOn[name](self.propertyValue(name));
+            });
         }
     };
 

@@ -17,16 +17,6 @@ module.exports = function (crudStrategies, storageDriver, entityDescriptionServi
         return systemCrudWrapper(service.strategyForCrudId(crudId));
     };
 
-    service.setupModels = function () {
-        _.forEach(entityDescriptionService.entityDescriptions, function (description) {
-            storageDriver.setupModel(description.tableDescription);
-        })
-    };
-
-    service.compile = function () {
-        this.setupModels();
-    };
-
     service.referenceValueByEntityId = function (crudId, entityId) { //TODO doubling
         var referenceFieldName = entityDescriptionService.entityDescription(crudId).referenceNameExpression;
         return service.strategyForCrudId(crudId).readEntity(entityId).then(function (e) {

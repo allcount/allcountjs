@@ -56,52 +56,16 @@ module.exports = function (dbUrl, injection, appUtil) {
         return connection;
     };
 
+    service.mongooseModels = function () {
+        return models;
+    };
+
     function modelFor(table) {
-        if (models[table.entityTypeId]) {
-            return models[table.entityTypeId];
+        if (!models[table.entityTypeId]) {
+            throw new Error("Can't find model for entity: " + table.entityTypeId);
         }
-        var definition = _.chain(getAllFields(table)).map(function (field, fieldName) {
-            if (field.fieldType.notPersisted) {
-                return undefined;
-            }
-            var fieldType;
-            if (field.fieldType.id === 'date') {
-                fieldType = Date;
-            } else if (field.fieldType.id === 'reference') {
-                fieldType = {id: Schema.ObjectId, name: String};
-            } else if (field.fieldType.id === 'multiReference') {
-                fieldType = [{id: Schema.ObjectId, name: String}];
-            } else if (field.fieldType.id === 'attachment') {
-                fieldType = {}; // allow to save attachments in different storage providers
-            } else if (field.fieldType.id === 'integer') {
-                fieldType = Number;
-            } else if (field.fieldType.id === 'money') {
-                fieldType = Schema.Types.Long;
-            } else if (field.fieldType.id === 'checkbox') {
-                if (field.fieldType.storeAsArrayField) {
-                    return [field.fieldType.storeAsArrayField, [String]];
-                } else {
-                    fieldType = Boolean;
-                }
-            } else {
-                fieldType = String;
-            }
-            if (field.isUnique) {
-                fieldType = {type: fieldType, index: { unique: true }};
-            }
-            return [fieldName, fieldType];
-        }).filter(_.identity).object().value();
-        definition.__textIndex = [String];
-        var schema = new Schema(definition, {
-            collection: table.tableName
-        });
-        models[table.entityTypeId] = connection.model(table.entityTypeId, schema);
         return models[table.entityTypeId];
     }
-
-    service.setupModel = function (table) {
-        modelFor(table);
-    };
 
     service.findCount = function (table, filteringAndSorting) {
         return onlyFilteringEnsureIndexes(table, filteringAndSorting).then(function () {
