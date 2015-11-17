@@ -36,6 +36,7 @@ module.exports = function (Q, crudService) {
                     })).then(function () {
                         return Q.all(sourceItems.map(function (sourceItem) {
                             if (!seenKeys[keyFn(sourceItem)]) {
+                                seenKeys[keyFn(sourceItem)] = true;
                                 return writeCrud.createEntity(sourceItem);
                             }
                         }))
