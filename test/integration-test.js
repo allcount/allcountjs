@@ -20,7 +20,7 @@ module.exports = function (test, fixtureName, testFn) {
                 console.log("Making clean up: dropped db");
                 return Q.nbind(mongoose.disconnect, mongoose)().then(function () {
                     console.log("Making clean up: success");
-                    mongoose.connections = [];
+                    //mongoose.connections = [];
                 })
             });
         });
