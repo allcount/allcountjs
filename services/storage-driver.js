@@ -19,7 +19,8 @@ module.exports = function (dbUrl, injection, appUtil) {
 
     connection.on('connected', function () {
         db = connection.db;
-        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null));
+        console.log("DEBUG: on connected");
+        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null)).done();
     });
 
     function toPromise(query, method) {
@@ -46,6 +47,7 @@ module.exports = function (dbUrl, injection, appUtil) {
 
     service.addOnConnectListener = function (listener) {
         if (db) {
+            console.log("DEBUG: already connected");
             listener();
         } else {
             onConnectListeners.push(listener);
@@ -493,7 +495,6 @@ module.exports = function (dbUrl, injection, appUtil) {
     //TODO addEntityListener -- deprecated
     service.addEntityListener = service.addAfterCrudListener = function (table, listener) {
         addCrudListener(afterCrudListeners, table, listener);
-
     };
 
     service.addBeforeCrudListener = function (table, listener) {
