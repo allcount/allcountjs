@@ -18,9 +18,6 @@ A.app({
                 },
                 afterSave: function (Crud, Entity) {
                     return Crud.crudForEntityType('Foo').updateEntity({id: Entity.id, foo: "Another " + Entity.bar});
-                },
-                views: {
-                    Bar: {}
                 }
             }
         }
