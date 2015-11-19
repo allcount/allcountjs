@@ -510,7 +510,9 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.closeConnection = function () {
         var defer = Q.defer();
         service.addOnConnectListener(function () {
+            console.log("DEBUG: closeConnection: addOnConnectListener");
             connection.close(function () {
+                console.log("DEBUG: closeConnection: close");
                 defer.resolve(null);
             });
         });
