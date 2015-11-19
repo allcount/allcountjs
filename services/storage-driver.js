@@ -20,7 +20,10 @@ module.exports = function (dbUrl, injection, appUtil) {
     connection.on('connected', function () {
         db = connection.db;
         console.log("DEBUG: on connected");
-        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null)).done();
+        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null)).catch(function (err) {
+            console.error(err);
+            throw err;
+        }).done();
     });
 
     function toPromise(query, method) {
