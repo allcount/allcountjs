@@ -66,6 +66,9 @@ module.exports = function (dbUrl, injection, appUtil) {
     };
 
     function modelFor(table) {
+        if (!table.entityTypeId) {
+            throw new Error("entityTypeId not defined for: " + JSON.stringify(table));
+        }
         if (!models[table.entityTypeId]) {
             throw new Error("Can't find model for entity: " + table.entityTypeId);
         }
