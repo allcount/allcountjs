@@ -21,7 +21,7 @@ module.exports = function (dbUrl, injection, appUtil) {
         db = connection.db;
         console.log("DEBUG: on connected");
         onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null)).catch(function (err) {
-            console.error(err);
+            console.error(err && err.stack || err);
             throw err;
         }).done();
     });
