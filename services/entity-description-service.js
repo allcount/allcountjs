@@ -66,6 +66,13 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                     accessToken: Fields.text('Access Token').readOnly()
                 }
             }
+        }),
+        migrations: new appUtil.ConfigObject({
+            fields: function (Fields) {
+                return {
+                    name: Fields.text("Name").unique().required()
+                }
+            }
         })
     };
 

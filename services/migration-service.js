@@ -6,6 +6,7 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
 
     var migrations = [];
     var migrationsTableDescription = {
+        entityTypeId: "migrations",
         tableName: "migrations",
         fields: {
             name: {
