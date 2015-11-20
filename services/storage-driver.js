@@ -21,13 +21,11 @@ module.exports = function (dbUrl, injection, appUtil) {
 
     connection.on('connected', function () {
         db = connection.db;
-        console.log("DEBUG: on connected");
         onConnectedDeferred.resolve();
     });
 
     service.addOnConnectListener = function (listener) {
         if (db) {
-            console.log("DEBUG: already connected");
             return Q(listener());
         } else {
             return onConnectedPromise = onConnectedPromise.then(function () {
@@ -496,9 +494,7 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.closeConnection = function () {
         var defer = Q.defer();
         service.addOnConnectListener(function () {
-            console.log("DEBUG: closeConnection: addOnConnectListener");
             connection.close(function () {
-                console.log("DEBUG: closeConnection: close");
                 defer.resolve(null);
             });
         });
