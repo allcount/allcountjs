@@ -34,6 +34,7 @@ function configure() {
         'homePageService',
         "webhookService",
         'baseUrlService',
+        'securityService',
         'migrationService'
     ]);
     injection.bindMultiple('entityDescriptionCompilers', [

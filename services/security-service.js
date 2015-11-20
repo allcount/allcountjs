@@ -66,8 +66,12 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         });
     };
 
+    service.compile = function () {
+        return service.initDefaultUsers();
+    };
+
     service.initDefaultUsers = function () {
-        storageDriver.addOnConnectListener(function () {
+        return storageDriver.addOnConnectListener(function () {
             return findUser("admin").then(function (user) {
                 if (!user) {
                     return storageDriver.createEntity(userTableDescription(), {

@@ -12,48 +12,27 @@ require('mongoose-long')(mongoose);
 module.exports = function (dbUrl, injection, appUtil) {
     var service = {};
     var db;
-    var onConnectListeners = [];
     var models = {};
 
     var connection = mongoose.createConnection(dbUrl);
 
+    var onConnectedDeferred = Q.defer();
+    var onConnectedPromise = onConnectedDeferred.promise;
+
     connection.on('connected', function () {
         db = connection.db;
         console.log("DEBUG: on connected");
-        onConnectListeners.map(function (listener) { return function () { return listener() }}).reduce(Q.when, Q(null)).catch(function (err) {
-            console.error(err && err.stack || err);
-            throw err;
-        }).done();
+        onConnectedDeferred.resolve();
     });
-
-    function toPromise(query, method) {
-        var deferred = Q.defer();
-        query[method](function (err, result) {
-            if (err) {
-                deferred.reject(new Error(err));
-            } else {
-                deferred.resolve(result);
-            }
-        });
-        return deferred.promise;
-    }
-
-    function deferredCallback(deferred) {
-        return function (err, result) {
-            if (err) {
-                deferred.reject(new Error(err));
-            } else {
-                deferred.resolve(result);
-            }
-        }
-    }
 
     service.addOnConnectListener = function (listener) {
         if (db) {
             console.log("DEBUG: already connected");
-            listener();
+            return Q(listener());
         } else {
-            onConnectListeners.push(listener);
+            return onConnectedPromise = onConnectedPromise.then(function () {
+                return listener();
+            });
         }
     };
 
