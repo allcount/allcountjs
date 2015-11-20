@@ -30,11 +30,11 @@ function configure() {
         'menuService',
         'trackingService',
         'themeService',
-        //'migrationService',
         'cloudinaryService',
         'homePageService',
         "webhookService",
-        'baseUrlService'
+        'baseUrlService',
+        'migrationService'
     ]);
     injection.bindMultiple('entityDescriptionCompilers', [
         'mongooseModelCompileService'

@@ -21,11 +21,12 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
         migrations = _.chain(objects).map(function (obj) {
             return obj.propertyValue('migrations') || [];
         }).flatten().map(function (m) { return m.evaluateProperties() }).value();
+        var deferred = Q.defer();
         storageDriver.addOnConnectListener(function () {
             if (!storageDriver.mongooseConnection) { //TODO support migrations for other DBs
                 return;
             }
-            return storageDriver.findAll(migrationsTableDescription,
+            deferred.resolve(storageDriver.findAll(migrationsTableDescription,
                 {
                     filtering: {
                         op: "in",
@@ -61,8 +62,9 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
                         throw new Error("Undefined operation id: '" + migration.operation.id + "'");
                     }
                 }).reduce(Q.when, Q(null));
-            });
+            }));
         });
+        return deferred.promise;
     };
 
     return service;
