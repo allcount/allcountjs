@@ -30,7 +30,7 @@ function configure() {
         'menuService',
         'trackingService',
         'themeService',
-        'migrationService',
+        //'migrationService',
         'cloudinaryService',
         'homePageService',
         "webhookService",
