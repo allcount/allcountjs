@@ -5,7 +5,6 @@ var crypto = require('crypto');
 var mongoose = require('mongoose');
 var mongo = mongoose.mongo;
 var GridStore = mongo.GridStore;
-var Schema = mongoose.Schema;
 var ObjectId = mongoose.Types.ObjectId;
 require('mongoose-long')(mongoose);
 
@@ -42,6 +41,8 @@ module.exports = function (dbUrl, injection, appUtil) {
         return models;
     };
 
+    service.serializers = {};
+
     function modelFor(table) {
         if (!table.entityTypeId) {
             throw new Error("entityTypeId not defined for: " + JSON.stringify(table));
@@ -61,14 +62,14 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.findAll = function (table, filteringAndSorting) {
         return ensureIndexes(table, filteringAndSorting).then(function () {
             return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).exec())
-                .then(function (result) { return result.map(fromBson(table.fields)) });
+                .then(function (result) { return result.map(fromBson(table)) });
         });
     };
 
     service.findRange = function (table, filteringAndSorting, start, count) {
         return ensureIndexes(table, filteringAndSorting).then(function () {
             return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).limit(count).skip(start).exec())
-                .then(function (result) { return result.map(fromBson(table.fields)) });
+                .then(function (result) { return result.map(fromBson(table)) });
         });
     };
 
@@ -82,7 +83,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             }
             var userId = user._id.toString();
             var digest = service.passwordHash(userId, password);
-            return digest === user.passwordHash ? fromBson(table.fields)(user) : false;
+            return digest === user.passwordHash ? fromBson(table)(user) : false;
         });
     };
 
@@ -201,7 +202,7 @@ module.exports = function (dbUrl, injection, appUtil) {
         return callBeforeCrudListeners(table, null, entity).then(function () {
             var objectID = entity.id && toMongoId(entity.id) || new ObjectId();
             entity.id = (objectID).toString();
-            var toInsert = toBson(table.fields)(entity);
+            var toInsert = toBson(table)(entity);
             toInsert._id = objectID;
             toInsert.createTime = new Date();
             toInsert.modifyTime = new Date();
@@ -218,7 +219,7 @@ module.exports = function (dbUrl, injection, appUtil) {
                 }
                 throw err;
             })
-                .then(callAfterCrudListeners(table, null, fromBson(table.fields)(toInsert)))
+                .then(callAfterCrudListeners(table, null, fromBson(table)(toInsert)))
                 .then(function (result) {
                     return result._id;
                 });
@@ -229,7 +230,7 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.aggregateQuery = function (table, aggregatePipeline) {
         var collection = db.collection(table.tableName);
         return Q.nfbind(collection.aggregate.bind(collection))(aggregatePipeline).then(function (rows) {
-            return rows.map(fromBson(table.fields));
+            return rows.map(fromBson(table));
         })
     };
 
@@ -241,12 +242,14 @@ module.exports = function (dbUrl, injection, appUtil) {
         return new ObjectId(padId(entityId));
     }
 
+    service.toMongoId = toMongoId;
+
     service.readEntity = function (table, entityId) {
         if (!entityId) {
             throw new Error('entityId should be defined for readEntity()');
         }
         return Q(modelFor(table).findById(toMongoId(entityId)).exec()).then(function (result) {
-            return result && fromBson(table.fields)(result) || result;
+            return result && fromBson(table)(result) || result;
         });
     };
 
@@ -254,7 +257,7 @@ module.exports = function (dbUrl, injection, appUtil) {
         return service.readEntity(table, entity.id).then(function (oldEntity) {
             var newEntity = _.extend(Object.create(oldEntity), entity);
             return callBeforeCrudListeners(table, oldEntity, newEntity).then(function () {
-                var toUpdate = toBson(table.fields)(_.extendOwn({}, newEntity));
+                var toUpdate = toBson(table)(_.extendOwn({}, newEntity));
                 toUpdate.modifyTime = new Date();
                 return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, toUpdate).exec())
                     .then(callAfterCrudListeners(table, oldEntity, newEntity)) //TODO REST layer should convert all data types
@@ -265,7 +268,7 @@ module.exports = function (dbUrl, injection, appUtil) {
                             return Q(modelFor(table).findOneAndUpdate({_id: toMongoId(entity.id)}, update).exec());
                         });
                     }).then(function (result) {
-                        return fromBson(table.fields)(result);
+                        return fromBson(table)(result);
                     });
             });
         });
@@ -276,7 +279,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             return callBeforeCrudListeners(table, oldEntity, null).then(function () {
                 return Q(modelFor(table).findOneAndRemove({_id: toMongoId(entityId)}).exec()).then(callAfterCrudListeners(table, oldEntity, null));
             }).then(function (result) {
-                return fromBson(table.fields)(result);
+                return fromBson(table)(result);
             });
         })
     };
@@ -328,9 +331,11 @@ module.exports = function (dbUrl, injection, appUtil) {
         });
     }
 
-    function fromBson(fields) {
+    function fromBson(table) {
         return function (entity) {
-            var result = convertEntity(fields, fromBsonValue, entity);
+            var result = convertEntity(table.fields, function (value, field, entity, fieldName) {
+                return service.serializers[table.entityTypeId][fieldName].fromBsonValue(value, field, entity, fieldName);
+            }, entity);
             if (entity._id) {
                 result.id = entity._id.toString();
             }
@@ -338,11 +343,11 @@ module.exports = function (dbUrl, injection, appUtil) {
         }
     }
 
-    service.fromBson = fromBson;
-
-    function toBson(fields) { //TODO it doesn't convert id
+    function toBson(table) { //TODO it doesn't convert id
         return function (entity) {
-            return convertEntity(fields, toBsonValue, entity);
+            return convertEntity(table.fields, function (value, field, entity, fieldName) {
+                return service.serializers[table.entityTypeId][fieldName].toBsonValue(value, field, entity, fieldName);
+            }, entity);
         }
     }
 
@@ -365,62 +370,6 @@ module.exports = function (dbUrl, injection, appUtil) {
             }
         });
         return result;
-    }
-
-    function fromBsonValue(value, field, entity) {
-        if (field.fieldType.id == 'money' && value) {
-            return value.toString(10);
-        } else if (field.fieldType.id == 'checkbox' && field.fieldType.storeAsArrayField) {
-            return entity[field.fieldType.storeAsArrayField] &&
-                _.isArray(entity[field.fieldType.storeAsArrayField]) &&
-                entity[field.fieldType.storeAsArrayField].indexOf(field.name) != -1
-        } else if (field.fieldType.id == 'password') {
-            return '';
-        } else if (field.fieldType.id == 'reference') {
-            return value && value.id ? {id: value.id.toString(), name: value.name} : undefined;
-        } else if (field.fieldType.id === 'multiReference') {
-            return value && value.map(function (v) { return {id: v.id.toString(), name: v.name}}) || undefined;
-        }
-        return value;
-    }
-
-    function toBsonValue(value, field, entity, fieldName) {
-        var toDbReference = function (value) {
-            if (!value.id) {
-                throw new Error("Reference value without id was passed for field '" + fieldName + "'"); //TODO mongoose returns empty objects for reference if it's undefined, Maybe return null here?
-            }
-            return {
-                id: toMongoId(value.id),
-                name: value.name
-            }
-        };
-        if (field.fieldType.id == 'date' && value) {
-            if (_.isDate(value)) {
-                return value;
-            }
-            return moment(value, 'YYYY-MM-DD HH:mm:ss').toDate(); //TODO move to REST layer?
-        } else if (field.fieldType.id == 'reference' && value) {
-            return toDbReference(value);
-        } else if (field.fieldType.id == 'multiReference' && value) {
-            return value.map(toDbReference);
-        } else if (field.fieldType.id == 'money' && value) {
-            return mongo.Long.fromString(value.toString());
-        } else if (field.fieldType.id == 'checkbox' && field.fieldType.storeAsArrayField && !_.isUndefined(value)) {
-            return value ? {
-                $$push: {
-                    field: field.fieldType.storeAsArrayField,
-                    value: field.name
-                }
-            } : {
-                $$pull: {
-                    field: field.fieldType.storeAsArrayField,
-                    value: field.name
-                }
-            };
-        } else if (field.fieldType.id == 'password' && value) {
-            return service.passwordHash(entity.id, value);
-        }
-        return value;
     }
 
     service.passwordHash = function (objectId, password) {

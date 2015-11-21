@@ -1,11 +1,8 @@
 var _ = require('underscore');
-var Q = require('q');
-var moment = require('moment');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-require('mongoose-long')(mongoose);
 
-module.exports = function (storageDriver) {
+module.exports = function (storageDriver, mongoFieldService) {
     return {
         entity: function (entityTypeId, persistenceEntityTypeId) {
             return {
@@ -14,15 +11,15 @@ module.exports = function (storageDriver) {
                         return;
                     }
 
-                    var self = this;
-
                     var definition = _.chain(fields.evaluateProperties()).map(function (field, fieldName) {
                         if (field.fieldType.notPersisted) {
                             return undefined;
                         }
-                        var fieldType;
-                        if (self.fieldTypes[field.fieldType.id]) {
-                            fieldType = self.fieldTypes[field.fieldType.id](field, fieldName);
+                        var fieldType, schemaFn;
+                        if (schemaFn = mongoFieldService.fieldTypes[field.fieldType.id] &&
+                            mongoFieldService.fieldTypes[field.fieldType.id].schema
+                        ) {
+                            fieldType = schemaFn(field, fieldName);
                             if (_.isArray(fieldType) && fieldType.length === 2) {
                                 fieldName = fieldType[0];
                                 fieldType = fieldType[1];
@@ -40,33 +37,6 @@ module.exports = function (storageDriver) {
                         collection: persistenceEntityTypeId || entityTypeId //TODO doubling?
                     });
                     storageDriver.mongooseModels()[entityTypeId] = storageDriver.mongooseConnection().model(entityTypeId, schema);
-                },
-                fieldTypes: {
-                    date: function () {
-                        return Date;
-                    },
-                    reference: function () {
-                        return {id: Schema.ObjectId, name: String};
-                    },
-                    multiReference: function () {
-                        return [{id: Schema.ObjectId, name: String}];
-                    },
-                    attachment: function () {
-                        return {}; // allow to save attachments in different storage providers
-                    },
-                    integer: function () {
-                        return Number;
-                    },
-                    money: function () {
-                        return Schema.Types.Long;
-                    },
-                    checkbox: function (field) {
-                        if (field.fieldType.storeAsArrayField) {
-                            return [field.fieldType.storeAsArrayField, [String]];
-                        } else {
-                            return Boolean;
-                        }
-                    }
                 }
             }
         }

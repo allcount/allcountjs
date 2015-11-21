@@ -38,8 +38,13 @@ function configure() {
         'migrationService'
     ]);
     injection.bindMultiple('entityDescriptionCompilers', [
-        'mongooseModelCompileService'
+        'mongooseModelCompileService',
+        'mongoBsonSerializationCompileService'
     ]);
+    injection.bindFactory('mongoBsonSerializationCompileService', require('./services/mongo/mongo-bson-serialization-compile-service'));
+    injection.bindFactory('mongoFieldService', require('./services/mongo/mongo-field-service'));
+    injection.bindFactory('mongoDefaultFieldProvider', require('./services/mongo/mongo-default-field-provider'));
+    injection.bindMultiple('mongoFieldProviders', ['mongoDefaultFieldProvider']);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));
     injection.bindFactory('indexRoute', require('./routes'));
