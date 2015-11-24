@@ -76,6 +76,8 @@ You could also pass `--template <template_name>` option that could be used to in
 After project is initialized you could see created from template `app-config/` and `package.json` in newly created project directory.
 In order to install AllcountJS dependencies please run:
 
+> *NOTE:* npm install command will install bower dependencies and shouldn't be run as a root user
+
 ```
 cd <project_name> && npm install
 ```
