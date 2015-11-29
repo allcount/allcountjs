@@ -86,7 +86,7 @@ A.app({
 ### Localization
 
 Strings translation can be defined in `messages` property. 
-The more convinient way is to put translation in separate file, and place it near your application configuration file.
+The more convinient way is to put translation in separate file, and place it next to your application configuration file.
 Example of `translations.js`:
 ```
  A.app({
