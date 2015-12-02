@@ -68,8 +68,6 @@ exports.inject = function (serviceName, optional) {
             return resolve(serviceName);
         } else if (exports.factories[serviceName]) {
             factory = exports.factories[serviceName];
-        } else if (exports.multipleBindings[serviceName]) {
-            factory = exports.multipleBindings[serviceName];
         } else {
             factory = requireWithServiceNameMatcher(serviceName);
         }
@@ -153,10 +151,10 @@ exports.findInScope = function (serviceName) {
 };
 
 exports.bindMultiple = function (serviceName, serviceNames) {
-    if (!exports.multipleBindings[serviceName]) {
-        exports.multipleBindings[serviceName] = [];
+    if (!exports.factories[serviceName]) {
+        exports.factories[serviceName] = [];
     }
-    exports.multipleBindings[serviceName].push.apply(exports.multipleBindings[serviceName], serviceNames);
+    exports.factories[serviceName].push.apply(exports.factories[serviceName], serviceNames);
 };
 
 var FunctionRegex = /function\s*\(([\s\S]*?)\)\s*{[\s\S]+?}/;
@@ -178,7 +176,6 @@ exports.resolveFuncArgs = function (func, resolver) {
 exports.resetInjection = function () {
     exports.providers = {};
     exports.factories = {};
-    exports.multipleBindings = {};
     exports.scoped = [];
     exports.nameMatchers = [];
 

@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries, entityDescriptionCompilers) {
+module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries, entityDescriptionCompilers, passwordFieldName) {
     var service = {};
 
     function CompiledField(field) {
@@ -44,7 +44,7 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
             fields: function (Fields) {
                 var fields = {};
                 fields.username = Fields.text('User name').unique();
-                fields.passwordHash = Fields.password('Password');
+                fields[passwordFieldName] = Fields.password('Password');
                 securityConfigService.roles().forEach(function (role) {
                     fields['role_' + role] = Fields.checkbox(role, 'roles');
                 });

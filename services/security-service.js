@@ -1,7 +1,7 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil, injection, keygrip) {
+module.exports = function (storageDriver, securityConfigService, entityDescriptionService, appUtil, injection, keygrip, passwordFieldName) {
     var service = {};
 
     var UserEntityTypeId = "User";
@@ -27,7 +27,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
             if (!user) {
                 return false;
             }
-            return storageDriver.checkUserPassword(table, user.id, 'passwordHash', password);
+            return storageDriver.checkUserPassword(table, user.id, passwordFieldName, password);
         }).then(prepareUserForReq).nodeify(done);
     };
 
@@ -74,11 +74,13 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         return storageDriver.addOnConnectListener(function () {
             return findUser("admin").then(function (user) {
                 if (!user) {
-                    return storageDriver.createEntity(userTableDescription(), {
+                    var adminUser = {
                         username: "admin",
-                        passwordHash: "admin",
+                        email: "admin@admin.com", //TODO
                         role_admin: true
-                    });
+                    };
+                    adminUser[passwordFieldName] = 'admin';
+                    return storageDriver.createEntity(userTableDescription(), adminUser);
                 }
             })
         });
@@ -104,9 +106,9 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
             throw new Error('Username and password required to create user');
         }
         var user = {
-            username: username,
-            passwordHash: password
+            username: username
         };
+        user[passwordFieldName] = password;
         _.forEach(roles, function (role) {
             user['role_' + role] = true;
         });
@@ -146,11 +148,17 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         return user;
     }
 
+    service.prepareUserForReq = prepareUserForReq;
+
     function readAndPrepareUser(userId) {
+        console.log('userid: ' + userId);
         return storageDriver.readEntity(userTableDescription(), userId).then(function (user) {
+            console.log('readAndPrepareUser: ' + JSON.stringify(user));
             return prepareUserForReq(user);
         });
     }
+
+    service.readAndPrepareUser = readAndPrepareUser;
 
     service.deserializeUser = function(userId, done) {
         readAndPrepareUser(userId).nodeify(done);

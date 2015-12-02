@@ -1,10 +1,9 @@
-var injection = require('./services/injection.js');
+var injection = require('./core');
 var path = require('path');
 var Keygrip = require('keygrip');
 var crypto = require('crypto');
 var http = require('http');
 var util = require('util');
-var Q = require('q');
 
 function configure() {
     injection.addNameMatcher(/(.*?)Route/, function (serviceName) {
@@ -15,26 +14,7 @@ function configure() {
         return './services/config/' + injection.camelHumpsToWireName(serviceName) + '.js';
     }, require);
 
-    injection.bindFactory('entityCrudStrategy', require('./services/crud/entity-crud-strategy'));
     injection.bindMultiple('compileServices', [
-        'messagesService',
-        'securityConfigService',
-        'entityDescriptionService',
-        'actionService',
-        'crudHookService',
-        'referentialIntegrity',
-        'defaultReferenceResolverHook',
-        'computedFieldService',
-        'layoutService',
-        'viewService',
-        'menuService',
-        'trackingService',
-        'themeService',
-        'cloudinaryService',
-        'homePageService',
-        "webhookService",
-        'baseUrlService',
-        'securityService',
         'migrationService'
     ]);
     injection.bindMultiple('entityDescriptionCompilers', [
@@ -45,7 +25,6 @@ function configure() {
     injection.bindFactory('mongoFieldService', require('./services/mongo/mongo-field-service'));
     injection.bindFactory('mongoDefaultFieldProvider', require('./services/mongo/mongo-default-field-provider'));
     injection.bindMultiple('mongoFieldProviders', ['mongoDefaultFieldProvider']);
-    injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('menuRoute', require('./routes/menu-route'));
     injection.bindFactory('indexRoute', require('./routes'));
     injection.bindFactory('entityRoute', require('./routes/entity'));
@@ -54,8 +33,6 @@ function configure() {
     injection.bindFactory('securityRoute', require('./routes/security'));
     injection.bindFactory('customViewsRoute', require('./routes/custom-views'));
     injection.bindFactory('messages', require('./routes/messages'));
-    injection.bindFactory('fieldsApi', require('./services/js/Fields'));
-    injection.bindFactory('allcountServerStartup', require('./allcount-server-startup'));
     injection.bindMultiple('viewPaths', ['defaultViewPathProvider']);
     injection.bindFactory('defaultViewPathProvider', function () {
         return [path.join(__dirname, 'views')];
@@ -89,12 +66,6 @@ function configure() {
         }
     });
     injection.bindMultiple('appConfigurators', ['webhooksRoute', 'integrationsRoute']);
-    injection.bindFactory('halt', function (gitRepoUrl) {
-        return function (cause) {
-            console.log(util.format('Exiting app "%s"%s...'), gitRepoUrl, cause ? " (" + cause + ")" : "");
-            process.exit();
-        };
-    });
     injection.bindMultiple('loginMethods', []);
     injection.bindMultiple('appSetup', [
         'variablesSetup',
@@ -124,20 +95,13 @@ function configure() {
         return require('less-middleware');
     });
     injection.bindFactory('routeUtil', require('./routes/route-util'));
-    injection.bindFactory('referenceResolvers', ['defaultReferenceResolver']);
-    injection.bindFactory('Console', function () {
-        return console;
-    });
     injection.bindMultiple('integrationProviders', []);
-    injection.bindFactory('Q', function () {
-        return Q;
-    });
-    injection.bindFactory('ValidationError', require('./services/validation-error'));
 }
 
 configure();
 
-injection.initializeScopedThen(Q);
-
 module.exports = injection;
-module.exports.reconfigureAllcount = configure;
+module.exports.reconfigureAllcount = function () {
+    module.exports.reconfigureCore();
+    configure();
+};
