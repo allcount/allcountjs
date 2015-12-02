@@ -83,6 +83,30 @@ A.app({
 });
 ```
 
+### Localization
+
+Strings translation can be defined in `messages` property. 
+The more convinient way is to put translation in separate file, and place it next to your application configuration file.
+Example of `translations.js`:
+```
+ A.app({
+   messages: {
+     ru: {
+       "Contact": "Контакт",
+       "Phone": "Тел."
+     }
+     de: {
+       "Contact": "Kontakt",
+       "Phone": "Telefon"
+     }
+   }
+ });
+```
+Language selection depends on user browser and OS settings.
+
+Also you can force app localization to particular language. For example:
+`forceLocale : "en"`
+in global application properties will force AllcountJS always use English language.
 
 ## Menus
 
