@@ -157,6 +157,14 @@ exports.bindMultiple = function (serviceName, serviceNames) {
     exports.factories[serviceName].push.apply(exports.factories[serviceName], serviceNames);
 };
 
+exports.bindMultipleBefore = function (serviceName, beforeServiceName, serviceNames) {
+    var insertIndex;
+    if (!exports.factories[serviceName] || (insertIndex = exports.factories[serviceName].indexOf(beforeServiceName)) === -1) {
+        throw new Error("'" + beforeServiceName + "' not found in '" + serviceName + "'");
+    }
+    exports.factories[serviceName].splice.apply(exports.factories[serviceName], _.union([insertIndex, 0], serviceNames));
+};
+
 var FunctionRegex = /function\s*\(([\s\S]*?)\)\s*{[\s\S]+?}/;
 
 exports.resolveFuncArgs = function (func, resolver) {
