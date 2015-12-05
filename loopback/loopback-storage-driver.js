@@ -10,8 +10,10 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
 
     service.serializers = {};
 
+    service.entityTypeIdToIncludes = {};
+
     function modelFor(table) {
-        return loopback.getModel(table.entityTypeId);
+        return loopback.getModel(table.tableName);
     }
 
     service.findCount = function (table, filteringAndSorting) {
@@ -20,18 +22,20 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
 
     service.findAll = function (table, filteringAndSorting) {
         return Q(modelFor(table).find({
-            filter: queryFor(table, filteringAndSorting),
-            order: sortingFor(filteringAndSorting, table.fields)
-        })).then(function (result) { return result.map(fromBson(table)) });
+            where: queryFor(table, filteringAndSorting),
+            order: sortingFor(filteringAndSorting, table.fields),
+            include: service.entityTypeIdToIncludes[table.entityTypeId]
+        })).then(function (result) { return result.map(fromStorage(table)) });
     };
 
     service.findRange = function (table, filteringAndSorting, start, count) {
         return Q(modelFor(table).find({
-            filter: queryFor(table, filteringAndSorting),
+            where: queryFor(table, filteringAndSorting),
             order: sortingFor(filteringAndSorting, table.fields),
             skip: start,
-            limit: count
-        })).then(function (result) { return result.map(fromBson(table)) });
+            limit: count,
+            include: service.entityTypeIdToIncludes[table.entityTypeId]
+        })).then(function (result) { return result.map(fromStorage(table)) });
     };
 
     service.checkUserPassword = function (table, entityId, passwordField, password) {
@@ -44,50 +48,19 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
             }
             var userId = user._id.toString();
             var digest = service.passwordHash(userId, password);
-            return digest === user.passwordHash ? fromBson(table)(user) : false;
+            return digest === user.passwordHash ? fromStorage(table)(user) : false;
         });
     };
 
     function sortingFor(filteringAndSorting, fields) {
-        return _.union(
-            filteringAndSorting && filteringAndSorting.sorting && filteringAndSorting.sorting.filter(function (i) { return !!fields[i[0]]}) || [], [['modifyTime', -1]]
+        var sorting = _.union(
+            filteringAndSorting && filteringAndSorting.sorting && filteringAndSorting.sorting.filter(function (i) {
+                return !!fields[i[0]]
+            }) || [], [/*['modifyTime', -1]*/] //TODO
         ).map(function (propertyAndDir) {
                 return propertyAndDir[0] + ' ' + (propertyAndDir === -1 ? 'DESC' : 'ASC')
             });
-    }
-
-    function ensureIndexes(table, filteringAndSorting) {
-        var indexFieldHash = {};
-        var indexes = [];
-
-        indexes = _.map(sortingFor(filteringAndSorting, table.fields), function (order, fieldName) { return [fieldName, order]});
-        _.forEach(indexes, function (i) { indexFieldHash[i[0]] = true });
-
-        return ensureIndexesWith(indexes, indexFieldHash, table, filteringAndSorting);
-    }
-
-    function onlyFilteringEnsureIndexes(table, filteringAndSorting) {
-        return ensureIndexesWith([], {}, table, filteringAndSorting);
-    }
-
-    function ensureIndexesWith(indexes, indexFieldHash, table, filteringAndSorting) {
-        var query = queryFor(table, filteringAndSorting);
-        function addIndexField(q, fieldName) {
-            if (fieldName === '$and' || fieldName === '$or') {
-                _.forEach(q, function (qObj) {_.forEach(qObj, addIndexField) });
-            } else if (!indexFieldHash[fieldName]) {
-                indexes.unshift([fieldName, 1]);
-                indexFieldHash[fieldName] = true;
-            }
-        }
-        _.forEach(query, addIndexField);
-
-        if (indexes.length > 0) {
-            var collection = db.collection(table.tableName);
-            return Q.nfbind(collection.ensureIndex.bind(collection))(indexes, {name: crypto.createHash('sha1').update(JSON.stringify(indexes)).digest('hex')});
-        } else {
-            return Q(null);
-        }
+        return sorting.length && sorting || undefined;
     }
 
     var systemFields = {
@@ -128,10 +101,7 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
                     var filterValue = filteringAndSorting.filtering[fieldName];
                     if (field.fieldType.id == 'reference') {
                         var reference = filteringAndSorting.filtering[fieldName];
-                        var referenceId = _.isUndefined(reference.id) ? reference : reference.id;
-                        query[fieldName + '.id'] = toMongoId(referenceId)
-                    } else if (field.fieldType.id == 'checkbox') {
-                        query[fieldName] = filteringAndSorting.filtering[fieldName] ? filteringAndSorting.filtering[fieldName] : {$in: [false, null]};
+                        query[fieldName + 'Id'] = _.isUndefined(reference.id) ? reference : reference.id
                     } else if (field.fieldType.id == 'date') {
                         if (filterValue.op === 'gt') {
                             query[fieldName] = {$gt: filterValue.value}; //TODO convert from string?
@@ -164,7 +134,7 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
     };
 
     service.createEntity = function (table, entity) {
-        var toInsert = toBson(table)(entity);
+        var toInsert = toStorage(table)(entity);
         //setAuxiliaryFields(table.fields, toInsert, toInsert);
         return Q(modelFor(table).create(toInsert))
             .then(function (result) {
@@ -176,7 +146,7 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
     service.aggregateQuery = function (table, aggregatePipeline) {
         var collection = db.collection(table.tableName);
         return Q.nfbind(collection.aggregate.bind(collection))(aggregatePipeline).then(function (rows) {
-            return rows.map(fromBson(table));
+            return rows.map(fromStorage(table));
         })
     };
 
@@ -194,15 +164,23 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
         if (!entityId) {
             throw new Error('entityId should be defined for readEntity()');
         }
-        return Q(modelFor(table).findById(entityId)).then(function (result) {
-            return result && fromBson(table)(result) || result;
+        return Q(modelFor(table).findById(entityId, {
+            include: service.entityTypeIdToIncludes[table.entityTypeId]
+        })).then(function (result) {
+            return result && fromStorage(table)(result) || result;
         });
     };
 
+    service.updateInstance = function (table, entity, modelInstance) {
+        var toUpdate = toStorage(table)(entity);
+        _.forEach(toUpdate, function (value, field) {
+            modelInstance[field] = value;
+        });
+    };
     service.updateEntity = function (table, entity) {
-        var toUpdate = toBson(table)(entity);
-        return Q(modelFor(table).findById(entity.id)).then(function (entity) {
-            entity.updateAttributes(toUpdate);
+        return Q(modelFor(table).findById(entity.id)).then(function (modelInstance) {
+            service.updateInstance(table, entity, modelInstance);
+            return modelInstance.save();
         })
     };
 
@@ -232,34 +210,47 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
         });
     }
 
-    function fromBson(table) {
+    function fromStorage(table) {
         return function (entity) {
-            return entity.toObject();
+            var result = convertEntity(table.fields, function (value, field, entity, fieldName) {
+                return service.serializers[table.entityTypeId][fieldName].fromStorageValue(value, field, entity, fieldName);
+            }, entity);
+            if (entity.id) {
+                result.id = entity.id;
+            }
+            return result;
         }
     }
 
-    function toBson(table) { //TODO it doesn't convert id
+    service.fromStorage = fromStorage;
+
+    service.prefetchReferencesAndConvertFromStorage = function (table, entity) {
+        return Q.all(_.map(table.fields, function (field, fieldName) {
+            if (field.fieldType.id === 'reference') {
+                return Q.nfcall(entity[fieldName].bind(entity));
+            }
+        })).then(function () {
+            return service.fromStorage(table)(entity);
+        })
+    };
+
+    function toStorage(table) {
         return function (entity) {
-            return entity;
+            return convertEntity(table.fields, function (value, field, entity, fieldName) {
+                return service.serializers[table.entityTypeId][fieldName].toStorageValue(value, field, entity, fieldName);
+            }, entity, true);
         }
     }
 
-    function convertEntity(fields, convertFun, entity) {
+    service.toStorage = toStorage;
+
+    function convertEntity(fields, convertFun, entity, referenceHack) {
         var result = {};
         _.each(fields, function (field, fieldName) {
+            var fieldSubs = (fieldName + (referenceHack && field.fieldType.id === 'reference' ? 'Id' : '')); //TODO
             var value = convertFun(entity[fieldName], field, entity, fieldName);
-            if (value && (value.$$push || value.$$pull)) {
-                var mergeOp = value.$$push || value.$$pull;
-                if (!result[mergeOp.field] || !_.isArray(result[mergeOp.field])) {
-                    result[mergeOp.field] = [];
-                }
-                if (value.$$push && !_.contains(result[mergeOp.field], mergeOp.value)) {
-                    result[mergeOp.field].push(mergeOp.value);
-                } else if (value.$$pull && _.contains(result[mergeOp.field], mergeOp.value)) {
-                    result[mergeOp.field].splice(result[mergeOp.field].indexOf(mergeOp.value), 1);
-                }
-            } else if (!_.isUndefined(value)) {
-                result[fieldName] = value;
+            if (!_.isUndefined(value)) {
+                result[fieldSubs] = value;
             }
         });
         return result;
@@ -317,8 +308,7 @@ module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
     var afterCrudListeners = {};
     var beforeCrudListeners = {};
 
-    //TODO addEntityListener -- deprecated
-    service.addEntityListener = service.addAfterCrudListener = function (table, listener) {
+    service.addAfterCrudListener = function (table, listener) {
         addCrudListener(afterCrudListeners, table, listener);
     };
 

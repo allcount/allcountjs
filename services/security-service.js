@@ -151,9 +151,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
     service.prepareUserForReq = prepareUserForReq;
 
     function readAndPrepareUser(userId) {
-        console.log('userid: ' + userId);
         return storageDriver.readEntity(userTableDescription(), userId).then(function (user) {
-            console.log('readAndPrepareUser: ' + JSON.stringify(user));
             return prepareUserForReq(user);
         });
     }

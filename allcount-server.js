@@ -19,7 +19,8 @@ function configure() {
     ]);
     injection.bindMultiple('entityDescriptionCompilers', [
         'mongooseModelCompileService',
-        'mongoBsonSerializationCompileService'
+        'mongoBsonSerializationCompileService',
+        'referenceNameService'
     ]);
     injection.bindFactory('mongoBsonSerializationCompileService', require('./services/mongo/mongo-bson-serialization-compile-service'));
     injection.bindFactory('mongoFieldService', require('./services/mongo/mongo-field-service'));

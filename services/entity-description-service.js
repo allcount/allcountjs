@@ -43,6 +43,7 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
             title: 'Users',
             fields: function (Fields) {
                 var fields = {};
+                fields.email = Fields.text('Email').unique(); //TODO
                 fields.username = Fields.text('User name').unique();
                 fields[passwordFieldName] = Fields.password('Password');
                 securityConfigService.roles().forEach(function (role) {
@@ -124,7 +125,12 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
                 disableReferentialIntegrity: description.propertyValue('disableReferentialIntegrity')
             });
             entityDescriptionCompilers.forEach(function (compiler) {
-                description.invokePropertiesOn(compiler.entity(entityTypeId, persistenceEntityTypeId));
+                var invokeOn = compiler.entity(entityTypeId, persistenceEntityTypeId || entityTypeId);
+                if (_.isFunction(invokeOn)) {
+                    invokeOn(description);
+                } else {
+                    description.invokePropertiesOn(invokeOn);
+                }
             })
         }
 
@@ -195,6 +201,9 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
     };
 
     service.entityDescription = function (entityCrudId) {
+        if (_.isString(entityCrudId)) {
+            entityCrudId = service.entityTypeIdCrudId(entityCrudId);
+        }
         var result = undefined;
         if (entityCrudId.relationField) {
             var entityTypeId = service.entityDescriptions[entityCrudId.entityTypeId].allFields[entityCrudId.relationField].fieldType.relationEntityTypeId;
