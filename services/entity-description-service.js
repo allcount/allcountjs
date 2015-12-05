@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries, entityDescriptionCompilers, passwordFieldName) {
+module.exports = function (queryParseService, securityConfigService, appUtil, injection, Queries, entityDescriptionCompilers) {
     var service = {};
 
     function CompiledField(field) {
@@ -34,73 +34,51 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
         }
     };
 
-    var DefaultDescriptions = {
-        User: new appUtil.ConfigObject({
-            referenceName: 'username',
-            permissions: {
-                read: ['admin']
-            },
-            title: 'Users',
-            fields: function (Fields) {
-                var fields = {};
-                fields.email = Fields.text('Email').unique(); //TODO
-                fields.username = Fields.text('User name').unique();
-                fields[passwordFieldName] = Fields.password('Password');
-                securityConfigService.roles().forEach(function (role) {
-                    fields['role_' + role] = Fields.checkbox(role, 'roles');
-                });
-                fields.isGuest = Fields.checkbox('Guest');
-                return fields;
-            }
-        }),
-        Integration: new appUtil.ConfigObject({
-            referenceName: 'name',
-            permissions: {
-                read: ['admin']
-            },
-            customView: 'integrations',
-            title: 'Integrations',
-            fields: function (Fields) {
-                return {
-                    name: Fields.text('Name').unique().required(),
-                    appId: Fields.text('Application ID').required(),
-                    accessToken: Fields.text('Access Token').readOnly()
-                }
-            }
-        }),
-        migrations: new appUtil.ConfigObject({
-            fields: function (Fields) {
-                return {
-                    name: Fields.text("Name").unique().required()
-                }
-            }
-        })
-    };
-
-
     service.compile = function(objects, errors) {
         service.entityDescriptions = {};
+        var entityTypeIdToDescription = {};
+        var entityTypeIdToPersistenceEntityTypeId = {};
+
+        function addToChain(description, entityTypeId, persistenceEntityTypeId, parentEntityTypeId) {
+            if (parentEntityTypeId && entityTypeIdToDescription[parentEntityTypeId]) {
+                entityTypeIdToDescription[entityTypeId] = description.withParent(entityTypeIdToDescription[parentEntityTypeId]);
+            } else if (entityTypeIdToDescription[entityTypeId]) {
+                entityTypeIdToDescription[entityTypeId] = description.withParent(entityTypeIdToDescription[entityTypeId]);
+            } else {
+                entityTypeIdToDescription[entityTypeId] = description;
+            }
+            if (entityTypeIdToPersistenceEntityTypeId[entityTypeId] &&
+                entityTypeIdToPersistenceEntityTypeId[entityTypeId] !== persistenceEntityTypeId) {
+                throw new Error("Parent for " + entityTypeId + " can't be changed from " + entityTypeIdToPersistenceEntityTypeId[entityTypeId] + " to " + persistenceEntityTypeId);
+            }
+            entityTypeIdToPersistenceEntityTypeId[entityTypeId] = persistenceEntityTypeId;
+        }
+
         objects.forEach(function (obj) {
             if (!obj.propertyValue('entities')) {
                 return;
             }
             _.forEach(obj.propertyValue('entities').propertyValues(), function (description, entityTypeId) {
-                if (DefaultDescriptions[entityTypeId]) {
-                    description = description.withParent(DefaultDescriptions[entityTypeId]);
-                }
-                compileEntityTypeId(entityTypeId, description);
+               addToChain(description, entityTypeId, entityTypeId);
+            });
+        });
+
+        objects.forEach(function (obj) {
+            if (!obj.propertyValue('entities')) {
+                return;
+            }
+            _.forEach(obj.propertyValue('entities').propertyValues(), function (description, entityTypeId) {
                 var views = description.propertyValue('views');
                 if (views) {
                     _.forEach(views.propertyValues(), function (viewDescription, viewTypeId) {
-                        compileEntityTypeId(viewTypeId, viewDescription.withParent(description), entityTypeId);
+                        addToChain(viewDescription, viewTypeId, entityTypeId, entityTypeId);
                     });
                 }
             });
         });
-        _.forEach(DefaultDescriptions, function (description, entityTypeId) {
-            if (!service.entityDescriptions[entityTypeId]) {
-                compileEntityTypeId(entityTypeId, description);
-            }
+
+        _.forEach(entityTypeIdToDescription, function (description, entityTypeId) {
+            compileEntityTypeId(entityTypeId, description, entityTypeIdToPersistenceEntityTypeId[entityTypeId]);
         });
 
         function compileEntityTypeId(entityTypeId, description, persistenceEntityTypeId) {

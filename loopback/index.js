@@ -32,5 +32,7 @@ exports.installModule = function (injection) {
         return {
             setup: function () {}
         }
-    })
+    });
+    injection.bindFactory('loopbackUserAppConfig', require('./loopback-user-app-config'));
+    injection.bindMultiple('appConfigs', ['loopbackUserAppConfig']);
 };
