@@ -33,6 +33,7 @@
     "url": "https://github.com/allcount/allcountjs"
   },
   "dependencies": {
+    "allcountjs-mailgun": "^1.0.0",
     "body-parser": "1.0.1",
     "bower-installer": "^0.8.4",
     "cloudinary": "^1.2.1",

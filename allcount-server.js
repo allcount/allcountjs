@@ -18,6 +18,10 @@ function configure() {
         'mongoBsonSerializationCompileService',
         'referenceNameService'
     ]);
+    injection.bindMultiple('compileServices', [
+        'forgotPasswordModule', //TODO: remove when modules will be supported. It is just to inject module's config object.
+        'forgotPasswordService'
+    ]);
     injection.bindFactory('mongoBsonSerializationCompileService', require('./services/mongo/mongo-bson-serialization-compile-service'));
     injection.bindFactory('mongoFieldService', require('./services/mongo/mongo-field-service'));
     injection.bindFactory('mongoDefaultFieldProvider', require('./services/mongo/mongo-default-field-provider'));
