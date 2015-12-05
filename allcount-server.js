@@ -13,10 +13,6 @@ function configure() {
     injection.addNameMatcher(/(.*?)Setup/, function (serviceName) {
         return './services/config/' + injection.camelHumpsToWireName(serviceName) + '.js';
     }, require);
-
-    injection.bindMultiple('compileServices', [
-        'migrationService'
-    ]);
     injection.bindMultiple('entityDescriptionCompilers', [
         'mongooseModelCompileService',
         'mongoBsonSerializationCompileService',
@@ -79,7 +75,8 @@ function configure() {
         'securitySetup',
         'viewPathsSetup',
         'routesSetup',
-        'errorHandlingSetup'
+        'errorHandlingSetup',
+        'notFoundHandlingSetup'
     ]);
     injection.bindFactory('defaultAssets', require('./services/config/default-assets'));
     injection.bindFactory('assetsMinifier', require('./services/config/assets-minifier'));

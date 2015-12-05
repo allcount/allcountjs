@@ -66,7 +66,7 @@ module.exports = function (storageDriver, securityConfigService, entityDescripti
         });
     };
 
-    service.compile = function () {
+    service.seedDbWithData = function () {
         return service.initDefaultUsers();
     };
 

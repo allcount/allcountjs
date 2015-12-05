@@ -1,7 +1,7 @@
 var _ = require('underscore');
 
 
-module.exports = function (dbUrl, injection, appUtil, loopback, Q) {
+module.exports = function (loopback, Q) {
     var service = {};
 
     service.addOnConnectListener = function (listener) {

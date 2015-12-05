@@ -21,8 +21,10 @@ function configure() {
         'homePageService',
         "webhookService",
         'baseUrlService',
-        'securityService'
+        'migrationService',
+        'dbSeedService'
     ]);
+    injection.bindMultiple('dbSeedProviders', ['securityService']);
     injection.bindMultiple('crudStrategies', ['entityCrudStrategy']);
     injection.bindFactory('fieldsApi', require('../services/js/Fields'));
     injection.bindFactory('allcountServerStartup', require('../allcount-server-startup'));
