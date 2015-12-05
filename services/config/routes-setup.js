@@ -1,6 +1,8 @@
 var path = require('path');
 var busboy = require('connect-busboy');
 var Q = require('q');
+var methods = require('express/node_modules/methods');
+var _ = require('underscore');
 
 module.exports = function (
     app,
@@ -22,30 +24,48 @@ module.exports = function (
 ) {
     return {
         setup: function () {
+            function notAuthenticated(req, res) {
+                if (req.url.indexOf('/api/') === 0) {
+                    res.status(403).send("Not authenticated");
+                } else {
+                    res.redirect('/login');
+                }
+            }
+
+            function checkOnlyAuthenticated(req, res, next) {
+                if (!req.user && securityService.onlyAuthenticated) {
+                    notAuthenticated(req, res);
+                } else {
+                    next();
+                }
+            }
             var crudOperationsRouter = express.Router();
-            var appAccessRouter = express.Router()
-                .use(securityRoute.authenticateWithTokenMiddleware)
-                .use(function (req, res, next) {
-                    function notAuthenticated() {
-                        if (req.url.indexOf('/api/') === 0) {
-                            res.status(403).send("Not authenticated");
-                        } else {
-                            res.redirect('/login');
-                        }
+            var appAccessRouter = express.Router();
+
+            var setupDefaultMiddlewareAfterMatch = function (router) {
+                _.union(['all'], methods).forEach(function (method) {
+                    var superMethod = router[method];
+                    router[method] = function () {
+                        var nextArguments = Array.prototype.concat.apply([], arguments);
+                        nextArguments.splice(1, 0, checkOnlyAuthenticated);
+                        return superMethod.apply(this, nextArguments);
                     }
+                });
+            };
+            setupDefaultMiddlewareAfterMatch(crudOperationsRouter);
+            setupDefaultMiddlewareAfterMatch(appAccessRouter);
+
+            appAccessRouter.use(securityRoute.authenticateWithTokenMiddleware)
+                .use(function (req, res, next) {
                     res.loginOrForbidden = function () {
                         if (!req.user) {
-                            notAuthenticated();
+                            notAuthenticated(req, res);
                         } else {
                             templateVarService.setupLocals(req, res);
                             res.render('permission-denied');
                         }
                     };
-                    if (!req.user && securityService.onlyAuthenticated) {
-                        notAuthenticated();
-                    } else {
-                        next();
-                    }
+                    next();
                 })
                 .use(crudRoute.withUserScope)
                 .get('/entity/:entityTypeId', entityRoute.entity)

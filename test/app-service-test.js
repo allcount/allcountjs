@@ -2,6 +2,7 @@ var assert = require('assert');
 var injection = require('../services/injection.js');
 
 function setupConfigFiles(content) {
+    injection.bindFactory('appConfigs', []);
     injection.bindFactory('repositoryService', {
         configFiles: function (callback) {
         callback([

@@ -5,7 +5,7 @@ module.exports = function (storageDriver, mongoFieldService) {
         entity: function (entityTypeId, persistenceEntityTypeId) {
             return {
                 fields: function (fields) {
-                    if (!storageDriver.mongooseModels()) {
+                    if (!storageDriver.mongooseModels) {
                         return;
                     }
 

@@ -4,6 +4,7 @@ var injection = require('../services/injection.js');
 exports.gutter = function (test) {
     injection.resetInjection();
     injection.bindFactory('entityDescriptionCompilers', []);
+    injection.bindFactory('passwordFieldName', function () { return 'passwordHash' });
     injection.bindFactory('ValidationError', require('../services/validation-error'));
     var layoutService = injection.inject('layoutService');
     var compiled = layoutService.compileLayout({

@@ -4,10 +4,6 @@ var _ = require('lodash');
 module.exports = function (app, templateVarService, appUtil) {
     return {
         setup: function () {
-            app.use(function (req, res) {
-                templateVarService.setupLocals(req, res);
-                res.status(404).render('not-found');
-            });
             app.use(function (err, req, res, next) {
                 templateVarService.setupLocals(req, res);
                 if (err instanceof appUtil.ValidationError) {

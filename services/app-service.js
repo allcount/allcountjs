@@ -5,8 +5,28 @@ var util = require('util');
 var syntaxCheck = require('syntax-error');
 
 module.exports = function (compileServices, repositoryService, injection, appUtil) {
-    var appService = {
+    return {
+        compileObjects: function (objects, errorsReport, callback) {
+            compileServices
+                .map(function (compileService) {
+                    return function () {
+                        return compileService.compile(objects, errorsReport)
+                    }
+                })
+                .reduce(Q.when, Q(null))
+                .catch(function (error) {
+                    if (error instanceof appUtil.CompileError) {
+                        errorsReport.error(error.message);
+                    } else {
+                        errorsReport.error(error.stack);
+                    }
+                })
+                .then(function () {
+                    callback(errorsReport.errors);
+                }).done();
+        },
         compile: function (callback) {
+            var self = this;
             var errorsReport = {
                 errors: [],
                 error: function () {
@@ -22,37 +42,36 @@ module.exports = function (compileServices, repositoryService, injection, appUti
                         errorsReport.error(err.toString());
                     } else {
                         try {
-                            vm.runInNewContext(file.content, {A: {
-                                app: function (obj) {
-                                    objects.push(appUtil.evaluateObject(obj));
+                            vm.runInNewContext(file.content, {
+                                A: {
+                                    app: function (obj) {
+                                        objects.push(appUtil.evaluateObject(obj));
+                                    }
                                 }
-                            }}, file.fileName);
+                            }, file.fileName);
                         } catch (e) {
                             errorsReport.error(e.stack);
                         }
                     }
                 });
+                injection.inScope({
+                    A: function () {
+                        return {
+                            app: function (obj) {
+                                objects.push(appUtil.evaluateObject(obj));
+                            }
+                        }
+                    }
+                }, function () {
+                    injection.inject('appConfigs');
+                });
                 if (errorsReport.errors.length > 0) {
                     callback(errorsReport.errors);
                     return;
                 }
-                compileServices
-                    .map(function (compileService) { return function () { return compileService.compile(objects, errorsReport) } })
-                    .reduce(Q.when, Q(null))
-                    .catch(function (error) {
-                        if (error instanceof appUtil.CompileError) {
-                            errorsReport.error(error.message);
-                        } else {
-                            errorsReport.error(error.stack);
-                        }
-                    })
-                    .then(function () {
-                        callback(errorsReport.errors);
-                    }).done();
+                self.compileObjects(objects, errorsReport, callback);
             });
         }
     };
-
-    return appService;
 };
 
