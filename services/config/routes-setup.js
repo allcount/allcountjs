@@ -1,6 +1,8 @@
 var path = require('path');
 var busboy = require('connect-busboy');
 var Q = require('q');
+var methods = require('express/node_modules/methods');
+var _ = require('underscore');
 
 module.exports = function (
     app,
@@ -38,8 +40,22 @@ module.exports = function (
                 }
             }
             var crudOperationsRouter = express.Router();
-            var appAccessRouter = express.Router()
-                .use(securityRoute.authenticateWithTokenMiddleware)
+            var appAccessRouter = express.Router();
+
+            var setupDefaultMiddlewareAfterMatch = function (router) {
+                _.union(['all'], methods).forEach(function (method) {
+                    var superMethod = router[method];
+                    router[method] = function () {
+                        var nextArguments = Array.prototype.concat.apply([], arguments);
+                        nextArguments.splice(1, 0, checkOnlyAuthenticated);
+                        return superMethod.apply(this, nextArguments);
+                    }
+                });
+            };
+            setupDefaultMiddlewareAfterMatch(crudOperationsRouter);
+            setupDefaultMiddlewareAfterMatch(appAccessRouter);
+
+            appAccessRouter.use(securityRoute.authenticateWithTokenMiddleware)
                 .use(function (req, res, next) {
                     res.loginOrForbidden = function () {
                         if (!req.user) {
@@ -52,42 +68,42 @@ module.exports = function (
                     next();
                 })
                 .use(crudRoute.withUserScope)
-                .get('/entity/:entityTypeId', checkOnlyAuthenticated, entityRoute.entity)
-                .get('/entity/:entityTypeId/:entityId', checkOnlyAuthenticated, entityRoute.entity)
-                .get('/entity/:entityTypeId/:entityId/:state', checkOnlyAuthenticated, entityRoute.entity)
-                .get('/api/entity/:entityTypeId/permissions', checkOnlyAuthenticated, fieldDescriptionsRoute.permissions);
+                .get('/entity/:entityTypeId', entityRoute.entity)
+                .get('/entity/:entityTypeId/:entityId', entityRoute.entity)
+                .get('/entity/:entityTypeId/:entityId/:state', entityRoute.entity)
+                .get('/api/entity/:entityTypeId/permissions', fieldDescriptionsRoute.permissions);
 
 
-            customViewsRoute.setupCustomViews(appAccessRouter); //TODO checkOnlyAuthenticated
+            customViewsRoute.setupCustomViews(appAccessRouter);
             if (!viewService.views['/']) {
-                appAccessRouter.get('/', checkOnlyAuthenticated, indexRoute.index);
+                appAccessRouter.get('/', indexRoute.index);
             }
 
             crudOperationsRouter.use(crudRoute.checkReadPermissionMiddleware);
 
-            crudOperationsRouter.get('/api/file/download/:fileId', checkOnlyAuthenticated, crudRoute.downloadFile);
-            crudOperationsRouter.post('/api/file/upload', checkOnlyAuthenticated, busboy(), crudRoute.uploadFile);
-            crudOperationsRouter.post('/api/file/upload/:provider', checkOnlyAuthenticated, busboy(), crudRoute.uploadFile);
+            crudOperationsRouter.get('/api/file/download/:fileId', crudRoute.downloadFile);
+            crudOperationsRouter.post('/api/file/upload', busboy(), crudRoute.uploadFile);
+            crudOperationsRouter.post('/api/file/upload/:provider', busboy(), crudRoute.uploadFile);
 
-            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values', checkOnlyAuthenticated, crudRoute.referenceValues);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values/:entityId', checkOnlyAuthenticated, crudRoute.referenceValueByEntityId);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values', crudRoute.referenceValues);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/reference-values/:entityId', crudRoute.referenceValueByEntityId);
 
-            crudOperationsRouter.get('/api/entity/:entityTypeId/layout', checkOnlyAuthenticated, fieldDescriptionsRoute.layout);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/entity-description', checkOnlyAuthenticated, fieldDescriptionsRoute.entityDescription);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/field-descriptions', checkOnlyAuthenticated, fieldDescriptionsRoute.fieldDescriptions);
-            crudOperationsRouter.post('/api/entity/:entityTypeId/actions/:actionId', checkOnlyAuthenticated, actionsRoute.performAction);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/actions', checkOnlyAuthenticated, actionsRoute.actionList);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/layout', fieldDescriptionsRoute.layout);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/entity-description', fieldDescriptionsRoute.entityDescription);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/field-descriptions', fieldDescriptionsRoute.fieldDescriptions);
+            crudOperationsRouter.post('/api/entity/:entityTypeId/actions/:actionId', actionsRoute.performAction);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/actions', actionsRoute.actionList);
 
-            crudOperationsRouter.get('/api/entity/:entityTypeId/count', checkOnlyAuthenticated, crudRoute.findCount);
-            crudOperationsRouter.get('/api/entity/:entityTypeId', checkOnlyAuthenticated, crudRoute.findRange);
-            crudOperationsRouter.post('/api/entity/:entityTypeId', checkOnlyAuthenticated, crudRoute.createEntity);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/:entityId', checkOnlyAuthenticated, crudRoute.readEntity);
-            crudOperationsRouter.put('/api/entity/:entityTypeId', checkOnlyAuthenticated, crudRoute.updateEntity);
-            crudOperationsRouter.delete('/api/entity/:entityTypeId/:entityId', checkOnlyAuthenticated, crudRoute.deleteEntity);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/count', crudRoute.findCount);
+            crudOperationsRouter.get('/api/entity/:entityTypeId', crudRoute.findRange);
+            crudOperationsRouter.post('/api/entity/:entityTypeId', crudRoute.createEntity);
+            crudOperationsRouter.get('/api/entity/:entityTypeId/:entityId', crudRoute.readEntity);
+            crudOperationsRouter.put('/api/entity/:entityTypeId', crudRoute.updateEntity);
+            crudOperationsRouter.delete('/api/entity/:entityTypeId/:entityId', crudRoute.deleteEntity);
 
             appAccessRouter.use(crudOperationsRouter);
-            appAccessRouter.get('/api/menus', checkOnlyAuthenticated, menuRoute.menus);
-            appAccessRouter.get('/api/app-info', checkOnlyAuthenticated, menuRoute.appInfo);
+            appAccessRouter.get('/api/menus', menuRoute.menus);
+            appAccessRouter.get('/api/app-info', menuRoute.appInfo);
             app.get('/api/messages', messages.messagesObj);
 
             injection.inScope({
