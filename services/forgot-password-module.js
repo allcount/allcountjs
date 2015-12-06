@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var moment = require('moment');
 
 module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlService) {
     var service = {};
@@ -28,19 +29,27 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
                             resetPassword: {
                                 fields: {
                                     username: Fields.text('User').required(),
-                                    token: Fields.text('Token').readOnly(),
                                     creationDate: Fields.date('Creation date').readOnly(),
                                     newPasswordHash: Fields.password('New password').required(),
-                                    repeatNewPasswordHash: Fields.password('Repeat password').required()
+                                    repeatNewPasswordHash: Fields.password('Repeat password').required(),
+                                    hasTokenBeenUsed: Fields.checkbox('Has token been used?')
                                 },
                                 layout: {
                                     V: ['newPasswordHash', 'repeatNewPasswordHash']
                                 },
                                 customView: 'forgotpassword/reset-password',
                                 beforeUpdate: function (NewEntity, OldEntity) {
-                                    if (NewEntity.newPasswordHash != NewEntity.repeatNewPasswordHash) {
+                                    if (OldEntity.hasTokenBeenUsed) {
+                                        throw new appUtil.ValidationError({
+                                            repeatNewPasswordHash: 'Token has been already used'
+                                        });
+                                    } else if (NewEntity.newPasswordHash != NewEntity.repeatNewPasswordHash) {
                                         throw new appUtil.ValidationError({
                                             repeatNewPasswordHash: 'Passwords doesn\'t match'
+                                        });
+                                    } else if (moment().subtract(15, 'minutes') > NewEntity.creationDate) {
+                                        throw new appUtil.ValidationError({
+                                            repeatNewPasswordHash: 'Token has expired'
                                         });
                                     } else {
                                         var userCrud = Crud.crudForEntityType('User'); //todo: what if User entity type would be overridden?
@@ -54,17 +63,17 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
                                                     userCrud.updateEntity(user);
                                                 });
                                             } else {
-                                                throw new Error('Something went wrong...'); //todo: consider this case
+                                                throw new Error('No users with name ' + NewEntity.username);
                                             }
                                         }).then(function () {
-                                            return Crud.crudForEntityType('forgotPassword').deleteEntity(OldEntity.id); //todo: What's next? Error will be thrown after this...
+                                            NewEntity.hasTokenBeenUsed = true;
                                         });
                                     }
                                 }
                             }
                         },
                         beforeSave: function (Entity, Dates) {
-                            if (Entity.newPasswordHash) {
+                            if (Entity.newPasswordHash || Entity.repeatNewPasswordHash) {
                                 return;
                             }
                             var userCrud = Crud.crudForEntityType('User'); //todo: what if User entity type would be overridden?
