@@ -33,6 +33,7 @@
     "url": "https://github.com/allcount/allcountjs"
   },
   "dependencies": {
+    "allcountjs-mailgun": "^1.0.0",
     "body-parser": "1.0.1",
     "bower-installer": "^0.8.4",
     "cloudinary": "^1.2.1",
@@ -56,7 +57,7 @@
     "methods": "^1.1.1",
     "minimist": "^1.1.0",
     "mkdirp": "~0.3.5",
-    "moment": "2.6.0",
+    "moment": "^2.6.0",
     "mongoose": "~3.8.21",
     "mongoose-long": "^0.0.2",
     "node-minify": "^1.2.1",
