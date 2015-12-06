@@ -1,15 +1,14 @@
 var _ = require('lodash');
 var moment = require('moment');
 
-module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlService) {
+module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlService, A) {
     var service = {};
 
     service.generateToken = function (entity) {
         return keygrip.sign(entity.username) + keygrip.sign(entity.creationDate.toString());
     };
 
-    service.compile = function (objects) {
-        objects.push(new appUtil.ConfigObject({
+    A.app({
             entities: function (Fields, Crud, Security, MailgunService) { //todo: remove direct dependency on MailgunService
                 return {
                     forgotPassword: {
@@ -109,8 +108,5 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
                     }
                 };
             }
-        }));
-    };
-
-    return service;
+        });
 };
