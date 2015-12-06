@@ -1,7 +1,7 @@
 var path = require('path');
 var busboy = require('connect-busboy');
 var Q = require('q');
-var methods = require('express/node_modules/methods');
+var methods = require('methods');
 var _ = require('underscore');
 
 module.exports = function (

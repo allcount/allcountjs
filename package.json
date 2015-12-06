@@ -53,6 +53,7 @@
     "less-middleware": "^1.0.4",
     "lodash": "~3.0.0",
     "marked": "^0.3.2",
+    "methods": "^1.1.1",
     "minimist": "^1.1.0",
     "mkdirp": "~0.3.5",
     "moment": "2.6.0",
