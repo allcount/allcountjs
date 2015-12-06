@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var moment = require('moment');
 
-module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlService, A) {
+module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlService, A, injection) {
     var service = {};
 
     service.generateToken = function (entity) {
@@ -9,7 +9,8 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
     };
 
     A.app({
-            entities: function (Fields, Crud, Security, MailgunService) { //todo: remove direct dependency on MailgunService
+            entities: function (Fields, Crud, Security) { //todo: remove direct dependency on MailgunService
+                var MailgunService = injection.inject('MailgunService', true);
                 return {
                     forgotPassword: {
                         fields: {
