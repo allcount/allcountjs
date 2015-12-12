@@ -8,7 +8,7 @@ var mongo = mongoose.mongo;
 module.exports = function (storageDriver) {
     return {
         fieldTypes: function () {
-            var toDbReference = function (value) {
+            var toDbReference = function (value, fieldName) {
                 if (!value.id) {
                     throw new Error("Reference value without id was passed for field '" + fieldName + "'"); //TODO mongoose returns empty objects for reference if it's undefined, Maybe return null here?
                 }
@@ -34,7 +34,7 @@ module.exports = function (storageDriver) {
                         return {id: Schema.ObjectId, name: String};
                     },
                     toBsonValue: function (value, field, entity, fieldName) {
-                        return value && toDbReference(value);
+                        return value && toDbReference(value, fieldName);
                     },
                     fromBsonValue: function (value, field, entity, fieldName) {
                         return value && value.id ? {id: value.id.toString(), name: value.name} : undefined;
@@ -45,7 +45,7 @@ module.exports = function (storageDriver) {
                         return [{id: Schema.ObjectId, name: String}];
                     },
                     toBsonValue: function (value, field, entity, fieldName) {
-                        return value && value.map(toDbReference);
+                        return value && value.map(function (v) { return toDbReference(v, fieldName) });
                     },
                     fromBsonValue: function (value, field, entity, fieldName) {
                         return value && value.map(function (v) { return {id: v.id.toString(), name: v.name}}) || undefined;
