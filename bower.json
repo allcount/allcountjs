@@ -31,6 +31,7 @@
       "svg": "public/assets/lib/fonts",
       "ttf": "public/assets/lib/fonts",
       "woff": "public/assets/lib/fonts",
+      "woff2": "public/assets/lib/fonts",
       "otf": "public/assets/lib/fonts",
       "png": "public/assets/lib/png",
       "gif": "public/assets/lib/gif",
@@ -45,6 +46,13 @@
         "bower_components/bootstrap-datepicker/less/**",
         "bower_components/bootstrap-datepicker/js/locales/*.js",
         "bower_components/bootstrap-datepicker/js/*.js"
+      ],  
+      "blueimp-tmpl": [
+        "bower_components/blueimp-tmpl/css/**",
+        "bower_components/blueimp-tmpl/js/*.js"
+      ],
+      "blueimp-canvas-to-blob": [
+        "blueimp-canvas-to-blob/js/*.js"
       ],
       "eonasdan-bootstrap-datetimepicker": [
         "bower_components/eonasdan-bootstrap-datetimepicker/src/js/*.js",
