@@ -339,4 +339,8 @@ Filtering object has following format:
 * `filtering` - CRUD filtering object.
 * `sorting` - CRUD sorting object. Not applied for count operation.
 
+Example:
+
+```$scope.viewState.filtering = {filtering: {parent: {id: null}}}```
+
 Query operation also supports `start` and `count` query params to perform paging.
