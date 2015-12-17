@@ -226,12 +226,19 @@ exports.installModule = function (module) {
 
 exports.installModulesFromPackageJson = function (packageJsonFilePath) {
     var packageJson = JSON.parse(fs.readFileSync(packageJsonFilePath));
-    packageJson.dependencies = packageJson.dependencies || {};
-    _.forEach(packageJson.dependencies, function (version, name) {
-        if (name.indexOf("allcountjs-") === 0) {
-            exports.installModule(require(name));
-        }
-    })
+    var allcountjsModules = packageJson.allcountjsModules;
+    if (allcountjsModules && _.isArray(allcountjsModules)) {
+        allcountjsModules.forEach(function (moduleName) {
+            exports.installModule(require(moduleName));
+        });
+    } else {
+        packageJson.dependencies = packageJson.dependencies || {};
+        _.forEach(packageJson.dependencies, function (version, name) {
+            if (name.indexOf("allcountjs-") === 0) {
+                exports.installModule(require(name));
+            }
+        })
+    }
 };
 
 exports.resetInjection();
