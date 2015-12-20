@@ -18,9 +18,6 @@ function configure() {
         'mongoBsonSerializationCompileService',
         'referenceNameService'
     ]);
-    injection.bindMultiple('compileServices', [
-        'forgotPasswordService'
-    ]);
     injection.bindMultiple('appConfigs',['forgotPasswordModule']);
     injection.bindFactory('mongoBsonSerializationCompileService', require('./services/mongo/mongo-bson-serialization-compile-service'));
     injection.bindFactory('mongoFieldService', require('./services/mongo/mongo-field-service'));

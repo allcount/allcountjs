@@ -5,6 +5,7 @@ var util = require('util');
 function configure() {
     injection.bindFactory('entityCrudStrategy', require('../services/crud/entity-crud-strategy'));
     injection.bindMultiple('compileServices', [
+        'forgotPasswordService',
         'messagesService',
         'securityConfigService',
         'entityDescriptionService',
