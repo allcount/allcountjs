@@ -22,6 +22,7 @@ block content
         h4
             a(href='/entity/forgotPassword')
                 p Forgot password?
+                p= JSON.stringify(locals)
 
 block js
     script(src="/assets/js/login.js")

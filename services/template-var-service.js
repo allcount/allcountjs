@@ -1,9 +1,11 @@
 var _ = require('underscore');
 
 module.exports = function (menuService, messagesService, securityService, themeService, entityDescriptionService, trackingService, jadeParserService, securityConfigService, integrationService, assetsService) {
+    console.log('orig init');
     var service = {};
 
     service.vars = function (req, obj) {
+        console.log('orig vars');
         var result = obj || {};
         var acceptLanguageHeader = req.header('Accept-Language');
         var languageSetting = req.languageSetting;
@@ -34,6 +36,7 @@ module.exports = function (menuService, messagesService, securityService, themeS
     };
 
     service.setupLocals = function (req, res, obj) {
+        console.log('orig setupLocals');
         res.locals = _.extend(res.locals, service.vars(req, obj));
     };
 
