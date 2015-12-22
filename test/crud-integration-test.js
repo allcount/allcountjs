@@ -15,6 +15,20 @@ exports.crudTest = function (test) {
     })
 };
 
+exports.crudDateFieldsOrdering = function (test) {
+    integrationTests(test, 'crud-time-fields', function () {
+        var crud = injection.inject('Crud').crudForEntityType('Foo');
+        return crud.createEntity({foo: "bar"}).then(function () {
+            return crud.createEntity({foo: "bar-2"}).then(function () {
+                return crud.find({}).then(function (entities) {
+                    assert.equal(entities[0].foo, "bar-2");
+                    assert.equal(entities[1].foo, "bar");
+                })
+            });
+        })
+    })
+};
+
 exports.crudFieldTest = function (test) {
     integrationTests(test, 'crud-field-types', function () {
         var crud = injection.inject('Crud').crudForEntityType('Foo');

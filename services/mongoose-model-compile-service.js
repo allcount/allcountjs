@@ -6,12 +6,24 @@ module.exports = function (storageDriver, mongoFieldService) {
     return {
         entity: function (entityTypeId, persistenceEntityTypeId) {
             return {
+                systemFields: {
+                    createTime: {
+                        fieldType: {
+                            id: 'date'
+                        }
+                    },
+                    modifyTime: {
+                        fieldType: {
+                            id: 'date'
+                        }
+                    }
+                },
                 fields: function (fields) {
                     if (!storageDriver.mongooseModels) {
                         return;
                     }
 
-                    var definition = _.chain(fields.evaluateProperties()).map(function (field, fieldName) {
+                    var definition = _.chain(_.extend({}, fields.evaluateProperties(), this.systemFields)).map(function (field, fieldName) {
                         if (field.fieldType.notPersisted) {
                             return undefined;
                         }

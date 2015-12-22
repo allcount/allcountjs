@@ -125,7 +125,7 @@ module.exports = function (dbUrl, injection, appUtil) {
         }
     }
 
-    var systemFields = {
+    var systemFields = { //TODO doubling
         createTime: {
             fieldType: {
                 id: 'date'
