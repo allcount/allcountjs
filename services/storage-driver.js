@@ -427,10 +427,16 @@ module.exports = function (dbUrl, injection, appUtil) {
     //TODO addEntityListener -- deprecated
     service.addEntityListener = service.addAfterCrudListener = function (table, listener) {
         addCrudListener(afterCrudListeners, table, listener);
+        return {
+            remove: function () { return removeListener(afterCrudListeners, table, listener) }
+        }
     };
 
     service.addBeforeCrudListener = function (table, listener) {
         addCrudListener(beforeCrudListeners, table, listener);
+        return {
+            remove: function () { return removeListener(beforeCrudListeners, table, listener) }
+        }
     };
 
     function addCrudListener(listeners, table, listener) {
@@ -438,6 +444,10 @@ module.exports = function (dbUrl, injection, appUtil) {
             listeners[table.tableName] = [];
         }
         listeners[table.tableName].push(listener);
+    }
+
+    function removeListener(listeners, table, listener) {
+        listeners[table.tableName].splice(listeners[table.tableName].indexOf(listener), 1);
     }
 
     service.closeConnection = function () {

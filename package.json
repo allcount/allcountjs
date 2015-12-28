@@ -67,6 +67,7 @@
     "q": "1.0.1",
     "ramda": "^0.13.0",
     "request": "^2.45.0",
+    "socket.io": "^1.3.7",
     "syntax-error": "^1.1.1",
     "then-jade": "^2.2.1",
     "underscore": "1.8.2"
