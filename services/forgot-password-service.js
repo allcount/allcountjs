@@ -1,4 +1,6 @@
-module.exports = function () {
+var _ = require('lodash');
+
+module.exports = function (injection) {
     var service = {};
 
     service.config = {};
@@ -11,6 +13,18 @@ module.exports = function () {
             }
         });
     };
+
+    injection.overrideFactory('templateVarService', 'templateVarServiceBase', function (templateVarServiceBase) {
+        var parentVarsMethod = templateVarServiceBase.vars;
+        templateVarServiceBase.vars = function (req, obj) {
+            var parentVars = parentVarsMethod(req, obj);
+            var vars = _.extend(parentVars, {
+                forgotPasswordConfigIsDefined: !_.isEmpty(service.config)
+            });
+            return vars;
+        };
+        return templateVarServiceBase;
+    });
 
     return service;
 };

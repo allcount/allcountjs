@@ -52,7 +52,7 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
                                             repeatNewPasswordHash: 'Token has expired'
                                         });
                                     } else {
-                                        var userCrud = Crud.crudForEntityType('User'); //todo: what if User entity type would be overridden?
+                                        var userCrud = Crud.crudForEntityType('User');
                                         return Security.asSystem(function () {
                                             return userCrud.find({filtering: {username: NewEntity.username}});
                                         }).then(function (users) {
@@ -76,7 +76,7 @@ module.exports = function (appUtil, keygrip, forgotPasswordService, baseUrlServi
                             if (Entity.newPasswordHash || Entity.repeatNewPasswordHash) {
                                 return;
                             }
-                            var userCrud = Crud.crudForEntityType('User'); //todo: what if User entity type would be overridden?
+                            var userCrud = Crud.crudForEntityType('User');
                             return Security.asSystem(function () {
                                 return userCrud.find({filtering: {username: Entity.username}});
                             }).then(function (users) {

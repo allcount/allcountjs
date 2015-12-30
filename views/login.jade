@@ -19,7 +19,7 @@ block content
             .login-or= messages('Or')
         each method in loginMethods
             a.btn.btn-lg.btn-primary.btn-block(href=method.url)= messages(method.label)
-        h4
+        h4(ng-show='#{locals.forgotPasswordConfigIsDefined}', ng-cloak)
             a(href='/entity/forgotPassword')
                 p Forgot password?
 
