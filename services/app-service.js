@@ -36,6 +36,17 @@ module.exports = function (compileServices, repositoryService, injection, appUti
 
             repositoryService.configFiles(function (files) {
                 var objects = [];
+                injection.inScope({
+                    A: function () {
+                        return {
+                            app: function (obj) {
+                                objects.push(appUtil.evaluateObject(obj));
+                            }
+                        }
+                    }
+                }, function () {
+                    injection.inject('appConfigs');
+                });
                 files.forEach(function (file) {
                     var err = syntaxCheck(file.content, file.fileName);
                     if (err) {
@@ -53,17 +64,6 @@ module.exports = function (compileServices, repositoryService, injection, appUti
                             errorsReport.error(e.stack);
                         }
                     }
-                });
-                injection.inScope({
-                    A: function () {
-                        return {
-                            app: function (obj) {
-                                objects.push(appUtil.evaluateObject(obj));
-                            }
-                        }
-                    }
-                }, function () {
-                    injection.inject('appConfigs');
                 });
                 if (errorsReport.errors.length > 0) {
                     callback(errorsReport.errors);
