@@ -1,10 +1,8 @@
-var vm = require('vm');
 var _ = require('underscore');
 var Q = require('q');
 var util = require('util');
-var syntaxCheck = require('syntax-error');
 
-module.exports = function (compileServices, repositoryService, injection, appUtil) {
+module.exports = function (compileServices, appUtil, configObjectProviders) {
     return {
         compileObjects: function (objects, errorsReport, callback) {
             compileServices
@@ -33,38 +31,10 @@ module.exports = function (compileServices, repositoryService, injection, appUti
                     this.errors.push(util.format.apply(util.format, arguments));
                 }
             };
-
-            repositoryService.configFiles(function (files) {
-                var objects = [];
-                injection.inScope({
-                    A: function () {
-                        return {
-                            app: function (obj) {
-                                objects.push(appUtil.evaluateObject(obj));
-                            }
-                        }
-                    }
-                }, function () {
-                    injection.inject('appConfigs');
-                });
-                files.forEach(function (file) {
-                    var err = syntaxCheck(file.content, file.fileName);
-                    if (err) {
-                        errorsReport.error(err.toString());
-                    } else {
-                        try {
-                            vm.runInNewContext(file.content, {
-                                A: {
-                                    app: function (obj) {
-                                        objects.push(appUtil.evaluateObject(obj));
-                                    }
-                                }
-                            }, file.fileName);
-                        } catch (e) {
-                            errorsReport.error(e.stack);
-                        }
-                    }
-                });
+            return Q.all(configObjectProviders.map(function (provider) {
+                return Q(provider.configObjects(errorsReport));
+            })).then(function (objectsByProvider) {
+                var objects = _.flatten(objectsByProvider, true);
                 if (errorsReport.errors.length > 0) {
                     callback(errorsReport.errors);
                     return;

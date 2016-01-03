@@ -61,21 +61,22 @@ module.exports = function (gitRepoUrl, gitService, halt) {
     };
 
     service.configFiles = function (callback) {
-        service.initializeRepository().then(function (repositoryDir) {
-            fs.readdir(repositoryDir, function (err, files) {
-                if (err) {
-                    throw err; //TODO
-                }
-                Q.all(files.filter(function (file) {
+        var promise = service.initializeRepository().then(function (repositoryDir) {
+            return Q.nfcall(fs.readdir, repositoryDir).then(function (files) {
+                return Q.all(files.filter(function (file) {
                         return file.indexOf('.js') === file.length - ".js".length;
                     }).map(function (file) {
                         return Q.nfcall(fs.readFile, repositoryDir + '/' + file, "utf-8").then(function (content) {
                             return {fileName: file, content: content};
                         })
                     })
-                ).then(callback).done();
+                );
             });
-        }).done();
+        });
+        if (callback) {
+            promise.then(callback);
+        }
+        return promise;
     };
 
     function checkRepoInitialized() {

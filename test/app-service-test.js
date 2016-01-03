@@ -1,13 +1,16 @@
 var assert = require('assert');
 var injection = require('../services/injection.js');
+var Q = require('q');
 
 function setupConfigFiles(content) {
     injection.bindFactory('appConfigs', []);
+    injection.bindFactory('Q', function () { return Q });
+    injection.bindMultiple('configObjectProviders', ['appConfigsObjectProvider', 'repositoryConfigObjectProvider']);
     injection.bindFactory('repositoryService', {
-        configFiles: function (callback) {
-        callback([
-            {fileName: 'root.js', content: content}
-        ]);
+        configFiles: function () {
+            return Q([
+                {fileName: 'root.js', content: content}
+            ]);
     }});
     injection.bindFactory('ValidationError', require('../services/validation-error'));
 }

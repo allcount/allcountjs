@@ -163,7 +163,7 @@ exports.bindMultipleBefore = function (serviceName, beforeServiceName, serviceNa
     exports.factories[serviceName].splice.apply(exports.factories[serviceName], _.union([insertIndex, 0], serviceNames));
 };
 
-var FunctionRegex = /function\s*\(([\s\S]*?)\)\s*{[\s\S]+?}/;
+var FunctionRegex = /function\s*\S*\(([\s\S]*?)\)\s*{[\s\S]+?}/;
 
 exports.resolveFuncArgs = function (func, resolver) {
     var match = func.toString().match(FunctionRegex);

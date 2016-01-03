@@ -48,6 +48,7 @@ function configure() {
     injection.bindFactory('passwordFieldName', function () { return 'passwordHash' }); //TODO make more clear
     injection.bindFactory('defaultAppConfig', require('./default-app-config'));
     injection.bindMultiple('appConfigs', ['defaultAppConfig']);
+    injection.bindMultiple('configObjectProviders', ['appConfigsObjectProvider', 'repositoryConfigObjectProvider']);
 }
 
 configure();
