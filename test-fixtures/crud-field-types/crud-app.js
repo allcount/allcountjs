@@ -12,7 +12,8 @@ A.app({
                     integer: Fields.integer("Integer"),
                     checkbox: Fields.checkbox("Checkbox"),
                     checkboxArrayField: Fields.checkbox("Checkbox Array", 'checkboxArray'),
-                    password: Fields.password("Password")
+                    password: Fields.password("Password"),
+                    link: Fields.link("Link")
                 }
             },
             Bar: {

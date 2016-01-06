@@ -43,7 +43,8 @@ exports.crudFieldTest = function (test) {
                 integer: 123456789,
                 checkbox: true,
                 checkboxArrayField: true,
-                password: '123'
+                password: '123',
+                link: 'http://www.example.com'
             };
             return crud.createEntity(_.clone(entityToCreate)).then(function (id) {
                 return crud.readEntity(id).then(function (entity) {
