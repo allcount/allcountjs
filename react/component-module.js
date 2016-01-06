@@ -1,4 +1,14 @@
+import React from 'react';
+
 exports.installModule = (injection) => {
+    injection.bindFactory('createReactClass', () => {
+        return (spec) => {
+            var cls = React.createClass(spec);
+            cls.originalSpec = spec;
+            return cls;
+        }
+    });
+
     injection.bindFactory('IndexPage', require('./pages/index'));
     injection.bindFactory('MainPage', require('./pages/main'));
     injection.bindFactory('EntityPage', require('./pages/entity'));

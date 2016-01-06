@@ -2,7 +2,7 @@ import React from 'react';
 import {Grid, Row, Col} from 'react-bootstrap';
 import {Link} from 'react-router';
 
-module.exports = (MainPage, menuService) => React.createClass({
+module.exports = (MainPage, menuService, createReactClass) => createReactClass({
     render: function () {
         return <MainPage>
             <div className="splash">

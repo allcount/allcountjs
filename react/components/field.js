@@ -1,7 +1,7 @@
 import React from 'react';
 import {Input} from 'react-bootstrap';
 
-module.exports = () => React.createClass({
+module.exports = (createReactClass) => createReactClass({
     handleChange: function (event) {
         this.props.model.setValue(this.props.fieldDescription.field, event.target.value);
     },

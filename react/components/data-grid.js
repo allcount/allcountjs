@@ -1,7 +1,7 @@
 import React from 'react';
 import {Table, Button, Glyphicon } from 'react-bootstrap';
 
-module.exports = (messages, MessageTooltip, Field) => React.createClass({
+module.exports = (messages, MessageTooltip, Field, createReactClass) => createReactClass({
     render: function () {
         return <Table>
             <thead>

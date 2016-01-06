@@ -53,7 +53,7 @@ module.exports = {
     ],
 
     debug: true,
-    devtool: 'eval-cheap-module-source-map',
+    devtool: 'inline-source-map',
     devServer: {
         contentBase: './tmp',
         historyApiFallback: true

@@ -2,7 +2,7 @@ import React from 'react';
 import {ButtonToolbar, Button, Grid, Glyphicon} from 'react-bootstrap';
 import BodyClassName from 'react-body-classname';
 
-module.exports = (ToolbarContainer, MessageTooltip) => React.createClass({
+module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createReactClass({
     render: function () {
         return <ToolbarContainer withoutHeader={this.props.withoutHeader}>
             <Grid>

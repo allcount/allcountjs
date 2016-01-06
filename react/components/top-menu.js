@@ -3,7 +3,7 @@ import {Navbar, Nav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
 import {LinkContainer} from 'react-router-bootstrap';
 import {Link} from 'react-router';
 
-module.exports = () => React.createClass({
+module.exports = (createReactClass) => createReactClass({
     render: function () {
         return <Navbar fixedTop>
             <Navbar.Header>

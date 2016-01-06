@@ -1,6 +1,6 @@
 import React from 'react';
 
-module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model) => React.createClass({
+module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, createReactClass) => createReactClass({
     getInitialState: function() {
         return {mode: 'list', grid: {items: [{item: 'bar', date: new Date()}].map((i) => Model.bindToComponent(this, i)), validationErrors: {}}, isInEditMode: false};
     },
