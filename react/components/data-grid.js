@@ -6,7 +6,7 @@ module.exports = (messages, MessageTooltip, Field) => React.createClass({
         return <Table>
             <thead>
                 <tr>
-                    <th style={{width: '68px'}}>
+                    <th>
                         <Button bsSize="xs" style={{opacity: '0'}}>
                             <Glyphicon glyph="chevron-right"/>
                         </Button>
@@ -29,18 +29,18 @@ module.exports = (messages, MessageTooltip, Field) => React.createClass({
     },
     rows: function () {
         return this.props.items.map(item => <tr className="animated-grid-row">
-            <td className="action-grid-cell">
-                { this.navigateButton() }
-                { this.deleteButton() }
-                { this.editButton() }
-                { this.saveButton() }
+            <td className="action-grid-cell btn-toolbar">
+                { this.navigateButton(item) }
+                { this.deleteButton(item) }
+                { this.editButton(item) }
+                { this.saveButton(item) }
             </td>
             {this.columns(item)}
         </tr>)
     },
     createNewRow: function () {
         return this.props.isInEditMode && this.props.permissions.create ? <tr>
-            <td className="action-grid-cell">
+            <td className="action-grid-cell btn-toolbar">
                 <MessageTooltip message="Add">
                     <Button bsSize="xs" bsStyle="success" onClick={() => this.props.actions.createEntity()}>
                         <Glyphicon glyph="plus"/>
@@ -60,28 +60,28 @@ module.exports = (messages, MessageTooltip, Field) => React.createClass({
             </tr>
         </tfoot> : null
     },
-    navigateButton: function () {
+    navigateButton: function (item) {
         return !this.props.isInEditMode && this.props.hasNavigate ? <MessageTooltip message="View">
             <Button bsSize="xs" onClick={() => this.props.actions.navigate(item.id)}>
                 <Glyphicon glyph="chevron-right"/>
             </Button>
         </MessageTooltip> : null
     },
-    deleteButton: function () {
+    deleteButton: function (item) {
         return this.props.isInEditMode && this.props.permissions.delete ? <MessageTooltip message="Delete">
             <Button bsSize="xs" bsStyle="danger" onClick={() => this.props.actions.deleteEntity(item)}>
                 <Glyphicon glyph="trash"/>
             </Button>
         </MessageTooltip> : null
     },
-    editButton: function () {
+    editButton: function (item) {
         return this.props.isInEditMode && this.props.editingItem !== item && this.props.permissions.update ? <MessageTooltip message="Edit">
             <Button bsSize="xs" onClick={() => this.props.actions.editEntity(item)}>
                 <Glyphicon glyph="pencil"/>
             </Button>
         </MessageTooltip> : null
     },
-    saveButton: function () {
+    saveButton: function (item) {
         return this.props.isInEditMode && this.props.editingItem === item ? <MessageTooltip message="Save">
             <Button bsSize="xs" onClick={() => this.props.actions.saveEntity()}>
                 <Glyphicon glyph="ok"/>

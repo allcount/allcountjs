@@ -97,8 +97,12 @@ a.shifted-anchor {
   }
 }
 
+@btn-toolbar-margin: 5px;
+@button-border-width: 1px;
+
 .action-grid-cell {
   height: 40px; /*TODO*/
+  width: (@btn-toolbar-margin + @padding-xs-horizontal*2 + @button-border-width*2 + @font-size-small)*2 + @table-cell-padding*2;
   padding-top: @table-cell-padding + @padding-base-vertical - @padding-xs-vertical !important;
 }
 /*

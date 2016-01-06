@@ -1,4 +1,5 @@
 import React from 'react';
+import BodyClassName from 'react-body-classname';
 
 module.exports = (TopMenu, injection) => React.createClass({
     render: function () {

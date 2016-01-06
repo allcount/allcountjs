@@ -1,12 +1,8 @@
 import React from 'react';
 import {ButtonToolbar, Button, Grid, Glyphicon} from 'react-bootstrap';
+import BodyClassName from 'react-body-classname';
 
 module.exports = (ToolbarContainer, MessageTooltip) => React.createClass({
-    componentDidMount: function () {
-        if (!this.props.withoutHeader) {
-            document.body.className = (document.body.className || '') + ' has-toolbar'; //TODO
-        }
-    },
     render: function () {
         return <ToolbarContainer withoutHeader={this.props.withoutHeader}>
             <Grid>
@@ -21,17 +17,29 @@ module.exports = (ToolbarContainer, MessageTooltip) => React.createClass({
         }
     },
     listContainer: function () {
-        return <div className="form-inline">
-            <div className="pull-left">
-                <ButtonToolbar>
-                    <MessageTooltip message="Create">
-                        <Button bsStyle="success" onClick={this.props.actions.toCreate}><Glyphicon glyph="plus"/></Button>
-                    </MessageTooltip>
-                    <MessageTooltip message="Edit">
-                        <Button onClick={this.props.actions.startGridEditing}><Glyphicon glyph="pencil"/></Button>
-                    </MessageTooltip>
-                </ButtonToolbar>
+        return <BodyClassName className="has-toolbar">
+            <div className="form-inline">
+                <div className="pull-left">
+                    <ButtonToolbar>
+                        {this.props.isInEditMode ? this.doneEditGridButton() : [this.createButton(), this.editGridButton()]}
+                    </ButtonToolbar>
+                </div>
             </div>
-        </div>
+        </BodyClassName>
+    },
+    createButton: function () {
+        return <MessageTooltip message="Create">
+            <Button bsStyle="success" onClick={this.props.actions.toCreate}><Glyphicon glyph="plus"/></Button>
+        </MessageTooltip>
+    },
+    editGridButton: function () {
+        return <MessageTooltip message="Edit">
+            <Button onClick={this.props.actions.startGridEditing}><Glyphicon glyph="pencil"/></Button>
+        </MessageTooltip>
+    },
+    doneEditGridButton: function () {
+        return <MessageTooltip message="Done">
+            <Button onClick={this.props.actions.doneGridEditing}><Glyphicon glyph="ok"/></Button>
+        </MessageTooltip>
     }
 });
