@@ -285,6 +285,18 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 });
                 scope.provider = fieldDescription.fieldType.provider;
                 return $compile('<div lc-upload="fieldValue" provider="{{provider}}"></div>')(scope);
+            }],
+            link: [function (value, fieldDescription) {
+                var link = $('<a target="_blank"></a>');
+                link.attr('href', value);
+                link.text(value);
+                return link;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.linkValue = controller.$viewValue;
+                scope.$watch('linkValue', function (linkValue) {
+                    controller.$setViewValue(linkValue ? linkValue : undefined);
+                });
+                return $compile('<input type="url" ng-model="linkValue" class="form-control">')(scope);
             }]
         }
     }]);

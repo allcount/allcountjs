@@ -141,6 +141,15 @@ exports.cloudinaryImage = function (name) {
     });
 };
 
+exports.link = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'link'
+        }
+    })
+};
+
 function Field(config) {
     _.extend(this, config);
 }
