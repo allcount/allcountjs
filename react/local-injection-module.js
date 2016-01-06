@@ -71,4 +71,8 @@ exports.installModule = function (injection) {
     injection.bindFactory('keygrip', function () {
         return Keygrip(['1234567890']);
     });
+
+    injection.bindFactory('messages', function () { //TODO
+        return function (msg) { return msg }
+    })
 };
