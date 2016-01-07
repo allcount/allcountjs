@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 module.exports = () => {
     return {
         bindToComponent: function (component, modelInstance) {
@@ -8,6 +10,9 @@ module.exports = () => {
                 setValue: function (property, value) {
                     this[property] = value;
                     updateState(this);
+                },
+                isFieldChanged: function (field) {
+                    return !_.isEqual(this[field], modelInstance[field])
                 }
             }), modelInstance || {});
             updateState(model);

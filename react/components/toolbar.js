@@ -5,27 +5,35 @@ import BodyClassName from 'react-body-classname';
 module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createReactClass({
     render: function () {
         return <ToolbarContainer withoutHeader={this.props.withoutHeader}>
-            <Grid>
-            { this.switchMode() }
-            </Grid>
+            <BodyClassName className="has-toolbar">
+                <Grid>
+                { this.switchMode() }
+                </Grid>
+            </BodyClassName>
         </ToolbarContainer>
     },
     switchMode: function () {
         switch(this.props.mode) {
             case 'list':
                 return this.listContainer();
+            case 'create':
+                return this.createContainer();
         }
     },
     listContainer: function () {
-        return <BodyClassName className="has-toolbar">
-            <div className="form-inline">
-                <div className="pull-left">
-                    <ButtonToolbar>
-                        {this.props.isInEditMode ? this.doneEditGridButton() : [this.createButton(), this.editGridButton()]}
-                    </ButtonToolbar>
-                </div>
+        return <div className="form-inline">
+            <div className="pull-left">
+                <ButtonToolbar>
+                    {this.props.isInEditMode ? this.doneEditGridButton() : [this.createButton(), this.editGridButton()]}
+                </ButtonToolbar>
             </div>
-        </BodyClassName>
+        </div>
+    },
+    createContainer: function () {
+        return <ButtonToolbar>
+            {this.backButton()}
+            {this.doneCreateButton()}
+        </ButtonToolbar>
     },
     createButton: function () {
         return <MessageTooltip message="Create">
@@ -40,6 +48,16 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
     doneEditGridButton: function () {
         return <MessageTooltip message="Done">
             <Button onClick={this.props.actions.doneGridEditing}><Glyphicon glyph="ok"/></Button>
+        </MessageTooltip>
+    },
+    doneCreateButton: function () {
+        return <MessageTooltip message="Done">
+            <Button onClick={this.props.actions.doneCreate}><Glyphicon glyph="ok"/></Button>
+        </MessageTooltip>
+    },
+    backButton: function () {
+        return <MessageTooltip message="Back to list">
+            <Button onClick={this.props.actions.returnToGrid}><Glyphicon glyph="chevron-left"/></Button>
         </MessageTooltip>
     }
 });

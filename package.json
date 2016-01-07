@@ -49,6 +49,7 @@
     "babel-runtime": "^6.3.19",
     "body-parser": "1.0.1",
     "bower-installer": "^0.8.4",
+    "classnames": "^2.2.3",
     "cloudinary": "^1.2.1",
     "connect-busboy": "^0.0.1",
     "console-stamp": "^0.1.3",

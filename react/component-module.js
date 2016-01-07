@@ -19,4 +19,7 @@ exports.installModule = (injection) => {
     injection.bindFactory('DataGrid', require('./components/data-grid'));
     injection.bindFactory('Field', require('./components/field'));
     injection.bindFactory('Model', require('./components/model'));
+    injection.bindFactory('Form', require('./components/form'));
+    injection.bindFactory('Layout', require('./components/layout'));
+    injection.bindFactory('layoutRenderers', require('./components/layout-renderers'));
 };
