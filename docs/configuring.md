@@ -336,6 +336,7 @@ Primitive fields types are:
 * `Fields.checkbox(name)`
 * `Fields.attachment(name)`
 * `Fields.password(name)`
+* `Fields.link(name)`
 
 `Fields.text(name)` is used to define text fields.
 If you want to define text field `foo` with 'Foo' label you could write:
