@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, Form, createReactClass, layoutService) => createReactClass({
     getInitialState: function() {
@@ -14,17 +15,14 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
         return <MainPage>
             <Toolbar mode={this.state.mode} actions={this.toolbarActions()} isInEditMode={this.state.isInEditMode}/>
             <div className="container screen-container">
-                {this.switchMode()}
+                <ReactCSSTransitionGroup transitionName="transition" transitionEnterTimeout={150} transitionLeaveTimeout={150}>
+                    {this.state.mode === 'list' ? <div className="left-animation-screen-transition">{this.list()}</div> : null}
+                </ReactCSSTransitionGroup>
+                <ReactCSSTransitionGroup  transitionName="transition"  transitionEnterTimeout={150} transitionLeaveTimeout={150}>
+                    {this.state.mode === 'create' ? <div className="right-animation-screen-transition">{this.createForm()}</div> : null}
+                </ReactCSSTransitionGroup>
             </div>
         </MainPage>
-    },
-    switchMode: function () {
-        switch(this.state.mode) {
-            case 'list':
-                return this.list();
-            case 'create':
-                return this.createForm();
-        }
     },
     list: function () {
         return <DataGrid
@@ -38,14 +36,12 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
         />
     },
     createForm: function () {
-        return <div className="right-animation-screen">
-            <Form
-                fieldDescriptions={entityDescriptionService.fieldDescriptions(this.props.params.entityTypeId)}
-                isEditor={true}
-                layout={layoutService.layoutFor(this.props.params.entityTypeId)}
-                {...this.state.createForm}
-            ></Form>
-        </div>
+        return <Form
+            fieldDescriptions={entityDescriptionService.fieldDescriptions(this.props.params.entityTypeId)}
+            isEditor={true}
+            layout={layoutService.layoutFor(this.props.params.entityTypeId)}
+            {...this.state.createForm}
+        ></Form>
     },
     toolbarActions: function () {
         return {
