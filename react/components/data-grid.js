@@ -22,7 +22,7 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         </Table>
     },
     headers: function () {
-        return this.props.fieldDescriptions.map((fd) => <th className={this.headerClass(fd)}>{messages(fd.name)}</th>)
+        return this.props.fieldDescriptions.map((fd) => <th key={'head-' + fd.field} className={this.headerClass(fd)}>{messages(fd.name)}</th>)
     },
     headerClass: function (fd) {
         return fd.fieldTypeId + '-grid-header';
@@ -47,7 +47,7 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
                     </Button>
                 </MessageTooltip>
             </td>
-            {this.props.fieldDescriptions.map((fd) => <td ng-repeat="fd in fieldDescriptions"></td>)}
+            {this.props.fieldDescriptions.map((fd) => <td key={'create-' + fd.field} ng-repeat="fd in fieldDescriptions"></td>)}
         </tr> : null
     },
     footer: function () {
@@ -55,7 +55,7 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
             <tr className="active">
                 <td></td>
                 {this.props.fieldDescriptions.map((fd) => <td>
-                    <Field model={totalRow} isEditor={false} fieldDescription={fd}/>
+                    <Field model={this.props.totalRow} isEditor={false} fieldDescription={fd}/>
                 </td>)}
             </tr>
         </tfoot> : null

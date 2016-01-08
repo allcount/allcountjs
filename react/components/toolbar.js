@@ -18,6 +18,8 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
                 return this.listContainer();
             case 'create':
                 return this.createContainer();
+            case 'form':
+                return this.formContainer();
         }
     },
     listContainer: function () {
@@ -35,7 +37,14 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
             {this.doneCreateButton()}
         </ButtonToolbar>
     },
+    formContainer: function () {
+        return <ButtonToolbar>
+            {this.backButton()}
+            {this.props.isFormEditing ? this.doneFormEditingButton() : this.startFormEditingButton()}
+        </ButtonToolbar>
+    },
     createButton: function () {
+        //TODO permissions
         return <MessageTooltip message="Create">
             <Button bsStyle="success" onClick={this.props.actions.toCreate}><Glyphicon glyph="plus"/></Button>
         </MessageTooltip>
@@ -53,6 +62,16 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
     doneCreateButton: function () {
         return <MessageTooltip message="Done">
             <Button onClick={this.props.actions.doneCreate}><Glyphicon glyph="ok"/></Button>
+        </MessageTooltip>
+    },
+    startFormEditingButton: function () {
+        return <MessageTooltip message="Edit">
+            <Button onClick={this.props.actions.startFormEditing}><Glyphicon glyph="pencil"/></Button>
+        </MessageTooltip>
+    },
+    doneFormEditingButton: function () {
+        return <MessageTooltip message="Done">
+            <Button onClick={this.props.actions.doneFormEditing}><Glyphicon glyph="ok"/></Button>
         </MessageTooltip>
     },
     backButton: function () {
