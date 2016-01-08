@@ -150,6 +150,15 @@ exports.link = function (name) {
     })
 };
 
+exports.email = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'email'
+        }
+    })
+};
+
 function Field(config) {
     _.extend(this, config);
 }
