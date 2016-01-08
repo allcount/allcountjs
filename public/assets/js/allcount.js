@@ -297,6 +297,18 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     controller.$setViewValue(linkValue ? linkValue : undefined);
                 });
                 return $compile('<input type="url" ng-model="linkValue" class="form-control">')(scope);
+            }],
+            email: [function (value, fieldDescription) {
+                var link = $('<a></a>');
+                link.attr('href', 'mailto:' + value);
+                link.text(value);
+                return link;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.emailValue = controller.$viewValue;
+                scope.$watch('emailValue', function (emailValue) {
+                    controller.$setViewValue(emailValue ? emailValue : undefined);
+                });
+                return $compile('<input type="email" ng-model="emailValue" class="form-control">')(scope);
             }]
         }
     }]);

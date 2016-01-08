@@ -13,7 +13,8 @@ A.app({
                     checkbox: Fields.checkbox("Checkbox"),
                     checkboxArrayField: Fields.checkbox("Checkbox Array", 'checkboxArray'),
                     password: Fields.password("Password"),
-                    link: Fields.link("Link")
+                    link: Fields.link("Link"),
+                    email: Fields.email("Email")
                 }
             },
             Bar: {
