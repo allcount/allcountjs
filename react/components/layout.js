@@ -9,7 +9,7 @@ module.exports = (createReactClass, layoutRenderers) => createReactClass({
             return this.props.fieldFn(element.params.field);
         }
         var LayoutElem = layoutRenderers[element.containerId];
-        return <LayoutElem {...element.params}>
+        return <LayoutElem {...element.params} key={JSON.stringify(element)}>
             {element.children.map((c) => this.layoutElement(c))}
         </LayoutElem>
     }

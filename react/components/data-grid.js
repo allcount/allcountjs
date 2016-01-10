@@ -6,7 +6,7 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         return <Table>
             <thead>
                 <tr>
-                    <th>
+                    <th key="action-column">
                         <Button bsSize="xs" style={{opacity: '0'}}>
                             <Glyphicon glyph="chevron-right"/>
                         </Button>
@@ -28,7 +28,7 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         return fd.fieldTypeId + '-grid-header';
     },
     rows: function () {
-        return this.props.items.map(item => <tr className="animated-grid-row">
+        return this.props.items.map(item => <tr className="animated-grid-row" key={item.id}>
             <td className="action-grid-cell btn-toolbar">
                 { this.navigateButton(item) }
                 { this.deleteButton(item) }
@@ -40,8 +40,8 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
     },
     createNewRow: function () {
         return this.props.isInEditMode && this.props.permissions.create ? <tr>
-            <td className="action-grid-cell btn-toolbar">
-                <MessageTooltip message="Add">
+            <td key="create-action-cell" className="action-grid-cell btn-toolbar">
+                <MessageTooltip message="Add" id="add-row-tooltip">
                     <Button bsSize="xs" bsStyle="success" onClick={() => this.props.actions.createEntity()}>
                         <Glyphicon glyph="plus"/>
                     </Button>
@@ -54,42 +54,42 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         return !this.props.isInEditMode && this.props.totalRow ? <tfoot>
             <tr className="active">
                 <td></td>
-                {this.props.fieldDescriptions.map((fd) => <td>
+                {this.props.fieldDescriptions.map((fd) => <td key={'footer-' + fd.field}>
                     <Field model={this.props.totalRow} isEditor={false} fieldDescription={fd}/>
                 </td>)}
             </tr>
         </tfoot> : null
     },
     navigateButton: function (item) {
-        return !this.props.isInEditMode && this.props.hasNavigate ? <MessageTooltip message="View">
+        return !this.props.isInEditMode && this.props.hasNavigate ? <MessageTooltip message="View" id={"view-tooltip-" + item.id}>
             <Button bsSize="xs" onClick={() => this.props.actions.navigate(item.id)}>
                 <Glyphicon glyph="chevron-right"/>
             </Button>
         </MessageTooltip> : null
     },
     deleteButton: function (item) {
-        return this.props.isInEditMode && this.props.permissions.delete ? <MessageTooltip message="Delete">
+        return this.props.isInEditMode && this.props.permissions.delete ? <MessageTooltip message="Delete" id={"delte-tooltip-" + item.id}>
             <Button bsSize="xs" bsStyle="danger" onClick={() => this.props.actions.deleteEntity(item)}>
                 <Glyphicon glyph="trash"/>
             </Button>
         </MessageTooltip> : null
     },
     editButton: function (item) {
-        return this.props.isInEditMode && this.props.editingItem !== item && this.props.permissions.update ? <MessageTooltip message="Edit">
+        return this.props.isInEditMode && this.props.editingItem !== item && this.props.permissions.update ? <MessageTooltip message="Edit" id={"edit-tooltip-" + item.id}>
             <Button bsSize="xs" onClick={() => this.props.actions.editEntity(item)}>
                 <Glyphicon glyph="pencil"/>
             </Button>
         </MessageTooltip> : null
     },
     saveButton: function (item) {
-        return this.props.isInEditMode && this.props.editingItem === item ? <MessageTooltip message="Save">
+        return this.props.isInEditMode && this.props.editingItem === item ? <MessageTooltip message="Save" id={"save-tooltip-" + item.id}>
             <Button bsSize="xs" onClick={() => this.props.actions.saveEntity()}>
                 <Glyphicon glyph="ok"/>
             </Button>
         </MessageTooltip> : null
     },
     columns: function (item) {
-        return this.props.fieldDescriptions.map((fd) => <td className={this.props.validationErrors[fd.field] ? 'has-error' : ''}>
+        return this.props.fieldDescriptions.map((fd) => <td key={'column-' + item.id + '-' + fd.field}className={this.props.validationErrors[fd.field] ? 'has-error' : ''}>
             <Field model={item} isEditor={this.props.editingItem === item} fieldDescription={fd}/>
             {this.props.validationErrors[fd.field] && this.props.editingItem === item ? <div className="text-danger">{messages(this.props.validationErrors[fd.field])}</div> : null}
         </td>)

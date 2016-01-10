@@ -45,37 +45,37 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
     },
     createButton: function () {
         //TODO permissions
-        return <MessageTooltip message="Create">
+        return <MessageTooltip message="Create" key="Create" id="create-tooltip">
             <Button bsStyle="success" onClick={this.props.actions.toCreate}><Glyphicon glyph="plus"/></Button>
         </MessageTooltip>
     },
     editGridButton: function () {
-        return <MessageTooltip message="Edit">
+        return <MessageTooltip message="Edit" key="EditGrid" id="edit-grid-tooltip">
             <Button onClick={this.props.actions.startGridEditing}><Glyphicon glyph="pencil"/></Button>
         </MessageTooltip>
     },
     doneEditGridButton: function () {
-        return <MessageTooltip message="Done">
+        return <MessageTooltip message="Done" key="DoneGrid" id="done-grid-tooltip">
             <Button onClick={this.props.actions.doneGridEditing}><Glyphicon glyph="ok"/></Button>
         </MessageTooltip>
     },
     doneCreateButton: function () {
-        return <MessageTooltip message="Done">
+        return <MessageTooltip message="Done" key="DoneCreate" id="done-create-tooltip">
             <Button onClick={this.props.actions.doneCreate}><Glyphicon glyph="ok"/></Button>
         </MessageTooltip>
     },
     startFormEditingButton: function () {
-        return <MessageTooltip message="Edit">
+        return <MessageTooltip message="Edit" key="EditForm" id="edit-form-tooltip">
             <Button onClick={this.props.actions.startFormEditing}><Glyphicon glyph="pencil"/></Button>
         </MessageTooltip>
     },
     doneFormEditingButton: function () {
-        return <MessageTooltip message="Done">
+        return <MessageTooltip message="Done" key="DoneForm" id="done-form-tooltip">
             <Button onClick={this.props.actions.doneFormEditing}><Glyphicon glyph="ok"/></Button>
         </MessageTooltip>
     },
     backButton: function () {
-        return <MessageTooltip message="Back to list">
+        return <MessageTooltip message="Back to list" key="Back" id="back-tooltip">
             <Button onClick={this.props.actions.returnToGrid}><Glyphicon glyph="chevron-left"/></Button>
         </MessageTooltip>
     }

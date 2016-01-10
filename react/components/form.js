@@ -15,8 +15,8 @@ module.exports = (createReactClass, Layout, Field, messages) => createReactClass
         return <Layout layout={this.props.layout} fieldFn={(field) => this.formGroup(field)}/>
     },
     formGroup: function (field) {
-        return <div className={classNames("form-group", {
-            'has-warning': this.props.model.isFieldChanged(field),
+        return <div key={field} className={classNames("form-group", {
+            'has-warning': this.props.model && this.props.model.isFieldChanged(field),
             'has-error': this.props.validationErrors[field]
         })}>
             {this.label(field)}

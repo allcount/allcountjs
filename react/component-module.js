@@ -9,9 +9,12 @@ exports.installModule = (injection) => {
         }
     });
 
+    injection.bindFactory('ReactApp', require('./react-app'));
     injection.bindFactory('IndexPage', require('./pages/index'));
     injection.bindFactory('MainPage', require('./pages/main'));
     injection.bindFactory('EntityPage', require('./pages/entity'));
+    injection.bindFactory('EntityCreateFormPage', require('./pages/entity-new'));
+    injection.bindFactory('EntityFormPage', require('./pages/entity-form'));
     injection.bindFactory('TopMenu', require('./components/top-menu'));
     injection.bindFactory('Toolbar', require('./components/toolbar'));
     injection.bindFactory('ToolbarContainer', require('./components/toolbar-container'));

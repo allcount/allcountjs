@@ -8,6 +8,6 @@ module.exports = (messages, createReactClass) => createReactClass({
         </OverlayTrigger>
     },
     tooltip: function () {
-        return <Tooltip>{messages(this.props.message)}</Tooltip>
+        return <Tooltip id={this.props.id}>{messages(this.props.message)}</Tooltip>
     }
 });

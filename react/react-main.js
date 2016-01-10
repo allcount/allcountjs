@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Link, hashHistory } from 'react-router'
+import { Router, Route, IndexRoute, Link, hashHistory } from 'react-router'
 
 module.exports = function (injection) {
+    var ReactApp = injection.inject('ReactApp');
     ReactDOM.render((
-        <Router history={hashHistory}>
-            <Route path="/" component={injection.inject('IndexPage')}/>
-            <Route path="/entity/:entityTypeId" component={injection.inject('EntityPage')}/>
-        </Router>
+        <ReactApp/>
     ), document.getElementById('content'));
 };

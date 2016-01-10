@@ -4,18 +4,38 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, Form, createReactClass, layoutService) => createReactClass({
     getInitialState: function() {
         return {
-            mode: 'list',
-            grid: {items: [{id: "1", item: 'bar', date: new Date()}].map((i) => Model.bindToComponent(this, i)), validationErrors: {}},
+            grid: {items: [], validationErrors: {}},
             isInEditMode: false,
-            createForm: {validationErrors: {}, model: Model.bindToComponent(this, {})},
+            createForm: {validationErrors: {}, isEditor: true},
             editForm: {isEditor: false, validationErrors: {}}
         };
+    },
+    componentDidMount: function () {
+        this.setState((state) => {
+            state.createForm.model = Model.bindToComponent(this, {});
+            if (!state.grid.items.length) {
+                state.grid.items = this.storageStub();
+            }
+            return {grid: state.grid, createForm: state.createForm} ;
+        });
+    },
+    storageStub: function () {
+        return [{id: "1", item: 'bar', date: new Date()}].map((i) => Model.bindToComponent(this, i))
+    },
+    getChildContext: function () {
+        return {actions: this.contextActions()};
+    },
+    childContextTypes: {
+        actions: React.PropTypes.object
+    },
+    contextTypes: {
+        router: React.PropTypes.object
     },
     render: function () {
         //TODO promise for fieldDescriptions?
         return <MainPage>
             <Toolbar
-                mode={this.state.mode}
+                mode={this.mode()}
                 actions={this.toolbarActions()}
                 isInEditMode={this.state.isInEditMode}
                 permissions={this.permissions()}
@@ -23,16 +43,16 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
             />
             <div className="container screen-container">
                 <ReactCSSTransitionGroup transitionName="transition" transitionEnterTimeout={150} transitionLeaveTimeout={150}>
-                    {this.state.mode === 'list' ? <div className="left-animation-screen-transition">{this.list()}</div> : null}
+                    {!this.props.children ? <div className="left-animation-screen-transition">{this.list()}</div> : null}
                 </ReactCSSTransitionGroup>
                 <ReactCSSTransitionGroup  transitionName="transition"  transitionEnterTimeout={150} transitionLeaveTimeout={150}>
-                    {this.state.mode === 'create' ? <div className="right-animation-screen-transition">{this.createForm()}</div> : null}
-                </ReactCSSTransitionGroup>
-                <ReactCSSTransitionGroup  transitionName="transition"  transitionEnterTimeout={150} transitionLeaveTimeout={150}>
-                    {this.state.mode === 'form' ? <div className="right-animation-screen-transition">{this.editForm()}</div> : null}
+                    {this.props.children ? <div className="right-animation-screen-transition">{React.cloneElement(this.props.children, {viewState: this.state})}</div> : null}
                 </ReactCSSTransitionGroup>
             </div>
         </MainPage>
+    },
+    mode: function () {
+        return this.props.location.pathname.indexOf('new') === this.props.location.pathname.length - 3 ? 'create' : ( this.props.params.entityId ? 'form' : 'list');
     },
     list: function () {
         return <DataGrid
@@ -62,18 +82,21 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
     },
     toolbarActions: function () {
         return {
-            toCreate: () => this.setState({mode: 'create'}),
+            toCreate: () => {
+                this.context.router.push('/entity/' + this.props.params.entityTypeId + '/new');
+            },
             startGridEditing: () => this.setState({isInEditMode: true}),
             doneGridEditing: () => this.setState({isInEditMode: false}),
             doneCreate: () => {
                 this.state.grid.items.push(this.state.createForm.model);
                 this.state.createForm.model = Model.bindToComponent(this, {});
-                this.setState({mode: 'list', createForm: this.state.createForm, grid: this.state.grid});
+                this.setState({createForm: this.state.createForm, grid: this.state.grid});
+                this.backToList();
             },
             returnToGrid: () => {
-                this.state.editForm.model = null;
                 this.state.editForm.isEditor = false;
-                this.setState({mode: 'list', editForm: this.state.editForm});
+                this.setState({editForm: this.state.editForm});
+                this.backToList();
             },
             startFormEditing: () => {
                 this.state.editForm.isEditor = true;
@@ -85,11 +108,13 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
             }
         }
     },
+    backToList: function () {
+        this.context.router.push('/entity/' + this.props.params.entityTypeId);
+    },
     gridActions: function () {
         return {
             navigate: (itemId) => {
-                this.state.editForm.model = _.find(this.state.grid.items, (i) => i.id === itemId);
-                this.setState({mode: 'form', editForm: this.state.editForm});
+                this.context.router.push('/entity/' + this.props.params.entityTypeId + '/' + itemId);
             },
             editEntity: (item) => this.setState({gridEditingItem: item}),
             saveEntity: () => this.setState({gridEditingItem: null}),
@@ -105,6 +130,19 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
                     state.grid.items.splice(state.grid.items.indexOf(item), 1);
                     return {grid: state.grid, gridEditingItem: state.gridEditingItem === item ? null : state.gridEditingItem};
                 })
+            }
+        }
+    },
+    contextActions: function () {
+        return {
+            loadFormItem: (itemId) => {
+                this.setState((state) => {
+                    if (!state.grid.items.length) {
+                        state.grid.items = this.storageStub();
+                    }
+                    state.editForm.model = _.find(state.grid.items, (i) => i.id === itemId);
+                    return {editForm: state.editForm, grid: state.grid};
+                });
             }
         }
     },

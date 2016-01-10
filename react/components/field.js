@@ -7,9 +7,9 @@ module.exports = (createReactClass) => createReactClass({
     },
     render: function () {
         if (this.props.isEditor) {
-            return <input type="text" value={this.props.model[this.props.fieldDescription.field]} onChange={this.handleChange} className="form-control"/>
+            return <input type="text" value={this.props.model && this.props.model[this.props.fieldDescription.field]} onChange={this.handleChange} className="form-control"/>
         } else {
-            return <div className="form-control-static">{this.props.model[this.props.fieldDescription.field] && this.props.model[this.props.fieldDescription.field].toString()}</div>; //TODO
+            return <div className="form-control-static">{this.props.model && this.props.model[this.props.fieldDescription.field] && this.props.model[this.props.fieldDescription.field].toString()}</div>; //TODO
         }
     }
 });

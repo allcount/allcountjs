@@ -22,7 +22,7 @@ module.exports = (createReactClass) => createReactClass({
                 {menuItem.children.map((i) => this.menu(false, i))}
             </NavDropdown>
         } else {
-            return <LinkContainer to={{pathname: menuItem.url}}>{isRoot ?
+            return <LinkContainer key={menuItem.name} to={{pathname: menuItem.url}}>{isRoot ?
                 <NavItem key={menuItem.name}>{menuItem.name}</NavItem> :
                 <MenuItem key={menuItem.name}>{menuItem.name}</MenuItem> }
             </LinkContainer>
