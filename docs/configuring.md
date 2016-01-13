@@ -94,7 +94,7 @@ Example of `translations.js`:
      ru: {
        "Contact": "Контакт",
        "Phone": "Тел."
-     }
+     },
      de: {
        "Contact": "Kontakt",
        "Phone": "Telefon"
@@ -107,6 +107,16 @@ Language selection depends on user browser and OS settings.
 Also you can force app localization to particular language. For example:
 `forceLocale : "en"`
 in global application properties will force AllcountJS always use English language.
+
+> *NOTE*: if you're willing to use `forceLocale` to change AngularJS locale for example to change date format without any actual message localization please add empty locale message object first:
+
+```
+A.app({
+  messages: {
+    ru: {}
+  }
+});
+```
 
 ## Menus
 
