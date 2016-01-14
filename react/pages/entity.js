@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
-module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, Form, createReactClass, layoutService) => createReactClass({
+module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, Form, createReactClass, layoutService, Crud) => createReactClass({
     getInitialState: function() {
         return {
             grid: {items: [], validationErrors: {}},
@@ -13,14 +13,20 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
     componentDidMount: function () {
         this.setState((state) => {
             state.createForm.model = Model.bindToComponent(this, {});
-            if (!state.grid.items.length) {
-                state.grid.items = this.storageStub();
-            }
             return {grid: state.grid, createForm: state.createForm} ;
         });
+        this.refreshGrid().done();
     },
-    storageStub: function () {
-        return [{id: "1", item: 'bar', date: new Date()}].map((i) => Model.bindToComponent(this, i))
+    refreshGrid: function () {
+        return this.entityCrud().find({}).then((items) => {
+            this.setState((state) => {
+                state.grid.items = items.map((i) => Model.bindToComponent(this, i));
+                return {grid: state.grid} ;
+            });
+        })
+    },
+    entityCrud: function () {
+        return Crud.crudFor(this.props.params.entityTypeId);
     },
     getChildContext: function () {
         return {actions: this.contextActions()};
@@ -88,10 +94,11 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
             startGridEditing: () => this.setState({isInEditMode: true}),
             doneGridEditing: () => this.setState({isInEditMode: false}),
             doneCreate: () => {
-                this.state.grid.items.push(this.state.createForm.model);
-                this.state.createForm.model = Model.bindToComponent(this, {});
-                this.setState({createForm: this.state.createForm, grid: this.state.grid});
-                this.backToList();
+                this.entityCrud().createEntity(this.state.createForm.model).then(() => {
+                    this.state.createForm.model = Model.bindToComponent(this, {});
+                    this.setState({createForm: this.state.createForm, grid: this.state.grid});
+                    return this.refreshGrid().then(() => this.backToList());
+                }).done()
             },
             returnToGrid: () => {
                 this.state.editForm.isEditor = false;
@@ -103,8 +110,13 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
                 this.setState({editForm: this.state.editForm});
             },
             doneFormEditing: () => {
-                this.state.editForm.isEditor = false;
-                this.setState({editForm: this.state.editForm});
+                this.entityCrud().updateEntity(this.state.editForm.model).then(() => {
+                    return this.contextActions().loadFormItem(this.state.editForm.model.id); //TODO move some from contextActions?
+                }).then(() => {
+                    this.state.editForm.isEditor = false;
+                    this.setState({editForm: this.state.editForm});
+                    return this.refreshGrid();
+                }).done()
             }
         }
     },
@@ -126,23 +138,19 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
                 })
             },
             deleteEntity: (item) => {
-                this.setState((state) => {
-                    state.grid.items.splice(state.grid.items.indexOf(item), 1);
-                    return {grid: state.grid, gridEditingItem: state.gridEditingItem === item ? null : state.gridEditingItem};
-                })
+                this.entityCrud().deleteEntity(item.id).then(() => this.refreshGrid());
             }
         }
     },
     contextActions: function () {
         return {
             loadFormItem: (itemId) => {
-                this.setState((state) => {
-                    if (!state.grid.items.length) {
-                        state.grid.items = this.storageStub();
-                    }
-                    state.editForm.model = _.find(state.grid.items, (i) => i.id === itemId);
-                    return {editForm: state.editForm, grid: state.grid};
-                });
+                return this.entityCrud().readEntity(itemId).then((item) => {
+                    this.setState((state) => {
+                        state.editForm.model = Model.bindToComponent(this, item);
+                        return {editForm: state.editForm, grid: state.grid};
+                    });
+                })
             }
         }
     },

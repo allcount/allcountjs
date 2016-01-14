@@ -40,7 +40,7 @@ exports.inject = function (serviceName, optional) {
         return exports;
     }
     if (cycleDependencyGuardStack.indexOf(serviceName) != -1) {
-        throw new Error('Cycle dependency detected: ' + cycleDependencyGuardStack.join(', ') + ', >>> ' + serviceName);
+        throw new Error('Cycle dependency detected: ' + serviceName + ' <<<, ' + cycleDependencyGuardStack.reverse().join(', '));
     }
     cycleDependencyGuardStack.push(serviceName);
     function resolve(serviceName) {
@@ -73,7 +73,7 @@ exports.inject = function (serviceName, optional) {
             if (optional) {
                 return undefined;
             }
-            throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
+            throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.reverse().join(', '));
         }
         var instance = exports.resolveFactory(factory);
         if (exports.scoped.length > 0) {

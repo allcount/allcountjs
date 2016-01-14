@@ -43,11 +43,15 @@ exports.installModule = function (injection) {
     //injection.bindFactory('homePageService', require('../services/home-page-service'));
     injection.bindFactory('dbSeedService', require('../services/db-seed-service'));
     injection.bindFactory('appService', require('../services/app-service'));
+    injection.bindFactory('crudService', require('../services/crud-service'));
+    injection.bindFactory('queryPerformerService', require('../services/query-performer-service'));
+    injection.bindFactory('validationService', require('../services/validation-service'));
     injection.bindFactory('appUtil', require('../services/app-util'));
     injection.bindFactory('linkBuilder', require('../services/link-builder'));
     injection.bindFactory('securityService', require('../services/security-service'));
     injection.bindFactory('Queries', require('../services/js/Queries'));
     injection.bindFactory('Fields', require('../services/js/Fields'));
+    injection.bindFactory('Crud', require('../services/js/Crud'));
     injection.bindMultiple('entityDescriptionCompilers', []);
     injection.bindFactory('queryParseService', function () { return {} }); //TODO
     injection.bindMultiple('dbSeedProviders', ['securityService']);
