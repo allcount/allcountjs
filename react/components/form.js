@@ -16,7 +16,7 @@ module.exports = (createReactClass, Layout, Field, messages) => createReactClass
     },
     formGroup: function (field) {
         return <div key={field} className={classNames("form-group", {
-            'has-warning': this.props.model && this.props.model.isFieldChanged(field),
+            'has-warning': false, //TODO this.props.model && this.props.model.isFieldChanged(field),
             'has-error': this.props.validationErrors[field]
         })}>
             {this.label(field)}
@@ -37,7 +37,7 @@ module.exports = (createReactClass, Layout, Field, messages) => createReactClass
         </div>
     },
     formField: function (field) {
-        return <Field model={this.props.model} isEditor={this.props.isEditor} fieldDescription={this.fieldToDesc()[field]}/>
+        return <Field model={this.props.model && this.props.model.fieldModel(field)} isEditor={this.props.isEditor} fieldDescription={this.fieldToDesc()[field]}/>
     },
     formValidationMessage: function (field) {
         return this.props.validationErrors[field] ? <div className="text-danger">{messages(this.props.validationErrors[field])}</div> : null;

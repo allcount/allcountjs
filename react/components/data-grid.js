@@ -28,15 +28,18 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         return fd.fieldTypeId + '-grid-header';
     },
     rows: function () {
-        return this.props.items.map(item => <tr className="animated-grid-row" key={item.id}>
-            <td className="action-grid-cell btn-toolbar">
-                { this.navigateButton(item) }
-                { this.deleteButton(item) }
-                { this.editButton(item) }
-                { this.saveButton(item) }
-            </td>
-            {this.columns(item)}
-        </tr>)
+        return (this.props.gridItemsLoader.models() || []).map(model => {
+            var item = model.state();
+            return <tr className="animated-grid-row" key={item.id}>
+                <td className="action-grid-cell btn-toolbar">
+                    { this.navigateButton(item) }
+                    { this.deleteButton(item) }
+                    { this.editButton(item) }
+                    { this.saveButton(item) }
+                </td>
+                {this.columns(model)}
+            </tr>
+        })
     },
     createNewRow: function () {
         return this.props.isInEditMode && this.props.permissions.create ? <tr>
@@ -88,10 +91,14 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
             </Button>
         </MessageTooltip> : null
     },
-    columns: function (item) {
-        return this.props.fieldDescriptions.map((fd) => <td key={'column-' + item.id + '-' + fd.field}className={this.props.validationErrors[fd.field] ? 'has-error' : ''}>
-            <Field model={item} isEditor={this.props.editingItem === item} fieldDescription={fd}/>
+    columns: function (model) {
+        var item = model.state();
+        return this.props.fieldDescriptions.map((fd) => <td key={'column-' + item.id + '-' + fd.field} className={this.props.validationErrors[fd.field] ? 'has-error' : ''}>
+            {this.field(model, fd)}
             {this.props.validationErrors[fd.field] && this.props.editingItem === item ? <div className="text-danger">{messages(this.props.validationErrors[fd.field])}</div> : null}
         </td>)
+    },
+    field: function (model, fd) {
+        return <Field model={model && model.fieldModel(fd.field)} isEditor={this.props.editingItem === model.state()} fieldDescription={fd}/>
     }
 });

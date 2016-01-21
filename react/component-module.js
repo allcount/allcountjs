@@ -25,4 +25,6 @@ exports.installModule = (injection) => {
     injection.bindFactory('Form', require('./components/form'));
     injection.bindFactory('Layout', require('./components/layout'));
     injection.bindFactory('layoutRenderers', require('./components/layout-renderers'));
+    injection.bindFactory('ItemsLoader', require('./components/items-loader'));
+    injection.bindFactory('StateMerger', require('./components/state-merger'));
 };

@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 module.exports = function (crudService, entityDescriptionService, injection) {
     function CrudFor(entityCrudId) {
         var crudStrategy = crudService.strategyForCrudId(entityCrudId);
@@ -15,8 +17,8 @@ module.exports = function (crudService, entityDescriptionService, injection) {
             deleteEntity: function (entityId) {
                 return crudStrategy.deleteEntity(entityId);
             },
-            find: function (query) {
-                return crudStrategy.findAll(query);
+            find: function (query, start, count) {
+                return !_.isUndefined(start) && !_.isUndefined(count) ? crudStrategy.findRange(query, start, count) : crudStrategy.findAll(query);
             },
             findCount: function (query) {
                 return crudStrategy.findCount(query);
