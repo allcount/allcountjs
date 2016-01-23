@@ -104,7 +104,10 @@ module.exports = function (
             appAccessRouter.use(crudOperationsRouter);
             appAccessRouter.get('/api/menus', menuRoute.menus);
             appAccessRouter.get('/api/app-info', menuRoute.appInfo);
-            app.get('/api/messages', messages.messagesObj);
+            app.get('/api/messages', function (req, res, next) {
+                securityRoute.setAccessControlHeaders(res);
+                next()
+            }, messages.messagesObj);
 
             injection.inScope({
                 app: function () { return app },

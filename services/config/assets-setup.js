@@ -4,7 +4,7 @@ var url = require('url');
 var mkdirp = require('mkdirp');
 var _ = require('underscore');
 
-module.exports = function (app, expressStatic, lessMiddleware, repositoryService, themeService, assetsService, Q, assetsMinifier) {
+module.exports = function (app, expressStatic, lessMiddleware, repositoryService, themeService, assetsService, Q, assetsMinifier, securityRoute) {
     return {
         defaultPublicPath: function () {
             return assetsMinifier.defaultPublicPath();
@@ -12,6 +12,12 @@ module.exports = function (app, expressStatic, lessMiddleware, repositoryService
         publicPaths: [],
         setup: function () {
             var repositoryPublic = path.join(repositoryService.repositoryDir(), 'public');
+            app.use(function (req, res, next) {
+                if (req.url.indexOf('/assets') === 0) {
+                    securityRoute.setAccessControlHeaders(res);
+                }
+                next();
+            });
             if (fs.existsSync(repositoryPublic)) {
                 this.setupPublicPathServing(repositoryPublic, path.join(repositoryService.repositoryDir(), 'tmp/css'));
             }
@@ -43,15 +49,16 @@ module.exports = function (app, expressStatic, lessMiddleware, repositoryService
 
             var buildPath = assetsMinifier.buildPath();
             app.use(function (req, res, next) {
-                var scripts = assetsService.scripts[req.url];
+                var scriptPath = url.parse(req.url).pathname;
+                var scripts = assetsService.scripts[scriptPath];
                 if (!scripts) {
                     next();
                     return;
                 }
 
                 return Q.all(scripts.map(pathToScript)).then(function (scriptPaths) {
-                    return assetsMinifier.scriptHash(req.url, scriptPaths).then(function (hash) {
-                        var hashUrl = assetsMinifier.hashPath(req.url, hash);
+                    return assetsMinifier.scriptHash(scriptPath, scriptPaths).then(function (hash) {
+                        var hashUrl = assetsMinifier.hashPath(scriptPath, hash);
                         var buildScriptPath = path.join(buildPath, hashUrl);
                         return fsExists(buildScriptPath).then(function (buildScriptExists) {
                             if (buildScriptExists) {
