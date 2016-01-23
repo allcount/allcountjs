@@ -641,7 +641,7 @@ allcountModule.directive("aMessage", messageDirective("aMessage")); //TODO depre
 
 allcountModule.directive("aMenu", menuDirective()); //TODO deprecated
 
-allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse", "$modal", function (rest, $location, messages, $parse, $modal) {
+allcountModule.directive("lcActions", ["rest", "messages", "$parse", "$modal", function (rest, messages, $parse, $modal) {
     return {
         restrict: 'A',
         scope: true,
@@ -716,7 +716,7 @@ allcountModule.directive("lcActions", ["rest", "$location", "messages", "$parse"
     }
 }]);
 
-allcountModule.directive("lcReference", ["rest", "$location", "messages", function (rest, $location, messages) {
+allcountModule.directive("lcReference", ["rest", "messages", function (rest, messages) {
     return {
         restrict: 'A',
         templateUrl: '/assets/template/reference.html',
