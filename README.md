@@ -96,7 +96,7 @@ You should see:
 Application server for "app-config" listening on port 9080
 ```
 
-You could see your server up and running at [http://localhost:9080](http://localhost:9080). Please use *admin* / *admin* as user name / password to sign in.
+You could see your server up and running at [http://localhost:9080](http://localhost:9080) then. Please use *admin* / *admin* as user name / password to sign in.
 
 # License
 AllcountJS is licensed under the MIT Open Source license. For more information, see the LICENSE file in this repository.
