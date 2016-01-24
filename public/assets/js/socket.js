@@ -1,4 +1,8 @@
-angular.module("allcount").directive("lcSocketListen", [function () {
+angular.module("allcount").factory('socket', function () {
+    return io();
+});
+
+angular.module("allcount").directive("lcSocketListen", ["socket", function (socket) {
     return {
         restrict: 'A',
         scope: false,
@@ -7,7 +11,6 @@ angular.module("allcount").directive("lcSocketListen", [function () {
                 if (!entityCrudId) {
                     return;
                 }
-                var socket = io();
                 socket.emit('listen-entity-change', entityCrudId);
                 socket.on('entity-change', function (changedEntityCrudId) {
                     if (changedEntityCrudId === entityCrudId) {
