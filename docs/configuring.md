@@ -684,6 +684,27 @@ This configuration defines `Profile` entity type that could be edited only by cu
 You could note that `username` field is reused from `User` and other fields are added.
 There is no constraints on field types and count for `User` entity type until your field names don't clash with default field names.
 
+## Extending Default Entity Types
+
+You could use `$parentProperty` dependency to get value of property from previous entity type definition. It could be very handful if you want add some fields to already defined entity type somewhere. For example to add `customer` field to `User` you could write:
+
+```js
+A.app({
+  ...,
+  entities: function(Fields) {
+    return {
+      User: {
+        fields: function ($parentProperty) {
+          $parentProperty.customer = Fields.reference(…);
+          return $parentProperty;
+        }
+      }
+    }
+  }
+});
+
+```
+
 # APIs
 
 There are numerous APIs could be required in various config property definitions.
