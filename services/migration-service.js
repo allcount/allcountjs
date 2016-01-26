@@ -22,9 +22,6 @@ module.exports = function (storageDriver, entityDescriptionService, referenceSer
             return obj.propertyValue('migrations') || [];
         }).flatten().map(function (m) { return m.evaluateProperties() }).value();
         return storageDriver.addOnConnectListener(function () {
-            if (!storageDriver.mongooseConnection) { //TODO support migrations for other DBs
-                return;
-            }
             return storageDriver.findAll(migrationsTableDescription,
                 {
                     filtering: {
