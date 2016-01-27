@@ -215,6 +215,17 @@ exports.initializeScopedThen = function (Q) {
                 } || fn;
         }));
     };
+    var superNodeify = Q.makePromise.prototype.nodeify;
+    Q.makePromise.prototype.nodeify = function () {
+        var storedScope = exports.storeScope();
+
+        return superNodeify.apply(this, _.map(arguments, function (fn) {
+            return _.isFunction(fn) && function () {
+                    var resolveArgs = arguments;
+                    return exports.restoreScope(storedScope, function () { return fn.apply(null, resolveArgs) });
+                } || fn;
+        }));
+    };
     Q.makePromise.prototype.scopedThenInitialized = true;
 };
 
