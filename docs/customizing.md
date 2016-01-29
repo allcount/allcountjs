@@ -142,6 +142,41 @@ block content
 Note that you could combine various AngularJS directives provided by AllcountJS.
 Most of AllcountJS directives accept `entityTypeId` identifier that passed to your view as local.
 
+## Overriding form layout
+
+There are many Jade mixins you could override and take control over specific parts of page rendering. For example you could override `defaultFormTemplate()` mixin to get an ability to customize form layout and field rendering of standard `entity.jade` as follows:
+
+```jade
+extends main
+include mixins
+
+block vars
+    - var hasToolbar = true
+    
+    mixin defaultFormTemplate()
+        .row
+          .col-md-6
+            +fieldGroup('dealNumber')
+            +fieldGroup('status')
+            +fieldGroup('employee')
+          .col-md-6  
+            +fieldGroup('taskDate')
+            +fieldGroup('isRejected')
+            +fieldGroup('rejectCause’)
+            
+block content
+    div(ng-app='allcount', ng-controller='EntityViewController')
+        +defaultToolbar()
+        .container.screen-container(ng-cloak)
+            +defaultGrid()
+            +noEntries()
+            +defaultEditAndCreateForms()
+
+block js
+    +entityJs()
+        
+```        
+
 ## Overriding default templates
 
 When `viewPaths` is set AllcountJS will check for templates according to reversed array priority.
