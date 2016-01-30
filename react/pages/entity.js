@@ -17,10 +17,10 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, StateMe
             state.createForm.model = {};
             return {createForm: state.createForm} ;
         });
-        this.refreshGrid().done();
+        this.gridItemsLoader().reload().done();
     },
     refreshGrid: function () {
-        return this.gridItemsLoader().loadItems();
+        return this.gridItemsLoader().refresh();
     },
     entityCrud: function () {
         return Crud.crudFor(this.props.params.entityTypeId);
@@ -46,6 +46,7 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, StateMe
                 isInEditMode={this.state.isInEditMode}
                 permissions={this.permissions()}
                 isFormEditing={this.state.editForm.isEditor}
+                itemsLoader={this.gridItemsLoader()}
             />
             <div className="container screen-container">
                 <ReactCSSTransitionGroup transitionName="transition" transitionEnterTimeout={150} transitionLeaveTimeout={150}>

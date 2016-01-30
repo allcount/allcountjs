@@ -2,7 +2,7 @@ import React from 'react';
 import {ButtonToolbar, Button, Grid, Glyphicon} from 'react-bootstrap';
 import BodyClassName from 'react-body-classname';
 
-module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createReactClass({
+module.exports = (ToolbarContainer, MessageTooltip, Paging, createReactClass) => createReactClass({
     render: function () {
         return <ToolbarContainer withoutHeader={this.props.withoutHeader}>
             <BodyClassName className="has-toolbar">
@@ -28,6 +28,9 @@ module.exports = (ToolbarContainer, MessageTooltip, createReactClass) => createR
                 <ButtonToolbar>
                     {this.props.isInEditMode ? this.doneEditGridButton() : [this.createButton(), this.editGridButton()]}
                 </ButtonToolbar>
+            </div>
+            <div className="pull-right">
+                <Paging itemsLoader={this.props.itemsLoader}/>
             </div>
         </div>
     },
