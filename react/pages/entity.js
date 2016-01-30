@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
-module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, Form, createReactClass, layoutService, Crud, ItemsLoader) => createReactClass({
+module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, StateMerger, Form, createReactClass, layoutService, Crud, ItemsLoader) => createReactClass({
     getInitialState: function() {
         var state = {
             grid: {validationErrors: {}},
@@ -52,7 +52,7 @@ module.exports = (MainPage, Toolbar, DataGrid, entityDescriptionService, Model, 
                     {!this.props.children ? <div className="left-animation-screen-transition">{this.list()}</div> : null}
                 </ReactCSSTransitionGroup>
                 <ReactCSSTransitionGroup  transitionName="transition"  transitionEnterTimeout={150} transitionLeaveTimeout={150}>
-                    {this.props.children ? <div className="right-animation-screen-transition">{React.cloneElement(this.props.children, {viewState: this.state})}</div> : null}
+                    {this.props.children ? <div className="right-animation-screen-transition">{React.cloneElement(this.props.children, {viewState: this.state, createFormModel: new StateMerger(this, ['createForm', 'model']), editFormModel: new StateMerger(this, ['editForm', 'model'])})}</div> : null}
                 </ReactCSSTransitionGroup>
             </div>
         </MainPage>

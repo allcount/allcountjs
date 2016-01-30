@@ -12,6 +12,7 @@ module.exports = (entityDescriptionService, layoutService, createReactClass, For
             fieldDescriptions={entityDescriptionService.fieldDescriptions(this.props.params.entityTypeId)}
             layout={layoutService.layoutFor(this.props.params.entityTypeId)}
             {...this.props.viewState.editForm}
+            model={this.props.editFormModel}
         ></Form>
     }
 });

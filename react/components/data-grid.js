@@ -99,6 +99,6 @@ module.exports = (messages, MessageTooltip, Field, createReactClass) => createRe
         </td>)
     },
     field: function (model, fd) {
-        return <Field model={model && model.fieldModel(fd.field)} isEditor={this.props.editingItem === model.state()} fieldDescription={fd}/>
+        return <Field model={model} isEditor={this.props.editingItem === model.state()} fieldDescription={fd}/>
     }
 });

@@ -37,7 +37,7 @@ module.exports = (createReactClass, Layout, Field, messages) => createReactClass
         </div>
     },
     formField: function (field) {
-        return <Field model={this.props.model && this.props.model.fieldModel(field)} isEditor={this.props.isEditor} fieldDescription={this.fieldToDesc()[field]}/>
+        return <Field model={this.props.model} isEditor={this.props.isEditor} fieldDescription={this.fieldToDesc()[field]}/>
     },
     formValidationMessage: function (field) {
         return this.props.validationErrors[field] ? <div className="text-danger">{messages(this.props.validationErrors[field])}</div> : null;

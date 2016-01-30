@@ -1,6 +1,6 @@
 import _ from 'underscore';
 
-module.exports = (Crud, StateMerger, Model) => {
+module.exports = (Crud, StateMerger) => {
     class ItemsLoader extends StateMerger {
         constructor (component, entityCrudId, stateProperty) {
             super(component, stateProperty);
@@ -33,7 +33,7 @@ module.exports = (Crud, StateMerger, Model) => {
         }
 
         models () {
-            return this.state().items && this.state().items.map((item, index) => new Model(this.component, _.union(this.statePathArray, ['items', index])))
+            return this.state().items && this.state().items.map((item, index) => new StateMerger(this.component, _.union(this.statePathArray, ['items', index])))
         }
     }
 
