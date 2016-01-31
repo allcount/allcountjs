@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { Router, Route, IndexRoute, Link, hashHistory } from 'react-router'
 
 module.exports = function (injection) {
-    var ReactApp = injection.inject('ReactApp');
+    var Editor = injection.inject('Editor');
     ReactDOM.render((
-        <ReactApp/>
+        <Editor/>
     ), document.getElementById('content'));
 };

@@ -9,7 +9,7 @@ module.exports = {
     target: 'web',
     cache: true,
     entry: {
-
+        editor: path.join(srcPath, 'allcountjs-react-editor.js'),
         module: path.join(srcPath, 'allcountjs-react-local.js'),
         common: ['react', 'react-router']
     },
@@ -45,10 +45,6 @@ module.exports = {
     },
     plugins: [
         new webpack.optimize.CommonsChunkPlugin('common', 'common.js'),
-        new HtmlWebpackPlugin({
-            inject: true,
-            template: 'react/index.html'
-        }),
         new webpack.NoErrorsPlugin()
     ],
 

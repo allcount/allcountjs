@@ -1,0 +1,40 @@
+@import "react-main";
+
+.editor-panel {
+  height: 100%;
+  color: #fff;
+}
+
+body {
+  padding-top: 0;
+  background: @gray;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+.editor-split {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  & > div {
+    height: 100%;
+  }
+}
+
+.editor-panel {
+  width: 20%;
+  float: left;
+  position: relative;
+}
+
+.content-panel {
+  width: 80%;
+  float: left;
+  position: relative;
+}
