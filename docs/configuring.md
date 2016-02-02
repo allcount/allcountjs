@@ -739,3 +739,19 @@ function (Crud) {
 ```
 
 To learn more about promises please read [kriskowal's Q docs](http://documentup.com/kriskowal/q/).
+
+## Google Export
+
+There's a way for templated export of your Entity's data to Google docs or Google spreadsheets. There are two methods in `Actions` API for that:
+
+* `exportToGoogleDoc(googleWebAppUrl, fileName, dataSource, templateId, folderId)` - call Google script web app at `googleWebAppUrl` and pass `dataSource` - could be array or object, `templateId` - Google file id for template document, `folderId` - Google folder id where to save exported file. This action returns url to newly created Google document.
+* `openGoogleDocument(exportActionResult)` - This method return `ActionResult` that opens Google document by passed url in `exportActionResult`.
+
+In order to configure Google script web app for Google SpreadSheet you need:
+
+1. Create Google spreadsheet template file. Example: [https://docs.google.com/spreadsheets/d/1DgqLCTPZpEwAaEiyKsL9rwBBUA7XWm0LMkpdcgpGgjY/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1DgqLCTPZpEwAaEiyKsL9rwBBUA7XWm0LMkpdcgpGgjY/edit?usp=sharing).
+2. Enter to Script Editor (Tools -> Script Editor)
+3. Insert this Gist contents as script: [https://gist.github.com/paveltiunov/03d99ac422a54b0b58ee](https://gist.github.com/paveltiunov/03d99ac422a54b0b58ee)
+4. Insert [underscore.js](http://underscorejs.org/underscore.js) as a script.
+5. Publish your web app visible for anyone.
+6. Use published web app url in your action call.
