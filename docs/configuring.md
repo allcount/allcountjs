@@ -269,6 +269,19 @@ views: {
 
 See MongoDB's [Query Documents](http://docs.mongodb.org/manual/tutorial/query-documents/) doc to learn how MongoDB queries should look like.
 
+There's an ability to filter entities depending on current `User`. For example if you have reference field `assignedEmployee` that references `User` entity you could write filtering like
+
+```js
+views: {
+  AssignedToMe: {
+    title: 'Assigned to me',
+    filtering: function (Queries, User) {
+      return Queries.filtering({assignedEmployee: User.id});
+    }
+  }
+},
+```
+
 ### CRUD hooks
 
 You could execute your own custom code when create, update or delete is performed for entity.
