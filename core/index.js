@@ -49,6 +49,7 @@ function configure() {
     injection.bindFactory('defaultAppConfig', require('./default-app-config'));
     injection.bindMultiple('appConfigs', ['defaultAppConfig']);
     injection.bindMultiple('configObjectProviders', ['appConfigsObjectProvider', 'repositoryConfigObjectProvider']);
+    injection.bindFactory('hotReload', require('./hot-reload'));
 }
 
 configure();

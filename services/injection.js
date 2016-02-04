@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 module.exports = require('./injection-base');
+var _ = require('underscore');
 
 var superResetInjection = module.exports.resetInjection;
 
@@ -25,13 +26,13 @@ module.exports.installModulesFromPackageJson = function (packageJsonFilePath) {
     var allcountjsModules = packageJson.allcountjsModules;
     if (allcountjsModules && _.isArray(allcountjsModules)) {
         allcountjsModules.forEach(function (moduleName) {
-            exports.installModule(require(moduleName));
+            module.exports.installModule(require(moduleName));
         });
     } else {
         packageJson.dependencies = packageJson.dependencies || {};
         _.forEach(packageJson.dependencies, function (version, name) {
             if (name.indexOf("allcountjs-") === 0) {
-                exports.installModule(require(name));
+                module.exports.installModule(require(name));
             }
         })
     }

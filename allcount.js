@@ -4,6 +4,8 @@ var argv = require('minimist')(process.argv.slice(2));
 var injection = require('./services/injection');
 var _ = require('lodash');
 var fs = require('fs');
+var crypto = require('crypto');
+var Keygrip = require('keygrip');
 
 var port = argv.port || process.env.PORT || 9080;
 var gitUrl = argv.app || process.env.APP || argv.git || process.env.GIT_URL;
@@ -15,20 +17,32 @@ if (!gitUrl || !dbUrl) {
 }
 
 require('./allcount-server.js');
-injection.bindFactory('port', port);
-injection.bindFactory('dbUrl', dbUrl);
-if (dbUrl.indexOf('postgres') !== -1) {
-    injection.bindFactory('storageDriver', require('./services/sql-storage-driver'));
-    injection.bindFactory('dbClient', 'pg');
-}
-injection.bindFactory('gitRepoUrl', gitUrl);
+var keygrip = Keygrip([crypto.randomBytes(30).toString('hex')]); //TODO load rotating keys from somewhere
 
-if (fs.existsSync("package.json")) {
-    injection.installModulesFromPackageJson("package.json");
+function reconfigure() {
+    injection.resetInjection();
+    require('./allcount-server.js').reconfigureAllcount();
+    injection.bindFactory('port', port);
+    injection.bindFactory('dbUrl', dbUrl);
+    if (dbUrl.indexOf('postgres') !== -1) {
+        injection.bindFactory('storageDriver', require('./services/sql-storage-driver'));
+        injection.bindFactory('dbClient', 'pg');
+    }
+    injection.bindFactory('gitRepoUrl', gitUrl);
+
+    if (fs.existsSync("package.json")) {
+        injection.installModulesFromPackageJson("package.json");
+    }
+
+    injection.bindFactory('keygrip', function () {
+        return keygrip;
+    });
 }
 
-var server = injection.inject('allcountServerStartup');
-server.startup(function (errors) {
+reconfigure();
+var hotReload = injection.inject('hotReload');
+
+hotReload.init(function (errors) {
     if (errors) {
         if (_.isArray(errors)) {
             throw new Error(errors.join('\n'));
@@ -36,4 +50,29 @@ server.startup(function (errors) {
             throw errors;
         }
     }
-});
+}, reconfigure);
+
+var fsmonitor = require('fsmonitor');
+
+hotReload.start().then(function () {
+    if (process.env.NODE_ENV !== 'production') {
+        var monitor = fsmonitor.watch(gitUrl, {
+            matches: function(relpath) {
+                return relpath.match(/\.js$/i) !== null;
+            },
+            excludes: function(relpath) {
+                return relpath.match(/^\.git$/i) !== null;
+            }
+        });
+        monitor.on('change', function(changes) {
+            hotReload.reload().catch(function (err) {
+                if (err.length) {
+                    console.error(err.join('\n'));
+                } else {
+                    console.error(err);
+                }
+            });
+        });
+    }
+}).done();
+

@@ -60,6 +60,7 @@
     "express": "^4.10.0",
     "express-session": "^1.2.1",
     "fs.extra": "^1.2.1",
+    "fsmonitor": "^0.2.4",
     "hash-files": "^1.0.0",
     "jade": "^1.8.1",
     "just": "0.1.8",

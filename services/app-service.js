@@ -5,7 +5,7 @@ var util = require('util');
 module.exports = function (compileServices, appUtil, configObjectProviders) {
     return {
         compileObjects: function (objects, errorsReport, callback) {
-            compileServices
+            var promise = compileServices
                 .map(function (compileService) {
                     return function () {
                         return compileService.compile(objects, errorsReport)
@@ -20,8 +20,18 @@ module.exports = function (compileServices, appUtil, configObjectProviders) {
                     }
                 })
                 .then(function () {
-                    callback(errorsReport.errors);
-                }).done();
+                    if (errorsReport.errors.length > 0) {
+                        throw errorsReport.errors;
+                    }
+                });
+            if (callback) {
+                promise.then(function () {
+                    callback([]);
+                }).catch(function (err) {
+                    callback(err);
+                });
+            }
+            return promise;
         },
         compile: function (callback) {
             var self = this;
@@ -31,16 +41,22 @@ module.exports = function (compileServices, appUtil, configObjectProviders) {
                     this.errors.push(util.format.apply(util.format, arguments));
                 }
             };
-            return Q.all(configObjectProviders.map(function (provider) {
+            var promise = Q.all(configObjectProviders.map(function (provider) {
                 return Q(provider.configObjects(errorsReport));
             })).then(function (objectsByProvider) {
                 var objects = _.flatten(objectsByProvider, true);
-                if (errorsReport.errors.length > 0) {
-                    callback(errorsReport.errors);
-                    return;
-                }
-                self.compileObjects(objects, errorsReport, callback);
+                return self.compileObjects(objects, errorsReport);
             });
+
+            if (callback) {
+                promise.then(function () {
+                    callback([]);
+                }).catch(function (err) {
+                    callback(err);
+                });
+            }
+
+            return promise;
         }
     };
 };

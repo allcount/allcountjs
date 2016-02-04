@@ -1,38 +1,42 @@
 var _ = require('underscore');
 var Q = require('q');
 
-module.exports = function (appService, gitRepoUrl, proxyHandler, injection, httpServer, express, app, appSetup, storageDriver) {
+module.exports = function (gitRepoUrl, proxyHandler, injection, httpServer, app, storageDriver) {
     return {
         startup: function (onReady) {
             var self = this;
-            appService.compile(function (errors) {
-                if (errors.length > 0) {
-                    if (onReady) {
-                        onReady(errors);
-                    }
-                    throw new Error(errors.join('\n'));
-                }
-
-                appSetup
+            var promise = this.reload().then(function () {
+                var deferred = Q.defer();
+                self.server = httpServer(function (req, res) {
+                    proxyHandler(req, res, function () {
+                        app(req, res);
+                    });
+                }, function() {
+                    console.log('Application server for "' + gitRepoUrl + '" listening on port ' + app.get('port'));
+                    deferred.resolve();
+                });
+                return deferred.promise;
+            });
+            if (onReady) {
+                promise.then(function () {
+                    onReady();
+                }, function (err) {
+                    onReady(err);
+                }).done();
+            }
+            return promise;
+        },
+        reload: function () {
+            app._router = null;
+            injection.bindFactory('app', function () {
+                return app;
+            });
+            var appService = injection.inject('appService');
+            var appSetup = injection.inject('appSetup');
+            return appService.compile().then(function () {
+                return appSetup
                     .map(function (setup) { return function () { return setup.setup() } })
                     .reduce(Q.when, Q(null))
-                    .catch(function (error) {
-                        if (onReady) {
-                            onReady(error)
-                        }
-                        throw error;
-                    }).then (function () {
-                        self.server = httpServer(function (req, res) {
-                            proxyHandler(req, res, function () {
-                                app(req, res);
-                            });
-                        }, function() {
-                            console.log('Application server for "' + gitRepoUrl + '" listening on port ' + app.get('port'));
-                            if (onReady) {
-                                onReady();
-                            }
-                        });
-                    }).done();
             });
         },
         stop: function () {
