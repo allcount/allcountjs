@@ -255,6 +255,19 @@ views: {
 },
 ```
 
+Pass multiple fields in filtering expression to achieve SQL `and` like effect for your query as follows
+
+```js
+views: {
+  NotCompleteTasks: {
+    title: 'Incomplete tasks',
+    filtering: function (Queries) {
+      return Queries.filtering({isComplete: false, priority: 2});
+    }
+  }
+},
+```
+
 Now supported only simple equality expressions.
 Also you could pass object that will mean a MongoDB (read mongoose) query as follows
 
