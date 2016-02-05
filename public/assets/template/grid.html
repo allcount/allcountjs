@@ -26,7 +26,7 @@
                 </button>
             </td>
             <td ng-repeat="fd in fieldDescriptions" ng-class="{'has-error': validationErrors[fd.field]}">
-                <div a-field="fd" ng-model="item[fd.field]" is-editor="editingItem === item"></div>
+                <div lc-field="fd" ng-model="item[fd.field]" is-editor="editingItem === item"></div>
                 <div class="text-danger" ng-if="validationErrors[fd.field] &amp;&amp; editingItem === item" lc-message="{{validationErrors[fd.field]}}"></div>
             </td>
         </tr>
@@ -44,7 +44,7 @@
         <tr class="active">
             <td></td>
             <td ng-repeat="fd in fieldDescriptions">
-                <div a-field="fd" ng-model="totalRow[fd.field]" is-editor="false"></div>
+                <div lc-field="fd" ng-model="totalRow[fd.field]" is-editor="false"></div>
             </td>
         </tr>
     </tfoot>

@@ -16,7 +16,7 @@
     "angular-ui-sortable": "0.13.4",
     "angular-bootstrap": "0.13.0",
     "blueimp-gallery": "~2.15.2",
-    "allcountjs-angular-base": "1.2.2",
+    "allcountjs-angular-base": "~1.2.3",
     "select2": "~3.5.2",
     "select2-bootstrap-css": "~1.4.6",
     "eonasdan-bootstrap-datetimepicker": "~4.17.37"
@@ -46,7 +46,7 @@
         "bower_components/bootstrap-datepicker/less/**",
         "bower_components/bootstrap-datepicker/js/locales/*.js",
         "bower_components/bootstrap-datepicker/js/*.js"
-      ],  
+      ],
       "blueimp-tmpl": [
         "bower_components/blueimp-tmpl/css/**",
         "bower_components/blueimp-tmpl/js/*.js"

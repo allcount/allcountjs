@@ -1,4 +1,4 @@
-allcountModule.controller('LoginController', ['$scope', 'rest', function ($scope, rest) {
+angular.module('allcount').controller('LoginController', ['$scope', 'rest', function ($scope, rest) {
     $scope.isSignUp = false;
 
     $scope.user = {};

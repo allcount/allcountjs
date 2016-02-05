@@ -2,6 +2,20 @@ var allcountModule = angular.module("allcount", ['ngAnimate', 'blueimp.fileuploa
 
 window.allcountModule = allcountModule;
 
+//TODO backward compatibility
+window._ = require('underscore');
+window.moment = require('moment');
+
+var allcountjsAngularBase;
+if (typeof require !== "undefined") {
+    allcountjsAngularBase = require('allcountjs-angular-base/allcount-base.js');
+}
+
+var listDirective = allcountjsAngularBase ? allcountjsAngularBase.listDirective : window.listDirective;
+var fieldDirective = allcountjsAngularBase ? allcountjsAngularBase.fieldDirective : window.fieldDirective;
+var messageDirective = allcountjsAngularBase ? allcountjsAngularBase.messageDirective : window.messageDirective;
+var menuDirective = allcountjsAngularBase ? allcountjsAngularBase.menuDirective : window.menuDirective;
+
 allcountModule.factory('track', function () {
     return lc.track;
 });

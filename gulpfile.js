@@ -4,20 +4,20 @@ require('./allcount-server.js');
 var _ = require('underscore');
 var path = require('path');
 var Q = require('q');
+var webpack = require('webpack');
 
 function buildScripts() {
     var assetsService = injection.inject('assetsService');
     var assetsMinifier = injection.inject('assetsMinifier');
-    return Q.all(_.map(assetsService.scripts, function (scriptPaths, url) {
-        var buildPath = assetsMinifier.buildPath();
-        var absoluteScriptPaths = scriptPaths.map(function (p) {
-            return path.join(assetsMinifier.defaultPublicPath(), p)
-        });
-        return assetsMinifier.scriptHash(url, absoluteScriptPaths).then(function (hash) {
-            var buildScriptPath = path.join(buildPath, assetsMinifier.hashPath(url, hash));
-            return assetsMinifier.minify(absoluteScriptPaths, buildScriptPath);
-        })
+
+    var config = assetsService.baseWebPackConfig(true);
+    config.entry = _.object(_.map(assetsService.scripts, function (scripts, url) {
+        return [url, scripts];
     }));
+    var compiler = webpack(config);
+    return Q.nfbind(compiler.run.bind(compiler))().then(function () {
+        console.log("Webpack compilation is finished");
+    });
 }
 
 module.exports = function (gulp) {

@@ -3,6 +3,7 @@ var fs = require('fs');
 var url = require('url');
 var mkdirp = require('mkdirp');
 var _ = require('underscore');
+var webpack = require('webpack');
 
 module.exports = function (app, expressStatic, lessMiddleware, repositoryService, themeService, assetsService, Q, assetsMinifier) {
     return {
@@ -16,56 +17,16 @@ module.exports = function (app, expressStatic, lessMiddleware, repositoryService
                 this.setupPublicPathServing(repositoryPublic, path.join(repositoryService.repositoryDir(), 'tmp/css'));
             }
             this.setupPublicPathServing(this.defaultPublicPath(), path.join(process.cwd(), 'tmp/css'));
-            if (app.get('env') === "production") {
-                this.setupMinifyMiddleware();
-            }
+            return this.setupMinifyMiddleware();
         },
         setupMinifyMiddleware: function () {
-            var self = this;
-            function fsExists(p) {
-                var deferred = Q.defer();
-                fs.exists(p, function (e) {
-                    deferred.resolve(e);
-                });
-                return deferred.promise;
-            }
-
-            function pathToScript(script) {
-                return Q.all(self.publicPaths.map(function (p) {
-                    var name = path.join(p, script);
-                    return fsExists(name).then(function (exists) {
-                        return exists && name;
-                    })
-                })).then(function (paths) {
-                    return _.find(paths, _.identity);
-                })
-            }
-
             var buildPath = assetsMinifier.buildPath();
-            app.use(function (req, res, next) {
-                var scripts = assetsService.scripts[req.url];
-                if (!scripts) {
-                    next();
-                    return;
-                }
-
-                return Q.all(scripts.map(pathToScript)).then(function (scriptPaths) {
-                    return assetsMinifier.scriptHash(req.url, scriptPaths).then(function (hash) {
-                        var hashUrl = assetsMinifier.hashPath(req.url, hash);
-                        var buildScriptPath = path.join(buildPath, hashUrl);
-                        return fsExists(buildScriptPath).then(function (buildScriptExists) {
-                            if (buildScriptExists) {
-                                return;
-                            }
-                            return assetsMinifier.minify(scriptPaths, buildScriptPath);
-                        }).then(function () {
-                            req.url = hashUrl;
-                            next();
-                        });
-                    })
-                }).catch(next);
+            var compiler = webpack(assetsService.webpackConfig(app.get('env') === "production"));
+            console.log("Compiling assets...");
+            return Q.nfbind(compiler.run.bind(compiler))().then(function () {
+                console.log("Asset compilation is finished");
+                app.use(expressStatic(buildPath));
             });
-            app.use(expressStatic(buildPath));
         },
         setupPublicPathServing: function (publicPath, cssOutputPath) {
             this.publicPaths.push(publicPath);
