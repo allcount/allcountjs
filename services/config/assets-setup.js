@@ -23,10 +23,19 @@ module.exports = function (app, expressStatic, lessMiddleware, repositoryService
             var buildPath = assetsMinifier.buildPath();
             var compiler = webpack(assetsService.webpackConfig(app.get('env') === "production"));
             console.log("Compiling assets...");
-            return Q.nfbind(compiler.run.bind(compiler))().then(function () {
-                console.log("Asset compilation is finished");
-                app.use(expressStatic(buildPath));
-            });
+            app.use(expressStatic(buildPath));
+            if (app.get('env') === "production") {
+                return Q.nfbind(compiler.run.bind(compiler))().then(function () {
+                    console.log("Asset compilation is finished");
+                });
+            } else {
+                this.webpackWatch = compiler.watch({poll: false}, function () {
+                    console.log("Asset compilation is finished");
+                });
+            }
+        },
+        tearDown: function () {
+            return this.webpackWatch && this.webpackWatch.close();
         },
         setupPublicPathServing: function (publicPath, cssOutputPath) {
             this.publicPaths.push(publicPath);

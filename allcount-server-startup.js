@@ -39,6 +39,11 @@ module.exports = function (gitRepoUrl, proxyHandler, injection, httpServer, app,
                     .reduce(Q.when, Q(null))
             });
         },
+        tearDown: function () {
+            return injection.inject('appSetup')
+                .map(function (setup) { return function () { return setup.tearDown && setup.tearDown() } })
+                .reduce(Q.when, Q(null))
+        },
         stop: function () {
             var defer = Q.defer();
             console.log("Shutting down HTTP server...");

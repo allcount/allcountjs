@@ -45,9 +45,7 @@ module.exports = function (scriptConfigs, assetsMinifier) {
                         "windows.jQuery": "jquery",
                         _: "underscore"
                     })
-                ]),
-                debug: !production,
-                devtool: !production ? 'inline-source-map' : undefined
+                ])
             };
         },
         webpackConfig: function (production) {

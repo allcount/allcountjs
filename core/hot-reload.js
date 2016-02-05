@@ -7,9 +7,11 @@ module.exports = function (injection, Q, allcountServerStartup) {
         reload: function () {
             var self = this;
             console.log("Reloading injection configuration...");
-            injection.resetInjection();
-            self.reconfigure(injection);
-            return allcountServerStartup.reload();
+            return allcountServerStartup.tearDown().then(function () {
+                injection.resetInjection();
+                self.reconfigure(injection);
+                return allcountServerStartup.reload();
+            })
         },
         start: function () {
             var self = this;
