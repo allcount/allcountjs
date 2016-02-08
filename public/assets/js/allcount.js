@@ -5,6 +5,7 @@ window.allcountModule = allcountModule;
 //TODO backward compatibility
 window._ = require('underscore');
 window.moment = require('moment');
+window['jQuery'] = window.$ = require('jquery');
 
 var allcountjsAngularBase;
 if (typeof require !== "undefined") {

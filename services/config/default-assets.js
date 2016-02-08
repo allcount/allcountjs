@@ -4,6 +4,7 @@ module.exports = function () {
             'assets/js/jquery.visible.js',
             'assets/lib/js/bootstrap/js/bootstrap.js',
             'assets/lib/js/angular-animate/angular-animate.js',
+            'blueimp-file-upload/js/jquery.fileupload.js',
             'blueimp-file-upload/js/jquery.fileupload-angular.js',
             'assets/lib/js/select2/select2.js',
             'assets/lib/js/jquery.inputmask/jquery.inputmask.js',
@@ -18,8 +19,8 @@ module.exports = function () {
         ],
         '/assets/js/allcount-head-scripts.js': [
             'jquery',
-            'assets/lib/js/underscore/underscore.js',
-            'assets/lib/js/angular/angular.js'
+            'underscore',
+            'angular'
         ]
     }
 };

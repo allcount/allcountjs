@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var webpack = require('webpack');
+var path = require('path');
 
 module.exports = function (scriptConfigs, assetsMinifier) {
     return {
@@ -23,9 +24,9 @@ module.exports = function (scriptConfigs, assetsMinifier) {
                     pathInfo: true
                 },
                 resolve: {
-                    root: assetsMinifier.defaultPublicPath(),
+                    root: [assetsMinifier.defaultPublicPath(), path.join(assetsMinifier.defaultPublicPath(), '..')],
                     extensions: ['', '.js'],
-                    modulesDirectories: ['node_modules', 'bower_components'],
+                    modulesDirectories: ['node_modules', path.join(__dirname, '..', 'node_modules'), path.join(__dirname, '..', 'bower_components')],
                     alias: {
                         'load-image': 'blueimp-load-image/js/load-image.js',
                         'load-image-exif': 'blueimp-load-image/js/load-image-exif.js',
@@ -39,10 +40,11 @@ module.exports = function (scriptConfigs, assetsMinifier) {
                 plugins: _.union(production ? [
                     new webpack.optimize.UglifyJsPlugin({minimize: true})
                 ]: [], [
+                    new webpack.optimize.CommonsChunkPlugin('/assets/js/allcount-head-scripts.js'),
                     new webpack.ProvidePlugin({
                         $: "jquery",
                         jQuery: "jquery",
-                        "windows.jQuery": "jquery",
+                        "window.jQuery": "jquery",
                         _: "underscore"
                     })
                 ])
