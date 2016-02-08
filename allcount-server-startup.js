@@ -45,16 +45,19 @@ module.exports = function (gitRepoUrl, proxyHandler, injection, httpServer, app,
                 .reduce(Q.when, Q(null))
         },
         stop: function () {
-            var defer = Q.defer();
+            var self = this;
             console.log("Shutting down HTTP server...");
-            this.server.close(function () {
-                defer.resolve(null);
-            });
-            return defer.promise.then(function () {
-                console.log("Closing db connection...");
-                return storageDriver.closeConnection();
-            }).then(function () {
-                console.log('Application server for "' + gitRepoUrl + '" on port ' + app.get('port') + ' has stopped');
+            return this.tearDown().then(function () {
+                var defer = Q.defer();
+                self.server.close(function () {
+                    defer.resolve(null);
+                });
+                return defer.promise.then(function () {
+                    console.log("Closing db connection...");
+                    return storageDriver.closeConnection();
+                }).then(function () {
+                    console.log('Application server for "' + gitRepoUrl + '" on port ' + app.get('port') + ' has stopped');
+                })
             })
         }
     }
