@@ -42,7 +42,7 @@ function configure() {
         return express()
     });
     injection.bindFactory('passport', function () {
-        return require('passport')
+        return new (require('passport').Passport)();
     });
 
     injection.bindFactory('keygrip', function () {

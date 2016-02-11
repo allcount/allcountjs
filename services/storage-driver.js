@@ -27,6 +27,7 @@ module.exports = function (dbUrl, injection, appUtil) {
         if (db) {
             return Q(listener());
         } else {
+            // Errors are caught somewhere up stack
             return onConnectedPromise = onConnectedPromise.then(function () {
                 return listener();
             });

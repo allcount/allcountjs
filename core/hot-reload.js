@@ -1,4 +1,4 @@
-module.exports = function (injection, Q, allcountServerStartup) {
+module.exports = function (injection, Q, allcountServerStartup, repositoryService) {
     return {
         init: function (onReady, reconfigure) {
             this.onReady = onReady;
@@ -10,6 +10,8 @@ module.exports = function (injection, Q, allcountServerStartup) {
             return allcountServerStartup.tearDown().then(function () {
                 injection.resetInjection();
                 self.reconfigure(injection);
+                injection.bindFactory('hotReload', function () { return self }); //TODO
+                injection.bindFactory('repositoryService', function () { return repositoryService }); //TODO
                 return allcountServerStartup.reload();
             })
         },
