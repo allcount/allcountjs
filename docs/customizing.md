@@ -1,6 +1,6 @@
 # AllcountJS as a dependency
 
-To install AllcountJS to your dependencies run `npm install allcountjs` from your project directory or declare dependency in `package.json`.
+To install AllcountJS to your dependencies run `npm install --save allcountjs` from your project directory or declare dependency in `package.json`.
 Minimum viable usage setup would look like
 
 ```
@@ -23,6 +23,27 @@ In order to run AllcountJS you should define three config dependencies
 - `port` - HTTP port to bind to,
 - `dbUrl` - MongoDB url to use,
 - `gitRepoUrl` - repository config url or regular directory path where business app configuration resides.
+
+## Setup for project initialized with AllcountJS CLI
+
+If your project was initialized with AllcountJS CLI in order to get control over `injection` configuration you should add `app.js` file in your project directory and put there something like
+
+```
+var injection = require('allcountjs');
+injection.bindFactory('port', 9080);
+injection.bindFactory('dbUrl', 'mongodb://localhost:27017/helloworld');
+injection.bindFactory('gitRepoUrl', 'app-config');
+var server = injection.inject('allcountServerStartup');
+server.startup(function (errors) {
+    if (errors) {
+        throw new Error(errors.join('\n'));
+    }
+});
+```
+
+> *NOTE*: Please change `dbUrl` to one you already use.
+
+Then run your app with `node app.js` from your project dir.
 
 # Dependency Injection
 
