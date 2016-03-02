@@ -134,6 +134,18 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     return textInput(controller, updateValue)
                 }
             }],
+            radio: [function (value, fieldDescription) {
+                return value;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.radioValue = controller.$viewValue;
+                scope.$watch('radioValue', function (radioValue) {
+                    controller.$setViewValue(radioValue);
+                });
+                var radioInputs = fieldDescription.fieldType.valuesArray.map(function (value) {
+                   return '<input type="radio" ng-model="radioValue" value="{0}">{0}<br/>'.replace(/\{0\}/g, value); 
+                }).join("\n");
+                return $compile(radioInputs)(scope);
+            }],            
             date: [function (value, fieldDescription) {
                 return $filter('date')(parseDate(value), dateFormat(fieldDescription));
             }, function (fieldDescription, controller, updateValue, clone, scope) { //TODO
