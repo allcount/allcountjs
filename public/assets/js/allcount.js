@@ -682,7 +682,7 @@ allcountModule.directive("lcActions", ["rest", "messages", "$parse", "$modal", f
                     scope.actions = [];
                 } else {
                     var entityCrudId = scope.entityCrudId;
-                    rest.actions(scope.entityCrudId, scope.actionTarget).then(function (actions) {
+                    rest.actions(scope.entityCrudId, scope.actionTarget, scope.selectedItems).then(function (actions) {
                         scope.actions = _.map(actions, function (action) {
                             action.perform = function () {
                                 action.isPerforming = true;
