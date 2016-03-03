@@ -47,6 +47,16 @@ exports.integer = function (name) {
     });
 };
 
+exports.radio = function (name, valuesArray) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'radio',
+            valuesArray: valuesArray,
+        }
+    });
+};
+
 exports.money = function (name) {
     return new Field({
         name: name,

@@ -14,7 +14,8 @@ A.app({
                     checkboxArrayField: Fields.checkbox("Checkbox Array", 'checkboxArray'),
                     password: Fields.password("Password"),
                     link: Fields.link("Link"),
-                    email: Fields.email("Email")
+                    email: Fields.email("Email"),
+                    radio: Fields.radio("Radio", ["Option 1", "Option 2", "Option 3"])
                 }
             },
             Bar: {

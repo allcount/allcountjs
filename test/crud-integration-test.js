@@ -45,7 +45,8 @@ exports.crudFieldTest = function (test) {
                 checkboxArrayField: true,
                 password: '123',
                 link: 'http://www.example.com',
-                email: 'example@example.com'
+                email: 'example@example.com',
+                radio: "Option 1",
             };
             return crud.createEntity(_.clone(entityToCreate)).then(function (id) {
                 return crud.readEntity(id).then(function (entity) {
