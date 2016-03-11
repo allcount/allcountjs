@@ -2,33 +2,41 @@ var _ = require('underscore');
 
 module.exports = function (entityDescriptionService, storageDriver, Q) {
     var AggregateFunToMongoFun = {
-        sum: "$sum"
+        sum: "$sum",
+        count: "$sum",
+        avg: "$avg",
     };
     return {
         performSingleValueSelect: function (query, rootEntityTypeId, rootEntityId) {
             if (query.fun) {
-                if (query.fun === 'sum') {
+                if (AggregateFunToMongoFun[query.fun]) {
                     var path = query.value.path;
-                    if (path.length !== 2) {
-                        throw new Error('Only two path elements are supported for queries');
+                    if (path.length !== 2 && query.fun !=='count') {
+                        throw new Error('Only two path elements are supported for %s queries', AggregateFunToMongoFun[query.fun]);
+                    } else if (path.length !== 1 && query.fun === 'count') {
+                        throw new Error('Only one path elements are supported for count queries');
                     }
                     if (path[0].forward === false) {
                         var tableDescription = entityDescriptionService.tableDescription(entityDescriptionService.entityTypeIdCrudId(path[0].entityTypeId));
-                        var filter = {};
+                        var entityFilter = entityDescriptionService.entityDescription(path[0].entityTypeId).filtering();
+                        filter = entityFilter ? entityFilter.filtering : {};
                         filter[path[0].backReferenceField] = rootEntityId;
                         var grouping = {_id: null};
-                        grouping[path[1].fieldName] = {$sum: "$" + path[1].fieldName};
+                        var mongoFun = AggregateFunToMongoFun[query.fun];
+                        var aggregateFieldName = query.fun != 'count' ? path[1].fieldName : 'count';
+                        grouping[aggregateFieldName] = {};
+                        grouping[aggregateFieldName][mongoFun] = query.fun != 'count' ? "$" + aggregateFieldName : 1;
                         return storageDriver.aggregateQuery(tableDescription, [
                             { $match: storageDriver.queryFor(tableDescription, {filtering: filter}) },
                             { $group: grouping }
                         ]).then(function (row) {
-                            return row[0] && row[0][path[1].fieldName];
+                            return row[0] && row[0][aggregateFieldName];
                         });
                     } else {
                         throw new Error('Only back reference queries are supported')
                     }
                 } else {
-                    throw new Error('Only sum queries are supported')
+                    throw new Error('%s queries are not supported', query.fun)
                 }
             } else {
                 throw new Error('Only function queries are supported');
@@ -37,8 +45,8 @@ module.exports = function (entityDescriptionService, storageDriver, Q) {
         getChangedIds: function (query, rootEntityTypeId, oldEntity, newEntity) {
             if (query.fun) {
                 var path = query.value.path;
-                if (path.length !== 2) {
-                    throw new Error('Only two path elements are supported for queries');
+                if (path.length !== 2 && path.length !== 1) {
+                    throw new Error('Only one or two path elements are supported for queries');
                 }
                 if (path[0].forward === false) {
                     var backReferenceFieldValue = newEntity ? newEntity[path[0].backReferenceField] : oldEntity[path[0].backReferenceField];

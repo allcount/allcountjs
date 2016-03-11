@@ -8,12 +8,12 @@ module.exports = function (entityDescriptionService, queryParseService, appUtil)
 
         function compileRecursive(expression) {
             if (expression.fun) {
-                if (expression.fun === 'sum') {
+                if (expression.fun === 'sum' || expression.fun === 'count' || expression.fun === 'avg') {
                     if (expression.args.length !== 1) {
-                        throw new appUtil.CompileError("Can't compile '%s': function sum expects only 1 arg", valueSelectExpression);
+                        throw new appUtil.CompileError("Can't compile '%s': function %s expects only 1 arg", valueSelectExpression, expression.fun);
                     }
                     return {
-                        fun: 'sum',
+                        fun: expression.fun,
                         value: compileRecursive(expression.args[0])
                     }
                 } else {
