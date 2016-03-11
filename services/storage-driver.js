@@ -230,7 +230,9 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.aggregateQuery = function (table, aggregatePipeline) {
         var collection = db.collection(table.tableName);
         return Q.nfbind(collection.aggregate.bind(collection))(aggregatePipeline).then(function (rows) {
-            return rows.map(fromBson(table));
+            return rows.map(function (row) {
+                return _.extend(row,  fromBson(table.fields)(row));
+            });
         })
     };
 
