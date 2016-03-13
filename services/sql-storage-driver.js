@@ -206,7 +206,9 @@ module.exports = function (dbUrl, injection, dbClient) {
     service.aggregateQuery = function (table, aggregatePipeline) { //TODO
         var collection = db.collection(table.tableName);
         return Q.nfbind(collection.aggregate.bind(collection))(aggregatePipeline).then(function (rows) {
-            return rows.map(fromBson(table.fields));
+            return rows.map(function (row) {
+                return _.extend(row,  fromBson(table.fields)(row));
+            });
         })
     };
 
