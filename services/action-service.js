@@ -30,8 +30,13 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
                         },
                         isEnabled: function (selectedItemIds) {
                             return Q(action.hasPropertyValue('enabled') ? invokeProperty(selectedItemIds, function () {
-                                                                            return action.propertyValue('enabled');
-                                                                          }) : true).then(function (v) { return !!v });
+                               return action.propertyValue('enabled');
+                            }) : true).then(function (v) { return !!v });
+                        },
+                        isHidden: function (selectedItemIds) {                         
+                            return Q(action.hasPropertyValue('hidden') ? invokeProperty(selectedItemIds, function () {
+                                return action.propertyValue('hidden');
+                            }) : false).then(function (v) { return !!v });
                         },
                         actionTarget: actionTarget
                     };
@@ -64,10 +69,18 @@ module.exports = function (entityDescriptionService, injection, appUtil) {
                     return {
                         id: action.id,
                         name: action.name,
-                        isEnabled: isEnabled
+                        isEnabled: isEnabled,
+                        action: action,
                     }
+                }).then(function (actionWrapper) {
+                    return actionWrapper.action.isHidden(selectedItemIds).then(function (isHidden) {
+                        actionWrapper.isHidden = isHidden;
+                        return actionWrapper;
+                    });
                 });
-            }));
+            })).then(function (actions) {
+                return actions.filter(function (action) {return !action.isHidden});
+            });
         },
         performAction: function (entityCrudId, actionId, selectedItemIds) {
             var action = _.find(entityDescriptionService.entityDescription(entityCrudId).actions, function (action) { //TODO permission filtering
