@@ -177,7 +177,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 return value;
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.numberValue = controller.$viewValue;
-                scope.pattern = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?./;
+                scope.pattern = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/;
                 scope.$watch('numberValue', function (numberValue) {
                     controller.$setViewValue(numberValue && parseFloat(numberValue) || undefined);
                 });
