@@ -164,22 +164,24 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 return input;
             }],
             integer: [function (value) {
-                return value;
+                return value.toString();
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.integerValue = controller.$viewValue;
                 scope.pattern = /\d+/;
                 scope.$watch('integerValue', function (integerValue) {
-                    controller.$setViewValue(integerValue && parseInt(integerValue, 10) || undefined);
+                    var x = integerValue && parseInt(integerValue, 10)
+                    controller.$setViewValue(isNaN(x) ?  undefined : x);
                 });
                 return $compile('<input ng-model="integerValue" class="form-control" ng-pattern="pattern">')(scope);
             }],
             number: [function (value) {
-                return value;
+                return value.toString();
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.numberValue = controller.$viewValue;
                 scope.pattern = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/;
                 scope.$watch('numberValue', function (numberValue) {
-                    controller.$setViewValue(numberValue && parseFloat(numberValue) || undefined);
+                    var x = numberValue && parseFloat(numberValue)
+                    controller.$setViewValue(isNaN(x) ?  undefined : x);
                 });
                 return $compile('<input ng-model="numberValue" class="form-control" ng-pattern="pattern">')(scope);
             }],
