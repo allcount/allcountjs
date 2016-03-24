@@ -61,6 +61,11 @@ module.exports = function (storageDriver) {
                         return Number;
                     }
                 },
+                number: {
+                    schema: function () {
+                        return Number;
+                    }
+                },
                 money: {
                     schema: function () {
                         return Schema.Types.Long;

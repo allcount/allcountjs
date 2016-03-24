@@ -173,6 +173,16 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 });
                 return $compile('<input ng-model="integerValue" class="form-control" ng-pattern="pattern">')(scope);
             }],
+            number: [function (value) {
+                return value;
+            }, function (fieldDescription, controller, updateValue, clone, scope) {
+                scope.numberValue = controller.$viewValue;
+                scope.pattern = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?./;
+                scope.$watch('numberValue', function (numberValue) {
+                    controller.$setViewValue(numberValue && parseFloat(numberValue) || undefined);
+                });
+                return $compile('<input ng-model="numberValue" class="form-control" ng-pattern="pattern">')(scope);
+            }],
             money: [function (value) {
                 return renderCurrency(value);
             }, function (fieldDescription, controller, updateValue, clone, scope) {
