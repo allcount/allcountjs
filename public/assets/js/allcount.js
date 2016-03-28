@@ -164,7 +164,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 return input;
             }],
             integer: [function (value) {
-                return value.toString();
+                return value && value.toString();
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.integerValue = controller.$viewValue;
                 scope.pattern = /\d+/;
@@ -175,7 +175,7 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                 return $compile('<input ng-model="integerValue" class="form-control" ng-pattern="pattern">')(scope);
             }],
             number: [function (value) {
-                return value.toString();
+                return value && value.toString();
             }, function (fieldDescription, controller, updateValue, clone, scope) {
                 scope.numberValue = controller.$viewValue;
                 scope.pattern = /[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?/;
