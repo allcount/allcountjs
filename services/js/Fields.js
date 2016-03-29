@@ -47,6 +47,15 @@ exports.integer = function (name) {
     });
 };
 
+exports.number = function (name) {
+    return new Field({
+        name: name,
+        fieldType: {
+            id: 'number'
+        }
+    });
+};
+
 exports.radio = function (name, valuesArray) {
     return new Field({
         name: name,
