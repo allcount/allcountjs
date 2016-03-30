@@ -92,7 +92,7 @@ module.exports = function (
             crudOperationsRouter.get('/api/entity/:entityTypeId/entity-description', fieldDescriptionsRoute.entityDescription);
             crudOperationsRouter.get('/api/entity/:entityTypeId/field-descriptions', fieldDescriptionsRoute.fieldDescriptions);
             crudOperationsRouter.post('/api/entity/:entityTypeId/actions/:actionId', actionsRoute.performAction);
-            crudOperationsRouter.get('/api/entity/:entityTypeId/actions', actionsRoute.actionList);
+            crudOperationsRouter.post('/api/entity/:entityTypeId/actions', actionsRoute.actionList);
 
             crudOperationsRouter.get('/api/entity/:entityTypeId/count', crudRoute.findCount);
             crudOperationsRouter.get('/api/entity/:entityTypeId', crudRoute.findRange);
