@@ -731,6 +731,19 @@ A.app({
 
 ```
 
+## Manipulating datetimes
+
+AllcountJS exposes the [momentjs](http://momentjs.com/) library in the `Dates` service, useful for manipulating datetimes in a more intuitive and easier manner.
+Just inject the `Dates` service into a function and call the `moment` functions through `Dates.moment`.
+
+For instance, to set a datetime to the start of the current day in an Entity's hook, do as follows:
+
+```js
+  beforeSave: function (Entity, Dates) {
+    Entity.myCustomDateField = Dates.moment().startOf('day');
+  }
+```
+
 # APIs
 
 There are numerous APIs could be required in various config property definitions.

@@ -47,6 +47,19 @@ To run your project and to connect to local MongoDB instance please run from pro
 
 Please note that MongoDB should be running in order to run this example.
 
+# Debugging
+
+A `Console` service is available as an alias for the classic `console` JS function to print log messages for debugging purposes.
+The service needs to be injected into the function that will make use of it.
+
+For instance, to debug an Entity `beforeSave` hook, use the `Console` service as follows:
+
+```js
+  beforeSave: function (Entity, Console) {
+    Console.log('Entering beforeSave hook.');
+  }
+```
+
 # Further reading
 
 - Read [Configuration docs](/docs/apps) to learn how to write AllcountJS configurations.
