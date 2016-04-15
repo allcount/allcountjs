@@ -357,6 +357,25 @@ injection.bindFactory('myFooService', function () {
 })
 ```
 
+### Custom validation errors
+AllcountJS allows to defined customised validation error messages, in order to provide a better feedback
+to your users. This can be accomplish by adding the `ValidationError` service into an Entity's hooks, and throwing an error as follows:
+`throw new ValidationError({field: 'Your custom validation error message'});`
+
+where `field` is the name of the Entity's field that will show the validation error message.
+
+For instance, having an Entity defining a numeric interval between `minValue` and `maxValue`:
+
+```js
+  beforeSave: function(Entity, ValidationError) {
+    if (Entity.minValue > Entity.maxValue) {
+      throw new ValidationError({
+        minValue: 'The start value cannot exceed the end value of the numeric interval.'
+      });
+    }
+  }
+```
+
 # REST API
 
 AllcountJS provides JSON REST API to perform all operations available to users including entity query, create, update, delete as well as utility operations to load entity descriptions.
