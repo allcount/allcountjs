@@ -161,7 +161,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             }else if(!_.isUndefined(allFields[filterName])){
                 fieldName = filterName;
                 field = allFields[filterName];
-                if (field.fieldType.id == 'reference') {
+                if (field.fieldType.id == 'reference' || field.fieldType.id == 'multiReference') {
                     var referenceId = _.isUndefined(filterValue.id) ? filterValue : filterValue.id;
                     query[filterName + '.id'] = toMongoId(referenceId)
                 } else if (field.fieldType.id == 'checkbox') {
