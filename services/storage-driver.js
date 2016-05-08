@@ -141,6 +141,54 @@ module.exports = function (dbUrl, injection, appUtil) {
     function getAllFields(table) {
         return _.extend({}, table.fields, systemFields);
     }
+    
+    function copyFilter(allFields, elements){
+        var query = {};
+        _.each(elements, function(filterValue, filterName){
+            if(filterName === '$and' || filterName === '$or'){
+                if(_.isArray(filterValue)){
+                    var tmparray = [];
+                    _.each(filterValue, function(filters){
+                        var tmp = copyFilter(allFields, filters)
+                        if(!_.isEmpty(tmp)){
+                            tmparray.push(tmp);
+                        }
+                    });
+                    if(!_.isEmpty(tmparray)){
+                      query[filterName] = tmparray;
+                    }
+                }
+            }else if(!_.isUndefined(allFields[filterName])){
+                fieldName = filterName;
+                field = allFields[filterName];
+                if (field.fieldType.id == 'reference' || field.fieldType.id == 'multiReference') {
+                    var referenceId = _.isUndefined(filterValue.id) ? filterValue : filterValue.id;
+                    query[filterName + '.id'] = toMongoId(referenceId)
+                } else if (field.fieldType.id == 'checkbox') {
+                    query[filterName] = filterValue ? filterValue : {$in: [false, null]};
+                } else if (field.fieldType.id == 'date') {
+                    if (filterValue.op === 'gt') {
+                        query[filterName] = {$gt: filterValue.value}; //TODO convert from string?
+                    } else if (filterValue.op === 'lt') {
+                        query[filterName] = {$lt: filterValue.value}; //TODO convert from string?
+                    } else {
+                        query[filterName] = filterValue;
+                    }
+                } else if (field.fieldType.id == 'text') {
+                    if (filterValue.op === 'startsWith') {
+                        query[filterName] = { $regex: "^" + filterValue.value + ".*" };
+                    } else if (filterValue.op === 'in') {
+                        query[filterName] = { $in: filterValue.value };
+                    } else {
+                        query[filterName] = filterValue;
+                    }
+                } else {
+                    query[filterName] = filterValue;
+                }
+            }
+        });
+        return query;
+    }
 
     function queryFor(table, filteringAndSorting) {
         var query = {};
@@ -156,37 +204,7 @@ module.exports = function (dbUrl, injection, appUtil) {
             }
             if (filteringAndSorting.filtering) {
                 var allFields = getAllFields(table);
-                _.each(allFields, function (field, fieldName) {
-                    if (_.isUndefined(filteringAndSorting.filtering[fieldName])) {
-                        return;
-                    }
-                    var filterValue = filteringAndSorting.filtering[fieldName];
-                    if (field.fieldType.id == 'reference') {
-                        var reference = filteringAndSorting.filtering[fieldName];
-                        var referenceId = _.isUndefined(reference.id) ? reference : reference.id;
-                        query[fieldName + '.id'] = toMongoId(referenceId)
-                    } else if (field.fieldType.id == 'checkbox') {
-                        query[fieldName] = filteringAndSorting.filtering[fieldName] ? filteringAndSorting.filtering[fieldName] : {$in: [false, null]};
-                    } else if (field.fieldType.id == 'date') {
-                        if (filterValue.op === 'gt') {
-                            query[fieldName] = {$gt: filterValue.value}; //TODO convert from string?
-                        } else if (filterValue.op === 'lt') {
-                            query[fieldName] = {$lt: filterValue.value}; //TODO convert from string?
-                        } else {
-                            query[fieldName] = filterValue;
-                        }
-                    } else if (field.fieldType.id == 'text') {
-                        if (filterValue.op === 'startsWith') {
-                            query[fieldName] = { $regex: "^" + filterValue.value + ".*" };
-                        } else if (filterValue.op === 'in') {
-                            query[fieldName] = { $in: filterValue.value };
-                        } else {
-                            query[fieldName] = filterValue;
-                        }
-                    } else {
-                        query[fieldName] = filteringAndSorting.filtering[fieldName];
-                    }
-                });
+                _.extend(query, copyFilter(allFields, filteringAndSorting.filtering));
             }
         }
         return query;
