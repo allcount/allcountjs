@@ -75,7 +75,7 @@ exports.inject = function (serviceName, optional) {
             if (optional) {
                 return undefined;
             }
-            throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
+            // throw new Error('No factory found for "' + serviceName + '". Injection stack: ' + cycleDependencyGuardStack.join(', '));
         }
         var instance = exports.resolveFactory(factory);
         if (exports.scoped.length > 0) {
