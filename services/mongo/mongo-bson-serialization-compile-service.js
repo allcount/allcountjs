@@ -14,7 +14,7 @@ module.exports = function (storageDriver, mongoFieldService) {
                             return undefined;
                         }
                         var serializers, fieldType;
-                        if (fieldType = mongoFieldService.fieldTypes[field.fieldType.id]) {
+                        if (fieldType == mongoFieldService.fieldTypes[field.fieldType.id]) {
                             serializers = {toBsonValue: fieldType.toBsonValue, fromBsonValue: fieldType.fromBsonValue};
                         } else {
                             serializers = {toBsonValue: _.identity, fromBsonValue: _.identity};
