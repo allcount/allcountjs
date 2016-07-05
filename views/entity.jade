@@ -1,0 +1,15 @@
+extends main
+include mixins
+
+block vars
+    - var hasToolbar = true
+block content
+    div(ng-app='allcount', ng-controller='EntityViewController')
+        +defaultToolbar()
+        .container.screen-container(ng-cloak)
+            +defaultGrid()
+            +noEntries()
+            +defaultEditAndCreateForms()
+
+block js
+    +entityJs()

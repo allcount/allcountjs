@@ -1,0 +1,36 @@
+extends main
+mixin renderToc(tocItem)
+    li
+        a(href="#" + tocItem.anchor)= tocItem.text
+
+        if tocItem.children
+            ul
+                each i in tocItem.children
+                    +renderToc(i)
+
+block content
+    .splash-left
+        .container
+            .row
+                .col-lg-12
+                    h1= docsTitle
+                    h2= docsAddTitle
+    .container
+        .col-lg-3.visible-lg
+            ul#toc.nav.nav-label
+                each i in tableOfContents
+                    +renderToc(i)
+        .col-lg-9.col-md-12
+            | !{docsContent}
+script(type="text/javascript").
+    $(function () {
+        $('#toc').affix({
+            offset: {
+                top: function () {
+                    return (this.top = ($('.splash-left').outerHeight(false)));
+                }
+            }
+        });
+        $("#toc").css({top: $('.navbar-fixed-top').outerHeight(false)});
+        $('body').scrollspy({ target: '#toc' })
+    });

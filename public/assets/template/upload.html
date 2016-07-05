@@ -1,0 +1,10 @@
+<form action="/rest/upload" method="POST" enctype="multipart/form-data" file-upload="options">
+    <span class="btn fileinput-button" ng-class="{disabled: disabled, 'btn-success': isNoFile(queue) || hasFile() && !isUploading(queue), 'btn-warning': isUploading(queue)}">
+        <i class="fa fa-fw" ng-class="{'fa-folder-open-o': isNoFile(queue), 'fa-spin': isUploading(queue), 'fa-spinner': isUploading(queue), 'fa-refresh': hasFile()}"></i>
+        <span>{{fileName(queue)}}</span>
+        <input type="file" name="files[]" ng-disabled="isUploading(queue)">
+    </span>
+    <span class="btn btn-danger" ng-if="hasFile()" ng-click="removeFile(); clear(queue)">
+        <i class="glyphicon glyphicon-trash"></i>
+    </span>
+</form>
