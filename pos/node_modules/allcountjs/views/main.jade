@@ -1,0 +1,17 @@
+include main-mixins
+
+block vars
+
+doctype html
+html
+    head
+        +defaultHead()
+        block head
+
+    body(class=hasToolbar? 'has-toolbar' : '')
+        +defaultNavBar()
+
+        block content
+
+        include core-scripts
+        block js

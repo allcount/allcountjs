@@ -1,0 +1,15 @@
+#!/usr/bin/env node
+var opter = require('opter'),
+	pkgVersion = require('../package.json').version,
+	hashFiles = require('../lib/hash'),
+	opts = require('../lib/options'),
+	options = opter(opts, pkgVersion);
+
+hashFiles(options, function(error, hash) {
+	if (error) {
+		console.log('There was a problem hashing the files:', options.files);
+		process.exit(1);
+	}
+	console.log(hash);
+	process.exit(0);
+})

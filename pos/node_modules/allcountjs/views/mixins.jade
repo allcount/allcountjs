@@ -1,0 +1,269 @@
+mixin defaultToolbar(withoutHeader)
+    +defaultToolbarContainer(withoutHeader)
+        +listActions()
+        +createActions()
+        +formActions()
+
+mixin defaultToolbarContainer(withoutHeader)
+    div(class=!withoutHeader ? 'toolbar-header' : '')
+        block
+
+mixin listActions()
+    +listActionsContainer()&attributes(attributes)
+        +listActionsToolbarContainer()
+            +navigateToCreateButton()
+            +startGridEditingButton()
+            +doneGridEditingButton()
+            +actions('all-items')
+            block
+            +entityTitle()
+        +searchAndPagingContainer()
+            +searchInput()
+            +pagingControl()
+
+mixin createActions()
+    +createActionsContainer()&attributes(attributes): +toolbarContainer()
+        +returnToGridButton()
+        +createEntityButton()
+        block
+
+mixin formActions()
+    +formActionsContainer()&attributes(attributes): +toolbarContainer()
+        +returnToGridButton()
+        +startFormEditingButton()
+        +doneFormEditingButton()
+        +deleteEntityButton()
+        block
+        +actions('single-item')
+
+mixin toolbarContainer()
+    .btn-toolbar
+        block
+
+mixin listActionsToolbarContainer()
+    .pull-left: +toolbarContainer()
+        block
+
+mixin searchAndPagingContainer()
+    .pull-right.form-inline
+        block
+
+mixin listActionsContainer()
+    .container.form-inline(ng-show='viewState.mode == "list"')&attributes(attributes)
+        block
+
+mixin createActionsContainer()
+    .container(ng-show="viewState.mode === 'create'")&attributes(attributes)
+        block
+
+mixin formActionsContainer()
+    .container(ng-show="viewState.mode == 'form'")&attributes(attributes)
+        block
+
+mixin entityTitle()
+    span.entity-title.hidden-xs.hidden-sm= messages(entityTitle) || ' '
+
+mixin navigateToCreateButton()
+    button.btn.btn-success.ng-cloak(ng-click='toCreate()', lc-tooltip="Create", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().create')&attributes(attributes)
+        i.glyphicon.glyphicon-plus
+
+mixin startGridEditingButton()
+    button.btn.btn-default.ng-cloak(ng-click='startGridEditing()', lc-tooltip="Edit", ng-hide='viewState.editState', ng-if='viewState.gridMethods.permissions().update || viewState.gridMethods.permissions().delete')&attributes(attributes)
+        i.glyphicon.glyphicon-pencil
+
+mixin doneGridEditingButton()
+    button.btn.btn-default.ng-cloak(ng-click='doneGridEditing()', lc-tooltip="Done", ng-show='viewState.editState')&attributes(attributes)
+        i.glyphicon.glyphicon-ok
+
+mixin startFormEditingButton()
+    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="Edit", ng-hide='viewState.isFormEditing', ng-if='viewState.gridMethods.permissions().update')&attributes(attributes)
+        i.glyphicon.glyphicon-pencil
+
+mixin doneFormEditingButton()
+    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="Done", ng-show='viewState.isFormEditing')&attributes(attributes)
+        i.glyphicon.glyphicon-ok
+
+mixin returnToGridButton()
+    button.btn.btn-default.ng-cloak(ng-click='returnToGrid()', lc-tooltip="Back to list")&attributes(attributes)&attributes(attributes)
+        i.glyphicon.glyphicon-chevron-left
+
+mixin createEntityButton()
+    button.btn.btn-default.ng-cloak(ng-click='viewState.createForm.createEntity(returnToGrid)', lc-tooltip="Done")&attributes(attributes)
+        i.glyphicon.glyphicon-ok
+
+mixin deleteEntityButton()
+    button.btn.btn-danger.ng-cloak(lc-tooltip="Delete", ng-show="viewState.mode == 'form'", ng-if='viewState.gridMethods.permissions().delete', popover-title=messages('Are you sure you want to delete it?'), popover-template="viewState.mode == 'form' ? '/assets/template/delete-confirm.html' : null", popover-placement="bottom")&attributes(attributes)
+        i.glyphicon.glyphicon-trash
+
+mixin searchInput()
+    input.form-control.hidden-xs(type='text', ng-model='viewState.filtering.textSearch', ng-trim='true', placeholder=messages("Search"))&attributes(attributes)
+
+mixin pagingControl()
+    span(a-paging='"' + entityTypeId + '"', paging='viewState.paging', publish-methods='viewState.pagingMethods', filtering='viewState.filtering', total-row='viewState.totalRow')&attributes(attributes)
+
+mixin actions(actionTarget)
+    button.btn.btn-default.ng-cloak(
+    ng-repeat='action in actions',
+    ng-click='action.perform()',
+    lc-actions='"' + entityTypeId + '"',
+    action-target="'#{actionTarget}'",
+    on-refresh="refreshOnAction()",
+    selected-items="[viewState.formEntityId]",
+    ng-disabled="!action.isEnabled || action.isPerforming",
+    publish-methods="viewState.actionMethods"
+    )&attributes(attributes)
+        i.fa.fa-fw.fa-spin.fa-spinner(ng-if="action.isPerforming")
+        | {{action.name}}
+
+mixin noEntries()
+    div(ng-show="viewState.mode === 'list' && viewState.paging.count == 0 && !viewState.editState")
+        b= messages("No records")
+
+mixin defaultEditAndCreateForms()
+    +defaultCreateForm()
+        +defaultFormTemplate()
+    +defaultEditForm()
+        +defaultFormTemplate()
+
+mixin defaultCreateForm()
+    .right-animation-screen.form-horizontal(ng-show='viewState.mode == "create"', lc-form='"' + entityTypeId + '"', publish-methods='viewState.createForm', is-editor="true")&attributes(attributes)
+        block
+
+mixin defaultEditForm()
+    .right-animation-screen.form-horizontal(ng-show="viewState.mode === 'form'", lc-form='"' + entityTypeId + '"', entity-id='viewState.formEntityId', publish-methods='viewState.editForm', is-editor='viewState.isFormEditing')&attributes(attributes)
+        block
+
+mixin defaultFormTemplate()
+    +defaultFormLayout()
+        +defaultLabelAndFieldVar()
+
+mixin fieldGroup(field)
+    - field = field ? "'" + field + "'" : field
+    +defaultFormGroup(field)
+        +defaultLabelAndFieldVar(field)
+
+mixin defaultLabelAndFieldVar(field)
+    +defaultFormLabel(field)
+    +defaultFormFieldContainer(field)
+        +defaultFormField(field)
+        +defaultFormValidationMessage(field)
+
+mixin defaultFormLayout()
+    +defaultFormGroup()(a-layout='entityTypeId', field='field')&attributes(attributes)
+        block
+
+mixin defaultFormGroup(field)
+    - field = field || 'field';
+    .form-group(ng-class="{'has-warning': isFieldChanged(#{field}), 'has-error': validationErrors[#{field}]}")&attributes(attributes)
+        block
+
+//TODO: get rid off width classes?
+mixin defaultFormLabel(field)
+    - field = field || 'field';
+    label.control-label(ng-class="labelWidthClass && labelWidthClass(labelWidth) || 'col-md-3'", ng-if="showLabel(#{field})", lc-message="{{fieldToDesc[#{field}].name}}")&attributes(attributes)
+        block
+
+//TODO: get rid off width classes?
+mixin defaultFormFieldContainer(field)
+    - field = field || 'field';
+    div(ng-class="!showLabel(#{field}) && 'col-sm-12' || fieldWidthClass && fieldWidthClass(labelWidth) || 'col-md-9'")&attributes(attributes)
+        block
+
+mixin defaultFormField(field)
+    - field = field || 'field';
+    +defaultField("fieldToDesc[" + field + "]", "entity[" + field+ "]", 'isEditor')&attributes(attributes)
+
+mixin defaultField(field, model, isEditor)
+    div(lc-field=field, ng-model=model, is-editor=isEditor)&attributes(attributes)
+
+mixin defaultFormValidationMessage(field)
+    - field = field || 'field';
+    .text-danger(ng-if="validationErrors[#{field}]", lc-message="{{validationErrors[#{field}]}}")&attributes(attributes)
+
+mixin defaultGrid()
+    .left-animation-screen(
+    lc-list="'#{entityTypeId}'",
+    filtering='viewState.filtering',
+    ng-show='showList()',
+    edit-mode='viewState.editState',
+    navigate='navigateTo($entityId)',
+    paging='viewState.paging',
+    total-row='viewState.totalRow',
+    publish-methods='viewState.gridMethods'
+    )&attributes(attributes)
+        +gridTemplate()
+
+mixin gridTemplate()
+    table.table&attributes(attributes)
+        thead: tr
+            +gridHeaderActionCell()
+            +gridHeaderColumnNames()
+        tbody
+            +gridItemRow()
+                +gridBodyActionCell()
+                +gridBodyFields()
+            +gridBodyCreateNewRow()
+        +gridFooterTemplate()
+            tr.active
+                td
+                +gridFooterTotalRow()
+
+
+mixin gridItemRow()
+    tr.animated-grid-row(ng-repeat='item in items track by item.id')&attributes(attributes)
+        block
+
+mixin gridHeaderActionCell()
+    th(style='width: 68px')&attributes(attributes)
+        button.btn.btn-default.btn-xs(style='opacity: 0')
+            i.glyphicon.glyphicon-chevron-right
+
+mixin gridHeaderColumnNames()
+    th(ng-repeat='fd in fieldDescriptions', ng-class='headerClass(fd)')&attributes(attributes) {{messages(fd.name)}}
+
+mixin gridBodyActionCell()
+    td.action-grid-cell
+        button.btn.btn-default.btn-xs(lc-tooltip='View', ng-show='!isInEditMode && hasNavigate', ng-click='navigate(item.id)')
+            i.glyphicon.glyphicon-chevron-right
+        button.btn.btn-danger.btn-xs(lc-tooltip='Delete', ng-show='isInEditMode && permissions.delete', ng-click='deleteEntity(item)')
+            i.glyphicon.glyphicon-trash
+        button.btn.btn-default.btn-xs(lc-tooltip='Edit', ng-show='isInEditMode && editingItem !== item && permissions.update', ng-click='editEntity(item)')
+            i.glyphicon.glyphicon-pencil
+        button.btn.btn-default.btn-xs(lc-tooltip='Save', ng-show='isInEditMode && editingItem === item', ng-click='saveEntity()')
+            i.glyphicon.glyphicon-ok
+
+mixin gridBodyFields()
+    td(ng-repeat='fd in fieldDescriptions', ng-class="{'has-error': validationErrors[fd.field]}")
+        +defaultField('fd', 'item[fd.field]', 'editingItem === item')
+        .text-danger(ng-if='validationErrors[fd.field] && editingItem === item', lc-message='{{validationErrors[fd.field]}}')
+
+mixin gridBodyCreateNewRow()
+    tr(ng-if='isInEditMode && permissions.create')
+        td.action-grid-cell
+            button.btn.btn-success.btn-xs(ng-click='createEntity()', lc-tooltip='Add')
+                i.glyphicon.glyphicon-plus
+        td(ng-repeat='fd in fieldDescriptions')
+
+mixin gridFooterTemplate()
+    tfoot(ng-if='!isInEditMode && totalRow')&attributes(attributes)
+        block
+
+mixin gridFooterTotalRow()
+    td(ng-repeat='fd in fieldDescriptions')
+        div(a-field='fd', ng-model='totalRow[fd.field]', is-editor='false')
+
+mixin defaultList()
+    .left-animation-screen(
+    lc-list="'#{entityTypeId}'",
+    filtering='viewState.filtering',
+    ng-show='showList()',
+    edit-mode='viewState.editState',
+    navigate='navigateTo($entityId)',
+    paging='viewState.paging',
+    total-row='viewState.totalRow',
+    publish-methods='viewState.gridMethods'
+    )&attributes(attributes)
+        block
+
+mixin entityJs()
+    script(src='/assets/js/views/entity.js')

@@ -1,0 +1,25 @@
+{
+    "name": "sf2",
+    "version": "2.0.0",
+    "main": "src/main/app.js",
+    "dependencies": {
+        "jquery-ui" : "latest",
+        "ember-bootstrap": "https://github.com/emberjs-addons/ember-bootstrap/releases/download/01c440e23a4772f5caabe9d8e27e0b6ac9b35c6c/ember-bootstrap.js",
+        "ember-easyForm": "http://builds.dockyard.com.s3.amazonaws.com/ember-easyForm/latest/ember-easyForm.js"
+    },
+    "install": {
+        "path": "build/src",
+        "sources": {
+            "ember-bootstrap": {
+              "mapping": [
+                {"bower_components/ember-bootstrap/index.js": "ember-bootstrap.js"}
+              ]
+            },
+            "ember-easyForm": {
+              "mapping": [
+                {"bower_components/ember-easyForm/index.js": "subdirectory/ember-easyForm.js"}
+              ]
+            }
+        }
+    }
+}

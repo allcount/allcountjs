@@ -1,0 +1,11 @@
+.idea/
+node_modules/
+*.iml
+public/assets/less/*.css
+tmp/
+bower_components/
+public/assets/lib/
+build/
+logs
+*.log
+npm-debug.log*

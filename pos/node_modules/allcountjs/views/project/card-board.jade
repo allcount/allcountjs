@@ -1,0 +1,38 @@
+extends main
+include mixins
+
+block vars
+    - var hasToolbar = true
+block content
+    .a-refresh-form-controller(ng-app='allcount-card-board', ng-controller='EntityViewController')
+        +defaultToolbar()
+        .container.screen-container
+            +defaultList()(style="overflow-y: scroll", ng-cloak, ng-init="entityTypeId = '" + entityTypeId + "'", ng-controller='BoardController as boardController')
+                block boardInit
+                table.table
+                    thead: tr
+                        th(ng-repeat="column in boardColumns", ng-class="boardColumnClasses()")
+                            block columnHead
+                                span(lc-message="{{column.name || 'Not set'}}")
+                                span &nbsp;({{boardItems[column.id || ''].length}})
+                    tbody: tr: td(ng-repeat="column in boardColumns", ng-class="boardColumnClasses()")
+                        div(ui-sortable="{connectWith: '.board-column', dropOnEmpty: true, placeholder: 'panel panel-success', forcePlaceholderSize: true}", ng-model="boardItems[column.id || '']", style="min-height: 100px").board-column
+                            .panel.panel-default(ng-repeat="item in boardItems[column.id || '']", ng-style="!isInEditMode && {cursor: 'move'}")
+                                .panel-heading(ng-if="isInEditMode")
+                                    button.btn.btn-default.btn-xs(lc-tooltip="View", ng-click="navigate(item.id)")
+                                        i.glyphicon.glyphicon-chevron-right
+                                    | &nbsp;
+                                    button.btn.btn-danger.btn-xs(lc-tooltip="Delete", ng-click="deleteEntity(item)")
+                                        i.glyphicon.glyphicon-trash
+                                block panelBody
+                                    .panel-body {{item[summaryField]}}
+                    block tableFooter
+            +noEntries()
+            +defaultEditAndCreateForms()
+            
+    script(src='/assets/lib/js/jquery-ui/jquery-ui.js')
+
+block js
+    script(src='/assets/lib/js/angular-ui-sortable/sortable.js')
+    script(src='/assets/js/views/entity.js')
+    script(src='/assets/js/views/project/card-board.js')

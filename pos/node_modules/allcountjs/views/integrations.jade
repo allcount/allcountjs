@@ -1,0 +1,29 @@
+extends main
+include mixins
+
+mixin defaultField(field, model, isEditor)
+    span(ng-if="(#{field}).field !== 'appId' && (#{field}).field !== 'accessToken'", lc-field=field, ng-model=model, is-editor=isEditor)&attributes(attributes)
+    div(ng-if="(#{field}).field === 'appId'")
+        .list-group(ng-if=isEditor)
+            a.list-group-item(href="#", ng-repeat="integration in integrations", ng-class="{active: (#{model}) === integration.appId}", ng-click="#{model} = integration.appId") {{integration.appName}}
+        .form-control-static(ng-if="!(#{isEditor})") {{appIdToIntegration[#{model}].appName}}
+    div(ng-if="#{field}.field === 'accessToken'")
+        a.btn.btn-default(ng-if="#{isEditor} && entity.appId && entity.id", lc-message="Get Access Token", ng-href="{{appIdToIntegration[entity.appId].getAccessTokenUrl}}?integrationId={{entity.id}}")
+        .form-control-static(ng-if="!(#{isEditor}) && (#{model})") Connected
+
+
+block vars
+    - var hasToolbar = true
+block content
+    div(ng-app='allcount', ng-controller='IntegrationsController')
+        div(ng-controller="EntityViewController")
+            +defaultToolbar()
+            .container.screen-container(ng-cloak)
+                +defaultGrid()
+                +noEntries()
+                +defaultEditAndCreateForms()
+
+
+block js
+    +entityJs()
+    script(src='/assets/js/views/integrations.js')

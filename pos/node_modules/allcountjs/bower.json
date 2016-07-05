@@ -1,0 +1,76 @@
+{
+  "name": "AllcountJS",
+  "version": "1.0.0",
+  "devDependencies": {},
+  "dependencies": {
+    "typeahead.js": "0.10.5",
+    "bootstrap": "3.3.1",
+    "components-font-awesome": "^4.2.0",
+    "jquery.visible": "*",
+    "angular": "1.3.6",
+    "angular-animate": "1.3.6",
+    "blueimp-file-upload": "9.8.1",
+    "jquery.inputmask": "3.1.27",
+    "underscore": "~1.8.2",
+    "bootswatch": "3.3.1+2",
+    "angular-ui-sortable": "0.13.4",
+    "angular-bootstrap": "0.13.0",
+    "blueimp-gallery": "~2.15.2",
+    "allcountjs-angular-base": "1.2.2",
+    "select2": "~3.5.2",
+    "select2-bootstrap-css": "~1.4.6",
+    "eonasdan-bootstrap-datetimepicker": "~4.17.37"
+  },
+  "install": {
+    "path": {
+      "js": "public/assets/lib/js",
+      "css": "public/assets/lib/css",
+      "less": "public/assets/lib/less",
+      "scss": "public/assets/lib/scss",
+      "eot": "public/assets/lib/fonts",
+      "svg": "public/assets/lib/fonts",
+      "ttf": "public/assets/lib/fonts",
+      "woff": "public/assets/lib/fonts",
+      "woff2": "public/assets/lib/fonts",
+      "otf": "public/assets/lib/fonts",
+      "png": "public/assets/lib/png",
+      "gif": "public/assets/lib/gif",
+      "map": "public/assets/lib/map"
+    },
+    "sources": {
+      "bootstrap": [
+        "bower_components/bootstrap/less/**",
+        "bower_components/bootstrap/dist/**"
+      ],
+      "bootstrap-datepicker": [
+        "bower_components/bootstrap-datepicker/less/**",
+        "bower_components/bootstrap-datepicker/js/locales/*.js",
+        "bower_components/bootstrap-datepicker/js/*.js"
+      ],  
+      "blueimp-tmpl": [
+        "bower_components/blueimp-tmpl/css/**",
+        "bower_components/blueimp-tmpl/js/*.js"
+      ],
+      "blueimp-canvas-to-blob": [
+        "blueimp-canvas-to-blob/js/*.js"
+      ],
+      "eonasdan-bootstrap-datetimepicker": [
+        "bower_components/eonasdan-bootstrap-datetimepicker/src/js/*.js",
+        "bower_components/eonasdan-bootstrap-datetimepicker/src/less/**"
+      ],
+      "moment": [
+        "bower_components/moment/min/*.js"
+      ],
+      "components-font-awesome": [
+        "bower_components/components-font-awesome/fonts/**",
+        "bower_components/components-font-awesome/less/**"
+      ],
+      "angular-i18n": [
+        "bower_components/angular-i18n/*.js"
+      ],
+      "angular-bootstrap": [
+        "bower_components/angular-bootstrap/*.js"
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+extends main
+include mixins
+
+block vars
+    - var hasToolbar = true
+block content
+    .a-refresh-form-controller(ng-app='allcount', ng-controller='TopEntityEditorController', ng-init="entityTypeId = '" + entityTypeId + "'")
+        block formAndHeader
+            .toolbar-header
+                .container(ng-show="viewState.mode == 'form'"): .btn-toolbar
+                    button.btn.btn-default.ng-cloak(ng-click='startEditing()', lc-tooltip="Edit", ng-hide='viewState.isFormEditing')
+                        i.glyphicon.glyphicon-pencil
+                    button.btn.btn-default.ng-cloak(ng-click='doneEditing()', lc-tooltip="Done", ng-show='viewState.isFormEditing')
+                        i.glyphicon.glyphicon-ok
+                    +actions('single-item')
+            .container.screen-container(ng-cloak)
+                +defaultEditAndCreateForms()
+
+block js
+    script(src='/assets/js/views/entity.js')
+    script(src='/assets/js/views/generic/top-entity-editor.js')

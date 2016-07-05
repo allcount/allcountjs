@@ -1,0 +1,24 @@
+<div class="input-group select2-bootstrap-append">
+    <span class="form-control reference-input"></span>
+    <span class="input-group-btn">
+        <button class="btn btn-danger" ng-click="clear()"><i class="glyphicon glyphicon-remove-circle"></i></button>
+        <button class="btn btn-success" ng-click="createNewReferenceItem()"><i class="glyphicon glyphicon-plus"></i></button>
+    </span>
+</div>
+<div class="modal fade" lc-modal="referenceViewState.isCreateModalShowing">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" a-message="Create"></h4>
+            </div>
+            <div class="modal-body">
+                <div lc-form="entityTypeId" class="form-horizontal lc-form-default" publish-methods="referenceViewState.editForm" is-editor="true"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" a-message="Close"></button>
+                <button type="button" class="btn btn-primary" a-message="Create" ng-click="referenceViewState.onCreate()"></button>
+            </div>
+        </div>
+    </div>
+</div>
