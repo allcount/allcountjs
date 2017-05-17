@@ -54,6 +54,10 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
             return s && moment(s, 'YYYY-MM-DD HH:mm:ss').toDate();
         }
 
+        function parseDateToMoment(s) {
+            return moment(s, "YYYY-MM-DD HH:mm:ss");
+        }
+
         function wireTextInputWithController(input, controller, updateValue) {
             input.val(controller.$viewValue);
             input.on('input', function () {
@@ -154,7 +158,10 @@ allcountModule.config(["fieldRenderingServiceProvider", function (fieldRendering
                     locale: $locale.id.split("-")[0],
                     format: toMomentDateFormat(dateFormat(fieldDescription))
                 });
-                input.data("DateTimePicker").date(parseDate(controller.$viewValue) || null);
+                if(typeof controller.$viewValue != 'undefined') {
+                    input.data("DateTimePicker").date(parseDate(controller.$viewValue) || null);
+                    input.data("DateTimePicker").defaultDate(parseDateToMoment(controller.$viewValue) || null);
+                }
                 input.on('dp.change', function (e) {
                     updateValue(e.date ? e.date.format('YYYY-MM-DD HH:mm:ss') : undefined);
                 });
