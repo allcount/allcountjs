@@ -1,0 +1,14 @@
+<span>
+    <span class="btn-group" ng-show="count > 0">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            {{currentPaging.start + 1}} - {{currentPaging.start + currentPaging.count}} / {{count}} <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li ng-repeat="page in pages"><a ng-click="setCurrentPage(page)">{{page.start + 1}} - {{page.start + page.count}}</a></li>
+        </ul>
+    </span>
+    <span class="btn-group">
+        <button type="button" class="btn btn-default" ng-class="{disabled: !hasPrevPage()}" ng-click="prevPage()"><i class="glyphicon glyphicon-chevron-left"></i></button>
+        <button type="button" class="btn btn-default" ng-class="{disabled: !hasNextPage()}" ng-click="nextPage()"><i class="glyphicon glyphicon-chevron-right"></i></button>
+    </span>
+</span>

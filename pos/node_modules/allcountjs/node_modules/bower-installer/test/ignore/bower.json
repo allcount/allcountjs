@@ -1,0 +1,12 @@
+{
+    "name": "sf2",
+    "version": "2.0.0",
+    "main": "src/main/app.js",
+    "dependencies": {
+        "ember-model" : "0.0.8"
+    },
+    "install": {
+        "path": "build/src",
+        "ignore": ["ember", "handlebars"]
+    }
+}

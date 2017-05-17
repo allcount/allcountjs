@@ -1,0 +1,26 @@
+.twitter-typeahead {
+  .tt-hint {
+    color: @input-color-placeholder;
+  }
+
+  .tt-dropdown-menu {
+    &:extend(.dropdown-menu);
+  }
+
+  .tt-suggestion {
+    & > p {
+      &:extend(.dropdown-menu > li > a);
+      margin-bottom: 0;
+    }
+    &.tt-cursor > p {
+      &:extend(.dropdown-menu > .active > a);
+    }
+  }
+
+  width: 100%;
+  display: table-cell !important;
+}
+
+.input-group .form-control.typeahead:not(:first-child):not(:last-child) {
+  .border-left-radius(@border-radius-base);
+}

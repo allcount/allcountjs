@@ -250,7 +250,7 @@ module.exports = function (queryParseService, securityConfigService, appUtil, in
         return function (entityCrudId, user) {
             var permissions = permissionsGetFn ? permissionsGetFn() : service.entityDescription(entityCrudId).permissions;
             return (permissions && !_.isUndefined(permissions[permission])) ? !permissions[permission] || user && _.any(permissions[permission], function (role) {
-                return user.hasRole(role);
+                return user.hasRole(role) && user['role_' + role];
             }) : (!parentPermissionFn || parentPermissionFn(entityCrudId, user));
         }
     }

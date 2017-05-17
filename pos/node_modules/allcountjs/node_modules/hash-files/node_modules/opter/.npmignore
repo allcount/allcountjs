@@ -1,0 +1,6 @@
+*~
+*.log
+node_modules
+lib-test
+test/coverage*
+.DS*

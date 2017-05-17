@@ -1,0 +1,14 @@
+{
+    "name": "sf2",
+    "version": "2.0.0",
+    "main": "src/main/app.js",
+    "dependencies": {
+        "datejs" : "latest"
+    },
+    "install": {
+        "path": "build/src",
+        "sources": {
+            "datejs" : ["bower_components/datejs/build/date.js",  "bower_components/datejs/build/time.js"]
+        }
+    }
+}

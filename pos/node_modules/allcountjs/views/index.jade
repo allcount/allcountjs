@@ -1,0 +1,20 @@
+extends main
+block content
+    .splash
+        .container
+            .row
+                .col-lg-12
+                    span.app-logo
+                        i(class="fa fa-" + (menuService.appIcon() || 'circle-thin') + " fa-fw")
+                    h1= menuService.appName()
+    .dashboard
+        .container.a-menu(ng-app='allcount')
+            .row(ng-repeat='menuItem in menuItems', ng-class='{"col-lg-4": onlyFirstLevel(), "col-sm-6": onlyFirstLevel()}', ng-cloak)
+                h2
+                    i(class="fa fa-{{menuItem.icon || 'circle-thin'}} fa-fw")
+                    a(ng-if='menuItem.entityTypeId', href='/entity/{{menuItem.entityTypeId}}', lc-message="{{menuItem.name}}")
+                    span(ng-if='!menuItem.entityTypeId') {{menuItem.name}}
+                .col-lg-4.col-sm-6(ng-repeat='childItem in menuItem.children')
+                    h3
+                        i(class="fa fa-{{childItem.icon || 'circle-thin'}} fa-fw")
+                        a(href='/entity/{{childItem.entityTypeId}}') {{childItem.name}}

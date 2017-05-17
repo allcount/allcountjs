@@ -1,0 +1,24 @@
+{
+    "name": "sf2",
+    "version": "2.0.0",
+    "main": "./src/main/webapp/app/index.html",
+    "dependencies": {
+        "buster.js"                 : "latest",
+        "buster-jquery-assertions"  : "latest"
+    },
+    "install": {
+        "path": {
+            "js": "build/src",
+            "css": "build/css"
+        },
+        "sources": {
+            "datejs"             : "bower_components/datejs/build/date.js",
+            "jquery-mousewheel"  : "bower_components/jquery-mousewheel/jquery.mousewheel.js",
+            "jquery.transit"     : "bower_components/jquery.transit/jquery.transit.js",
+            "json2"              : "bower_components/json2/json2.js",
+            "requirejs"          : "bower_components/requirejs/require.js",
+            "underscore.string"  : "bower_components/underscore.string/dist/underscore.string.min.js",
+            "jquery-ui"          : "bower_components/jquery-ui/ui/jquery-ui.js"
+        }
+    }
+}

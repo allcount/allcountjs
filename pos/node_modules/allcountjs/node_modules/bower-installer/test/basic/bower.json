@@ -1,0 +1,11 @@
+{
+    "name": "sf2",
+    "version": "2.0.0",
+    "main": "src/main/app.js",
+    "dependencies": {
+        "jquery-ui" : "latest"
+    },
+    "install": {
+        "path": "build/src"
+    }
+}

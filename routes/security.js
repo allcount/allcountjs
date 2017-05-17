@@ -74,7 +74,7 @@ module.exports = function (templateVarService, keygrip, securityService, securit
 
     routes.apiSignIn = function (req, res, next) {
         routes.setAccessControlHeaders(res);
-        securityService.authenticateAndGenerateToken(req.body.username, req.body.password).then(function (token) {
+        securityService.authenticateAndGenerateToken(req.body.username, req.body.password, ["admin"]).then(function (token) {
             if (token) {
                 res.json({token: token})
             } else {

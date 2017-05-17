@@ -1,0 +1,115 @@
+mixin menu(isRoot, menuItem)
+    li(class=menuItem.children ? "dropdown" : "")
+        if (menuItem.children && isRoot)
+            a(href="#", data-toggle="dropdown").dropdown-toggle= messages(menuItem.name)
+                b.caret
+        else
+            a(href=menuItem.url)= messages(menuItem.name)
+
+        if menuItem.children
+            ul.dropdown-menu
+                each child in menuItem.children
+                    +menu(false, child)
+
+
+mixin defaultMeta()
+   meta(charset='utf-8')
+   meta(http-equiv='X-UA-Compatible', content='IE=edge')
+   meta(name='viewport', content='width=device-width, initial-scale=1.0')
+   meta(name='apple-mobile-web-app-capable', content='yes')
+   meta(name='mobile-web-app-capable', content='yes')
+
+mixin defaultFavicon()
+   link(rel="icon" href="/favicon.ico", type="image/x-icon")
+
+mixin pageTitle()
+   title= menuService.appTitle || menuService.appName()
+
+mixin lessTheme()
+   link(href=services.themeService.mainCssPath(), rel='stylesheet')
+
+mixin defaultNavBar()
+   +navBarContainer()
+      +navBarHeader()
+      +navBarContent()
+          +appMenu()
+          if user && !user.isGuest
+              +userMenu()
+          else
+              +navBarRightItem()
+                +signInLink()
+
+mixin navBarRightItem()
+    .nav.navbar-nav.navbar-right: li
+        block
+
+mixin navBarContent()
+    if user || !securityService.onlyAuthenticated
+        .navbar-collapse.collapse
+            block
+
+mixin appMenu()
+    ul.nav.navbar-nav
+        each i in menuService.menus(user)
+            +menu(true, i)
+
+mixin navBarContainer()
+    .navbar.navbar-default.navbar-fixed-top(role='navigation')
+        div(class=fluid ? 'container-fluid col-lg-12' : 'container')
+            block
+
+mixin navBarHeader()
+    .navbar-header
+        button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+            span.sr-only Toggle navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+        +navBarBrandLink()
+
+mixin navBarBrandLink()
+    a.navbar-brand(href='/')= menuService.appName()
+
+mixin signInLink()
+    a(href='/login')= messages('Sign in')
+
+mixin userMenu()
+    ul.nav.navbar-nav.navbar-right
+        li.dropdown
+            a.dropdown-toggle(href='#', data-toggle='dropdown')
+                i.glyphicon.glyphicon-user
+                | &nbsp;#{user.username}
+                b.caret
+            ul.dropdown-menu
+                li
+                    +userMenuItems()
+                        block
+
+mixin userMenuItems()
+    if user.hasRole('admin')
+        a(href='/entity/User')= messages('Users')
+        if integrationService.availableIntegrations().length > 0
+            a(href='/entity/Integration')= messages('Integrations')
+    block
+    +signOutLink()
+
+mixin signOutLink()
+    a(href='/logout')= messages('Logout')
+
+mixin defaultBase()
+    if entityTypeId
+        base(href="/entity/#{entityTypeId}/")
+
+mixin inlineStyle()
+    style.
+      [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak { display: none !important; }
+
+mixin defaultHead()
+    +defaultMeta()
+    +inlineStyle()
+    +defaultFavicon()
+    +pageTitle()
+    +lessTheme()
+    +defaultBase()
+    include head-scripts
+    include tracking

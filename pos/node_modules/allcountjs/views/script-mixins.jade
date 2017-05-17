@@ -1,0 +1,3 @@
+mixin concatScripts(concatScriptPath)
+   each path in assetsService.concatScripts(concatScriptPath)
+      script(src=path)
