@@ -12,7 +12,7 @@ module.exports = function (gitRepoUrl, gitService, halt) {
     var repositoryDir;
 
     service.cloneRepo = function (repoUrl, repoDir) {
-        return Q.nfcall(childProcess.exec, 'git clone ' + repoUrl + ' ' + repoDir, {cwd: process.cwd, timeout: 30000})
+        return Q.nfcall(childProcess.exec, 'git clone ' + repoUrl + ' ' + repoDir, {cwd: process.cwd(), timeout: 30000})
     };
 
     function convertToPath(fileUrl) {
