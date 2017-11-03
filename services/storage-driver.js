@@ -62,14 +62,17 @@ module.exports = function (dbUrl, injection, appUtil) {
     service.findAll = function (table, filteringAndSorting) {
         return ensureIndexes(table, filteringAndSorting).then(function () {
             return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).exec())
-                .then(function (result) { return result.map(fromBson(table)) });
+                .then(function (result) { return result.map(fromBson(table)); });
         });
     };
 
     service.findRange = function (table, filteringAndSorting, start, count) {
+        // Force numeric
+        start = Number(start);
+        count = Number(count);
         return ensureIndexes(table, filteringAndSorting).then(function () {
             return Q(modelFor(table).find(queryFor(table, filteringAndSorting)).sort(sortingFor(filteringAndSorting, table.fields)).limit(count).skip(start).exec())
-                .then(function (result) { return result.map(fromBson(table)) });
+                .then(function (result) { return result.map(fromBson(table)); });
         });
     };
 
