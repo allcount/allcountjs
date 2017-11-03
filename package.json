@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/allcount/allcountjs"
+    "url": "https://github.com/cgeorges/allcountjs"
   },
   "dependencies": {
     "allcountjs-mailgun": "^1.0.0",
@@ -42,6 +42,7 @@
     "consolidate": "0.10.0",
     "cookie-parser": "^1.1.0",
     "cookie-session": "^1.0.2",
+    "dotenv": "^4.0.0",
     "ejs": "^1.0.0",
     "express": "^4.10.0",
     "express-session": "^1.2.1",
@@ -58,13 +59,13 @@
     "minimist": "^1.1.0",
     "mkdirp": "~0.3.5",
     "moment": "^2.6.0",
-    "mongoose": "~3.8.21",
-    "mongoose-long": "^0.0.2",
+    "mongoose": "^4.13.0",
+    "mongoose-long": "^0.1.1",
     "node-minify": "^1.2.1",
     "parsimmon": "^0.4.0",
     "passport": "^0.2.0",
     "passport-local": "^1.0.0",
-    "q": "1.0.1",
+    "q": "^1.5.1",
     "ramda": "^0.13.0",
     "request": "^2.45.0",
     "socket.io": "^1.3.7",
