@@ -4,7 +4,6 @@
 
 <img src="https://allcountjs.com/assets/images/allcountjs-logo-card.png" width="381">
 
-# WARNING: This project is not maintained anymore
 
 # What is AllcountJS
 
