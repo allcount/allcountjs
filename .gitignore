@@ -9,3 +9,4 @@ build/
 logs
 *.log
 npm-debug.log*
+blueimp-load-image
