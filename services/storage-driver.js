@@ -158,15 +158,22 @@ module.exports = function (dbUrl, injection, appUtil) {
                         }
                     });
                     if(!_.isEmpty(tmparray)){
-                      query[filterName] = tmparray;
+                        query[filterName] = tmparray;
                     }
                 }
             }else if(!_.isUndefined(allFields[filterName])){
-                fieldName = filterName;
-                field = allFields[filterName];
+                var field = allFields[filterName];
                 if (field.fieldType.id == 'reference' || field.fieldType.id == 'multiReference') {
                     var referenceId = _.isUndefined(filterValue.id) ? filterValue : filterValue.id;
-                    query[filterName + '.id'] = toMongoId(referenceId)
+                    if (referenceId) {
+                        query[filterName + '.id'] = toMongoId(referenceId);
+                    } else {
+                        for (var filter in filterValue) {
+                            if (filter !== 'id') {
+                                query[filterName + '.' + filter] = filterValue[filter];
+                            }
+                        }
+                    }
                 } else if (field.fieldType.id == 'checkbox') {
                     query[filterName] = filterValue ? filterValue : {$in: [false, null]};
                 } else if (field.fieldType.id == 'date') {
