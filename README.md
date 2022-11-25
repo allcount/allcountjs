@@ -6,6 +6,14 @@
 
 # WARNING: This project is not maintained anymore
 
+* * *
+
+This code is published as part of the [corresponding blog article](https://www.toptal.com/nodejs/rapid-application-development-with-allcountjs) at the Toptal Engineering Blog.
+
+Visit <https://www.toptal.com/blog> and subscribe to our newsletter to read great articles!
+
+* * *
+
 # What is AllcountJS
 
 The fastest way to deliver web & mobile applications with business value using Node.js.
