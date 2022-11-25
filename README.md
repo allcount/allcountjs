@@ -37,6 +37,7 @@ A.app({
 });
 ```
 
+<!--
 Get this:
 
 ![AllcountJS Hello World App](https://allcountjs.com/assets/images/allcountjs-splash.png)
@@ -44,12 +45,13 @@ Get this:
 # Try it
 
 - [Run application demo](http://allcountjs.com/#demo)
+-->
 
 # Documentation
 
-- [Getting Started](http://allcountjs.com/docs/getting-started)
-- [Application Configuration](http://allcountjs.com/docs/apps)
-- [Customizing](http://allcountjs.com/docs/server)
+- [Getting Started](https://github.com/allcount/allcountjs/blob/master/docs/getting-started.md)
+- [Application Configuration](https://github.com/allcount/allcountjs/blob/master/docs/configuring.md)
+- [Customizing](https://github.com/allcount/allcountjs/blob/master/docs/customizing.md)
 
 # Install
 Before we start you should install [Node.js](http://nodejs.org/), [MongoDB](http://www.mongodb.org/) and [Git](http://git-scm.com/).
@@ -73,8 +75,8 @@ allcountjs init
 ```
 
 You'll be prompted to enter project name, description and other info saved to package.json.
-You could also pass `--template <template_name>` option that could be used to init your project with existing demo at [Demo Gallery](https://allcountjs.com/entity/DemoGallery).
-`template_name` can be found at [Demo Gallery](https://allcountjs.com/entity/DemoGallery).
+You could also pass `--template <template_name>` option that could be used to init your project <!-- with existing demo at [Demo Gallery](https://allcountjs.com/entity/DemoGallery).
+`template_name` can be found at [Demo Gallery](https://allcountjs.com/entity/DemoGallery). -->
 After project is initialized you could see created from template `app-config/` and `package.json` in newly created project directory.
 In order to install AllcountJS dependencies please run:
 
